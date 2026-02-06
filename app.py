@@ -49,6 +49,57 @@ st.markdown("""
         border-radius: 0.5rem;
         margin-bottom: 1rem;
     }
+    /* Estilização Premium para o Sidebar */
+    [data-testid="stSidebar"] {
+        background-color: #fcfcfc;
+        border-right: 1px solid #f0f0f0;
+    }
+    [data-testid="stSidebar"] .stMarkdown h1 {
+        font-size: 1.2rem !important;
+        font-weight: 700 !important;
+        color: #333;
+        margin-bottom: 0.5rem !important;
+    }
+    [data-testid="stSidebar"] .stMarkdown p, 
+    [data-testid="stSidebar"] .stMarkdown span,
+    [data-testid="stSidebar"] label {
+        font-size: 0.85rem !important;
+        color: #555;
+    }
+    [data-testid="stSidebar"] .stExpander {
+        border: none !important;
+        background-color: transparent !important;
+        margin-bottom: 0.2rem !important;
+    }
+    [data-testid="stSidebar"] .stExpander details {
+        border: 1px solid #f0f0f0 !important;
+        border-radius: 8px !important;
+        background-color: #ffffff !important;
+        transition: all 0.2s ease;
+    }
+    [data-testid="stSidebar"] .stExpander details:hover {
+        border-color: #e0e0e0 !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    [data-testid="stSidebar"] .stExpander summary p {
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        color: #444 !important;
+    }
+    /* Ajuste de inputs no sidebar */
+    [data-testid="stSidebar"] .stNumberInput input,
+    [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
+        font-size: 0.8rem !important;
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
+    }
+    [data-testid="stSidebar"] .stCaption {
+        font-size: 0.75rem !important;
+        opacity: 0.8;
+    }
+    [data-testid="stSidebar"] hr {
+        margin: 0.5rem 0 !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -58,9 +109,6 @@ st.sidebar.markdown("---")
 
 # 1. MARKETPLACES
 with st.sidebar.expander("📊 Marketplaces", expanded=False):
-    st.markdown("**Taxas de Comissão e Custos Fixos**")
-    st.markdown("---")
-    
     for marketplace, config in st.session_state.marketplaces.items():
         st.markdown(f"**{marketplace}**")
         col1, col2 = st.columns([1, 1])
@@ -92,9 +140,6 @@ with st.sidebar.expander("📊 Marketplaces", expanded=False):
 
 # 2. REGIMES TRIBUTÁRIOS
 with st.sidebar.expander("🏛️ Regimes Tributários", expanded=False):
-    st.markdown("**Configuração de Impostos e Encargos**")
-    st.markdown("---")
-    
     for regime, config in st.session_state.regimes.items():
         st.markdown(f"**{regime}**")
         
@@ -139,8 +184,6 @@ with st.sidebar.expander("🏛️ Regimes Tributários", expanded=False):
 
 # 3. MARGENS E PUBLICIDADE
 with st.sidebar.expander("📈 Margens e Publicidade", expanded=False):
-    st.markdown("**Defina suas Margens Alvo**")
-    st.markdown("---")
     
     margem_bruta = st.slider(
         "Margem Bruta Alvo (%)",
@@ -177,8 +220,6 @@ with st.sidebar.expander("📈 Margens e Publicidade", expanded=False):
 
 # 4. CUSTOS OPERACIONAIS (NOVO)
 with st.sidebar.expander("💼 Custos Operacionais", expanded=False):
-    st.markdown("**Custos Fixos e Devoluções**")
-    st.markdown("---")
     
     custo_fixo_op = st.number_input(
         "Custo Fixo Operacional (R$)",
@@ -204,8 +245,6 @@ with st.sidebar.expander("💼 Custos Operacionais", expanded=False):
 
 # 5. CARREGAR RELATÓRIO
 with st.sidebar.expander("📥 Carregar Relatório", expanded=True):
-    st.markdown("**Importar Vendas**")
-    st.markdown("---")
     
     st.markdown("""
     **Formato esperado:**
