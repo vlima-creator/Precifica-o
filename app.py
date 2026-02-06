@@ -54,96 +54,93 @@ st.markdown("""
 
 # ============ SIDEBAR ============
 st.sidebar.markdown("# ⚙️ Configurações")
+st.sidebar.markdown("---")
 
 # 1. MARKETPLACES
 with st.sidebar.expander("📊 Marketplaces", expanded=False):
     st.markdown("**Taxas de Comissão e Custos Fixos**")
+    st.markdown("---")
     
     for marketplace, config in st.session_state.marketplaces.items():
-        with st.container():
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                comissao = st.number_input(
-                    f"{marketplace}",
-                    label_visibility="collapsed",
-                    value=config["comissao"] * 100,
-                    min_value=0.0,
-                    max_value=100.0,
-                    step=0.1,
-                    key=f"comissao_{marketplace}",
-                    help=f"Comissão do {marketplace} (%)"
-                ) / 100
-            with col2:
-                taxa_fixa = st.number_input(
-                    f"Taxa Fixa",
-                    label_visibility="collapsed",
-                    value=config["custo_fixo"],
-                    min_value=0.0,
-                    step=0.1,
-                    key=f"taxa_fixa_{marketplace}",
-                    help=f"Taxa fixa do {marketplace} (R$)"
-                )
-            
-            st.session_state.marketplaces[marketplace]["comissao"] = comissao
-            st.session_state.marketplaces[marketplace]["custo_fixo"] = taxa_fixa
-            
-            # Mostrar valores de forma clara
-            st.caption(f"💰 Comissão: {comissao*100:.1f}% | 📌 Taxa Fixa: R$ {taxa_fixa:.2f}")
-            st.divider()
+        st.markdown(f"**{marketplace}**")
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            comissao = st.number_input(
+                "Comissão (%)",
+                value=config["comissao"] * 100,
+                min_value=0.0,
+                max_value=100.0,
+                step=0.1,
+                key=f"comissao_{marketplace}",
+            ) / 100
+        
+        with col2:
+            taxa_fixa = st.number_input(
+                "Taxa Fixa (R$)",
+                value=config["custo_fixo"],
+                min_value=0.0,
+                step=0.1,
+                key=f"taxa_fixa_{marketplace}",
+            )
+        
+        st.session_state.marketplaces[marketplace]["comissao"] = comissao
+        st.session_state.marketplaces[marketplace]["custo_fixo"] = taxa_fixa
+        
+        st.markdown("")
+        st.divider()
 
 # 2. REGIMES TRIBUTÁRIOS
 with st.sidebar.expander("🏛️ Regimes Tributários", expanded=False):
     st.markdown("**Configuração de Impostos e Encargos**")
+    st.markdown("---")
     
     for regime, config in st.session_state.regimes.items():
-        with st.container():
-            st.markdown(f"**{regime}**")
-            
-            # Organizar em 3 colunas
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
-                ibs = st.number_input(
-                    "IBS (%)",
-                    value=config.get("ibs", 0.0) * 100,
-                    min_value=0.0,
-                    max_value=100.0,
-                    step=0.01,
-                    key=f"ibs_{regime}",
-                ) / 100
-            
-            with col2:
-                cbs = st.number_input(
-                    "CBS (%)",
-                    value=config.get("cbs", 0.0) * 100,
-                    min_value=0.0,
-                    max_value=100.0,
-                    step=0.01,
-                    key=f"cbs_{regime}",
-                ) / 100
-            
-            with col3:
-                impostos = st.number_input(
-                    "Impostos (%)",
-                    value=config.get("impostos_encargos", 0.0) * 100,
-                    min_value=0.0,
-                    max_value=100.0,
-                    step=0.1,
-                    key=f"impostos_{regime}",
-                ) / 100
-            
-            st.session_state.regimes[regime]["ibs"] = ibs
-            st.session_state.regimes[regime]["cbs"] = cbs
-            st.session_state.regimes[regime]["impostos_encargos"] = impostos
-            
-            # Mostrar resumo
-            st.caption(f"📊 IBS: {ibs*100:.2f}% | CBS: {cbs*100:.2f}% | Impostos: {impostos*100:.1f}%")
-            st.divider()
+        st.markdown(f"**{regime}**")
+        
+        col1, col2, col3 = st.columns([1, 1, 1])
+        
+        with col1:
+            ibs = st.number_input(
+                "IBS (%)",
+                value=config.get("ibs", 0.0) * 100,
+                min_value=0.0,
+                max_value=100.0,
+                step=0.01,
+                key=f"ibs_{regime}",
+            ) / 100
+        
+        with col2:
+            cbs = st.number_input(
+                "CBS (%)",
+                value=config.get("cbs", 0.0) * 100,
+                min_value=0.0,
+                max_value=100.0,
+                step=0.01,
+                key=f"cbs_{regime}",
+            ) / 100
+        
+        with col3:
+            impostos = st.number_input(
+                "Impostos (%)",
+                value=config.get("impostos_encargos", 0.0) * 100,
+                min_value=0.0,
+                max_value=100.0,
+                step=0.1,
+                key=f"impostos_{regime}",
+            ) / 100
+        
+        st.session_state.regimes[regime]["ibs"] = ibs
+        st.session_state.regimes[regime]["cbs"] = cbs
+        st.session_state.regimes[regime]["impostos_encargos"] = impostos
+        
+        st.markdown("")
+        st.divider()
 
 # 3. MARGENS E PUBLICIDADE
 with st.sidebar.expander("📈 Margens e Publicidade", expanded=False):
     st.markdown("**Defina suas Margens Alvo**")
+    st.markdown("---")
     
     margem_bruta = st.slider(
         "Margem Bruta Alvo (%)",
@@ -152,6 +149,9 @@ with st.sidebar.expander("📈 Margens e Publicidade", expanded=False):
         value=st.session_state.margem_bruta_alvo,
         step=1.0,
     )
+    st.caption(f"💰 Margem Bruta: {margem_bruta:.1f}%")
+    
+    st.markdown("")
     
     margem_liquida = st.slider(
         "Margem Líquida Mínima (%)",
@@ -160,6 +160,9 @@ with st.sidebar.expander("📈 Margens e Publicidade", expanded=False):
         value=st.session_state.margem_liquida_minima,
         step=1.0,
     )
+    st.caption(f"💵 Margem Líquida: {margem_liquida:.1f}%")
+    
+    st.markdown("")
     
     percent_pub = st.slider(
         "% Publicidade",
@@ -168,30 +171,24 @@ with st.sidebar.expander("📈 Margens e Publicidade", expanded=False):
         value=st.session_state.get("percent_publicidade", 3.0),
         step=0.1,
     )
+    st.caption(f"📢 Publicidade: {percent_pub:.1f}%")
     
     atualizar_margens(margem_bruta, margem_liquida, percent_pub)
-    
-    st.divider()
-    st.markdown("**Resumo**")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Margem Bruta", f"{margem_bruta:.1f}%")
-    with col2:
-        st.metric("Margem Líquida", f"{margem_liquida:.1f}%")
-    with col3:
-        st.metric("Publicidade", f"{percent_pub:.1f}%")
 
 # 4. CUSTOS OPERACIONAIS (NOVO)
 with st.sidebar.expander("💼 Custos Operacionais", expanded=False):
     st.markdown("**Custos Fixos e Devoluções**")
+    st.markdown("---")
     
     custo_fixo_op = st.number_input(
         "Custo Fixo Operacional (R$)",
         value=st.session_state.get("custo_fixo_operacional", 0.0),
         min_value=0.0,
         step=0.1,
-        help="Custo fixo mensal de operação (aluguel, salários, etc.)"
     )
+    st.caption("💰 Custo fixo mensal (aluguel, salários, etc.)")
+    
+    st.markdown("")
     
     taxa_devolucao = st.number_input(
         "Taxa de Devoluções e Trocas (%)",
@@ -199,33 +196,28 @@ with st.sidebar.expander("💼 Custos Operacionais", expanded=False):
         min_value=0.0,
         max_value=100.0,
         step=0.1,
-        help="Percentual de perdas com devoluções e trocas"
     ) / 100
+    st.caption("📦 Percentual de perdas com devoluções")
     
     st.session_state.custo_fixo_operacional = custo_fixo_op
     st.session_state.taxa_devolucao = taxa_devolucao
-    
-    st.divider()
-    st.markdown("**Resumo**")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("Custo Fixo", f"R$ {custo_fixo_op:.2f}")
-    with col2:
-        st.metric("Taxa Devoluções", f"{taxa_devolucao*100:.1f}%")
 
 # 5. CARREGAR RELATÓRIO
 with st.sidebar.expander("📥 Carregar Relatório", expanded=True):
     st.markdown("**Importar Vendas**")
+    st.markdown("---")
     
     st.markdown("""
     **Formato esperado:**
-    - Coluna A: SKU/MLB
-    - Coluna B: Título
-    - Coluna C: Custo Produto (R$)
-    - Coluna D: Frete (R$)
-    - Coluna E: Preço Atual (R$)
-    - Coluna F: Tipo de Anúncio (opcional)
+    - **A:** SKU/MLB
+    - **B:** Título
+    - **C:** Custo Produto (R$)
+    - **D:** Frete (R$)
+    - **E:** Preço Atual (R$)
+    - **F:** Tipo de Anúncio (opcional)
     """)
+    
+    st.markdown("")
     
     uploaded_file = st.file_uploader(
         "Escolha um arquivo",
@@ -250,19 +242,20 @@ with st.sidebar.expander("📥 Carregar Relatório", expanded=True):
                 if valido:
                     df_agregado = processor.agregar_por_sku(df_normalizado)
                     st.session_state.relatorio_vendas = df_agregado
-                    st.success(f"✅ {len(df_agregado)} SKUs carregados")
+                    st.success(f"✅ {len(df_agregado)} SKUs carregados com sucesso!")
                 else:
                     st.error(f"❌ {mensagem}")
         
         except Exception as e:
-            st.error(f"❌ Erro ao processar: {str(e)}")
+            st.error(f"❌ Erro: {str(e)}")
 
 # ============ ABAS PRINCIPAIS ============
+st.markdown("---")
 tab1, tab2, tab3 = st.tabs(["🏠 Home", "🧮 Calculadora de Precificação", "📊 Simulador de Preço Alvo"])
 
 # ============ ABA 1: HOME ============
 with tab1:
-    st.markdown('<div class="main-header">Bem-vindo ao Carblue Pricing Manager</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">💰 Carblue Pricing Manager</div>', unsafe_allow_html=True)
     
     st.markdown("""
     ### 📌 Como Funciona
@@ -299,7 +292,7 @@ with tab1:
 
 # ============ ABA 2: CALCULADORA ============
 with tab2:
-    st.markdown('<div class="section-header">🧮 Calculadora de Precificação</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Calculadora de Precificação</div>', unsafe_allow_html=True)
     
     if st.session_state.relatorio_vendas is None or st.session_state.relatorio_vendas.empty:
         st.warning("⚠️ Nenhum relatório carregado. Carregue um arquivo no Sidebar.")
@@ -380,7 +373,7 @@ with tab2:
 
 # ============ ABA 3: SIMULADOR ============
 with tab3:
-    st.markdown('<div class="section-header">📊 Simulador de Preço Alvo</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Simulador de Preço Alvo</div>', unsafe_allow_html=True)
     
     if st.session_state.relatorio_vendas is None or st.session_state.relatorio_vendas.empty:
         st.warning("⚠️ Nenhum relatório carregado. Carregue um arquivo no Sidebar.")
