@@ -46,7 +46,7 @@ inicializar_sessao()
 # Estilos customizados
 st.markdown("""
     <style>
-    /* Tema Minimalista - Preto & Verde Floresta */
+    /* Tema Minimalista - Preto & Verde Militar */
     .stApp {
         background-color: #000000;
         color: #E8E8E8;
@@ -65,7 +65,7 @@ st.markdown("""
         margin-top: 1rem;
         margin-bottom: 0.5rem;
     }
-    .status-saudavel { color: #4ade80; font-weight: bold; }
+    .status-saudavel { color: #6B8E23; font-weight: bold; }
     .status-alerta { color: #fbbf24; font-weight: bold; }
     .status-prejuizo { color: #f87171; font-weight: bold; }
     
@@ -164,13 +164,13 @@ st.markdown("""
     }
     /* Corrigir botões de upload e outros botões secundários */
     .stButton button {
-        background-color: #228B22 !important;
+        background-color: #556B2F !important;
         color: #ffffff !important;
-        border: 1px solid #228B22 !important;
+        border: 1px solid #556B2F !important;
     }
     .stButton button:hover {
-        background-color: #1a6b1a !important;
-        border-color: #1a6b1a !important;
+        background-color: #6B8E23 !important;
+        border-color: #6B8E23 !important;
         color: #ffffff !important;
     }
     
