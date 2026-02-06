@@ -15,7 +15,7 @@ from mercado_livre_processor import MercadoLivreProcessor
 
 # Configurar página
 st.set_page_config(
-    page_title="Carblue Pricing Manager",
+    page_title="Dominador De Preços",
     page_icon="💰",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -255,12 +255,14 @@ tab1, tab2, tab3 = st.tabs(["🏠 Home", "🧮 Calculadora de Precificação", "
 
 # ============ ABA 1: HOME ============
 with tab1:
-    st.markdown('<div class="main-header">💰 Carblue Pricing Manager</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">💰 Dominador De Preços</div>', unsafe_allow_html=True)
+    st.markdown("**Gestão Completa de Preços, Margens e Promoções**")
+    st.markdown("---")
     
     st.markdown("""
-    ### 📌 Como Funciona
+    ### 📃 Como Funciona
     
-    Este aplicativo ajuda você a precificar seus produtos de forma inteligente e automática.
+    O **Dominador De Preços** ajuda você a precificar seus produtos de forma inteligente e automática.
     
     **Passo 1: Configurar** ⚙️
     - Defina as taxas de comissão dos marketplaces
