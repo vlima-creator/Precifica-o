@@ -27,78 +27,106 @@ inicializar_sessao()
 # Estilos customizados
 st.markdown("""
     <style>
+    /* Tema Escuro Global */
+    .stApp {
+        background-color: #0e1117;
+        color: #fafafa;
+    }
     .main-header {
         font-size: 2.5rem;
         font-weight: bold;
-        color: #1f77b4;
+        color: #ffffff;
         margin-bottom: 0.5rem;
+        text-shadow: 0px 2px 4px rgba(0,0,0,0.3);
     }
     .section-header {
         font-size: 1.5rem;
         font-weight: bold;
-        color: #1f77b4;
+        color: #ffffff;
         margin-top: 1rem;
         margin-bottom: 0.5rem;
     }
-    .status-saudavel { color: #28a745; font-weight: bold; }
-    .status-alerta { color: #ffc107; font-weight: bold; }
-    .status-prejuizo { color: #dc3545; font-weight: bold; }
+    .status-saudavel { color: #4ade80; font-weight: bold; }
+    .status-alerta { color: #fbbf24; font-weight: bold; }
+    .status-prejuizo { color: #f87171; font-weight: bold; }
+    
     .config-section {
-        background-color: #f8f9fa;
+        background-color: #1e293b;
         padding: 1rem;
         border-radius: 0.5rem;
         margin-bottom: 1rem;
+        border: 1px solid #334155;
     }
-    /* Estilização Premium para o Sidebar */
+
+    /* Estilização Premium Dark para o Sidebar */
     [data-testid="stSidebar"] {
-        background-color: #fcfcfc;
-        border-right: 1px solid #f0f0f0;
+        background-color: #000000;
+        border-right: 1px solid #1e293b;
     }
     [data-testid="stSidebar"] .stMarkdown h1 {
         font-size: 1.2rem !important;
         font-weight: 700 !important;
-        color: #333;
+        color: #ffffff;
         margin-bottom: 0.5rem !important;
     }
     [data-testid="stSidebar"] .stMarkdown p, 
     [data-testid="stSidebar"] .stMarkdown span,
     [data-testid="stSidebar"] label {
         font-size: 0.85rem !important;
-        color: #555;
+        color: #cbd5e1;
     }
     [data-testid="stSidebar"] .stExpander {
         border: none !important;
         background-color: transparent !important;
-        margin-bottom: 0.2rem !important;
+        margin-bottom: 0.4rem !important;
     }
     [data-testid="stSidebar"] .stExpander details {
-        border: 1px solid #f0f0f0 !important;
+        border: 1px solid #1e293b !important;
         border-radius: 8px !important;
-        background-color: #ffffff !important;
+        background-color: #0f172a !important;
         transition: all 0.2s ease;
     }
     [data-testid="stSidebar"] .stExpander details:hover {
-        border-color: #e0e0e0 !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        border-color: #334155 !important;
+        background-color: #1e293b !important;
     }
     [data-testid="stSidebar"] .stExpander summary p {
         font-size: 0.9rem !important;
         font-weight: 600 !important;
-        color: #444 !important;
+        color: #f8fafc !important;
     }
-    /* Ajuste de inputs no sidebar */
+    /* Ajuste de inputs no sidebar para Dark Mode */
     [data-testid="stSidebar"] .stNumberInput input,
     [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
         font-size: 0.8rem !important;
-        padding-top: 2px !important;
-        padding-bottom: 2px !important;
+        background-color: #020617 !important;
+        color: #ffffff !important;
+        border-color: #1e293b !important;
     }
     [data-testid="stSidebar"] .stCaption {
         font-size: 0.75rem !important;
-        opacity: 0.8;
+        color: #94a3b8 !important;
     }
     [data-testid="stSidebar"] hr {
         margin: 0.5rem 0 !important;
+        border-color: #1e293b !important;
+    }
+    /* Estilo para Tabs no Dark Mode */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background-color: transparent;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 40px;
+        white-space: pre;
+        background-color: #1e293b;
+        border-radius: 4px 4px 0px 0px;
+        color: #94a3b8;
+        padding: 10px 20px;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #334155 !important;
+        color: #ffffff !important;
     }
     </style>
 """, unsafe_allow_html=True)
