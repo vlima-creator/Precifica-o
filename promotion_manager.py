@@ -70,6 +70,34 @@ class PromotionManager:
 
         return df
 
+    def aplicar_descontos(self, df, desconto_a, desconto_b, desconto_c):
+        """
+        Aplica descontos por curva ABC
+        
+        Args:
+            df: DataFrame com coluna 'Curva ABC'
+            desconto_a: Desconto para Curva A (em decimal, ex: 0.05 para 5%)
+            desconto_b: Desconto para Curva B
+            desconto_c: Desconto para Curva C
+            
+        Returns:
+            DataFrame com colunas de desconto adicionadas
+        """
+        df = df.copy()
+        
+        # Criar mapa de descontos
+        regras = {
+            "A": desconto_a,
+            "B": desconto_b,
+            "C": desconto_c,
+            "Sem Curva": 0.0,
+        }
+        
+        # Aplicar descontos
+        df["Desconto"] = df["Curva ABC"].map(regras).fillna(0.0)
+        
+        return df
+
     def validar_desconto_seguro(self, df, desconto_max_col="Desconto Máximo %"):
         """
         Valida se os descontos aplicados estão dentro do limite seguro
