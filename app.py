@@ -151,7 +151,7 @@ with st.sidebar.expander("📈 Margens e Publicidade", expanded=False):
         "% Publicidade",
         min_value=0.0,
         max_value=100.0,
-        value=st.session_state.percent_publicidade,
+        value=st.session_state.get("percent_publicidade", 3.0),
         step=0.1,
     )
     
