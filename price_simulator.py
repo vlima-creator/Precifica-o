@@ -5,6 +5,7 @@ Implementa a lógica automática baseada em dados do relatório
 
 import pandas as pd
 import numpy as np
+from config import MERCADO_LIVRE_AD_TYPES
 
 
 class PriceSimulator:
@@ -27,8 +28,26 @@ class PriceSimulator:
         self.margem_liquida_minima = margem_liquida_minima
         self.percent_publicidade = percent_publicidade
 
+    def obter_config_marketplace(self, marketplace, tipo_anuncio=""):
+        """
+        Obtém configuração do marketplace, considerando tipo de anúncio para Mercado Livre
+        
+        Args:
+            marketplace: Nome do marketplace
+            tipo_anuncio: Tipo de anúncio (para Mercado Livre: "Clássico" ou "Premium")
+            
+        Returns:
+            Dict com configuração (comissao, custo_fixo)
+        """
+        # Se é Mercado Livre e tem tipo de anúncio especificado
+        if marketplace == "Mercado Livre" and tipo_anuncio and tipo_anuncio in MERCADO_LIVRE_AD_TYPES:
+            return MERCADO_LIVRE_AD_TYPES[tipo_anuncio]
+        
+        # Caso contrário, usar configuração padrão do marketplace
+        return self.marketplaces.get(marketplace, {"comissao": 0.0, "custo_fixo": 0.0})
+
     def calcular_linha(self, sku, descricao, custo_produto, frete, 
-                       marketplace, regime_tributario):
+                       marketplace, regime_tributario, tipo_anuncio=""):
         """
         Calcula simulação de preço para uma linha
         
@@ -39,12 +58,13 @@ class PriceSimulator:
             frete: Frete (R$)
             marketplace: Nome do marketplace
             regime_tributario: Regime tributário
+            tipo_anuncio: Tipo de anúncio (opcional, para Mercado Livre)
             
         Returns:
             Dict com simulação de preço
         """
-        # Obter configurações
-        mp_config = self.marketplaces.get(marketplace, {})
+        # Obter configurações (considerando tipo de anúncio)
+        mp_config = self.obter_config_marketplace(marketplace, tipo_anuncio)
         comissao_percent = mp_config.get("comissao", 0.0)
         taxa_fixa = mp_config.get("custo_fixo", 0.0)
         
@@ -100,7 +120,7 @@ class PriceSimulator:
         Calcula simulação para múltiplas linhas
         
         Args:
-            df: DataFrame com colunas: SKU, Descrição, Custo Produto, Frete
+            df: DataFrame com colunas: SKU, Descrição, Custo Produto, Frete, Tipo de Anúncio (opcional)
             marketplace: Marketplace selecionado
             regime_tributario: Regime tributário selecionado
                 
@@ -110,6 +130,8 @@ class PriceSimulator:
         resultados = []
         
         for _, row in df.iterrows():
+            tipo_anuncio = row.get("Tipo de Anúncio", "")
+            
             resultado = self.calcular_linha(
                 sku=row.get("SKU", ""),
                 descricao=row.get("Descrição", ""),
@@ -117,6 +139,7 @@ class PriceSimulator:
                 frete=float(row.get("Frete", 0) or 0),
                 marketplace=marketplace,
                 regime_tributario=regime_tributario,
+                tipo_anuncio=tipo_anuncio,
             )
             resultados.append(resultado)
         

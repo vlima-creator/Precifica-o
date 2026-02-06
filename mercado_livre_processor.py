@@ -14,18 +14,15 @@ class MercadoLivreProcessor:
     def normalizar_relatorio_vendas(df):
         """
         Normaliza relatório de vendas do Mercado Livre
-        Aceita formato simples com colunas: SKU/MLB, Titulo, Custo Produto, Frete, Preço Atual
+        Aceita formato simples com colunas: SKU/MLB, Titulo, Custo Produto, Frete, Preço Atual, Tipo de Anúncio (opcional)
         
         Args:
             df: DataFrame com dados brutos do Mercado Livre
             
         Returns:
-            DataFrame normalizado com colunas: SKU, Descrição, Custo Produto, Frete, Preço Atual
+            DataFrame normalizado com colunas: SKU, Descrição, Custo Produto, Frete, Preço Atual, Tipo de Anúncio
         """
         df = df.copy()
-        
-        # Se as colunas já estão em inglês/português correto, usar diretamente
-        # Caso contrário, tentar mapear
         
         # Mapeamento de colunas possíveis
         mapeamento_colunas = {
@@ -48,11 +45,19 @@ class MercadoLivreProcessor:
             "preço": "Preço Atual",
             "price": "Preço Atual",
             "current price": "Preço Atual",
+            "tipo de anúncio": "Tipo de Anúncio",
+            "tipo de anuncio": "Tipo de Anúncio",
+            "ad type": "Tipo de Anúncio",
+            "anuncio": "Tipo de Anúncio",
         }
         
         # Normalizar nomes de colunas
         df.columns = df.columns.str.lower().str.strip()
         df = df.rename(columns=mapeamento_colunas)
+        
+        # Adicionar coluna Tipo de Anúncio se não existir
+        if "Tipo de Anúncio" not in df.columns:
+            df["Tipo de Anúncio"] = ""  # Vazio por padrão
         
         # Verificar colunas obrigatórias
         colunas_obrigatorias = ["SKU", "Descrição", "Custo Produto", "Frete", "Preço Atual"]
@@ -84,8 +89,21 @@ class MercadoLivreProcessor:
         if len(df) == 0:
             raise ValueError("Nenhuma linha com preço válido encontrada")
         
+        # Converter Tipo de Anúncio para string (pode estar vazio)
+        df["Tipo de Anúncio"] = df["Tipo de Anúncio"].astype(str).str.strip().str.lower()
+        # Normalizar valores: "clássico" ou "premium"
+        df["Tipo de Anúncio"] = df["Tipo de Anúncio"].replace({
+            "clássico": "Clássico",
+            "classico": "Clássico",
+            "classic": "Clássico",
+            "premium": "Premium",
+            "nan": "",  # Converter NaN para vazio
+        })
+        # Se ainda tiver valores não reconhecidos, deixar vazio
+        df.loc[~df["Tipo de Anúncio"].isin(["Clássico", "Premium", ""]), "Tipo de Anúncio"] = ""
+        
         # Selecionar apenas as colunas necessárias
-        df = df[["SKU", "Descrição", "Custo Produto", "Frete", "Preço Atual"]]
+        df = df[["SKU", "Descrição", "Custo Produto", "Frete", "Preço Atual", "Tipo de Anúncio"]]
         
         return df.reset_index(drop=True)
 
@@ -105,6 +123,7 @@ class MercadoLivreProcessor:
             "Custo Produto": "mean",
             "Frete": "mean",
             "Preço Atual": "mean",
+            "Tipo de Anúncio": "first",
         }
         
         df_agg = df.groupby("SKU").agg(agg_dict).reset_index()

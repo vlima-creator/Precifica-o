@@ -4,12 +4,17 @@ Configurações e constantes do aplicativo de precificação Carblue
 
 # Configurações padrão de Marketplaces
 DEFAULT_MARKETPLACES = {
-    "Mercado Livre Premium": {"comissao": 0.19, "custo_fixo": 6.0, "taxa_devolucao": 0.02},
-    "Mercado Livre Clássico": {"comissao": 0.14, "custo_fixo": 6.0, "taxa_devolucao": 0.02},
+    "Mercado Livre": {"comissao": 0.14, "custo_fixo": 6.0, "taxa_devolucao": 0.02},  # Padrão Clássico
     "Shopee": {"comissao": 0.20, "custo_fixo": 0.0, "taxa_devolucao": 0.02},
     "Amazon": {"comissao": 0.15, "custo_fixo": 0.0, "taxa_devolucao": 0.02},
     "Magalu": {"comissao": 0.18, "custo_fixo": 0.0, "taxa_devolucao": 0.02},
     "Outros": {"comissao": 0.18, "custo_fixo": 0.0, "taxa_devolucao": 0.02},
+}
+
+# Configurações de tipos de anúncio para Mercado Livre
+MERCADO_LIVRE_AD_TYPES = {
+    "Clássico": {"comissao": 0.14, "custo_fixo": 6.0},
+    "Premium": {"comissao": 0.19, "custo_fixo": 6.0},
 }
 
 # Configurações de Regimes Tributários
@@ -36,9 +41,10 @@ STATUS_PREJUIZO = "🔴 Prejuízo/Abaixo"
 MERCADO_LIVRE_COLUMNS = [
     "SKU",
     "Título",
-    "Preço",
-    "Quantidade Vendida",
-    "Faturamento",
+    "Custo Produto",
+    "Frete",
+    "Preço Atual",
+    "Tipo de Anúncio",  # Opcional
 ]
 
 # Colunas da Base de Dados interna
