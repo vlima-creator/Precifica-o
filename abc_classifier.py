@@ -72,14 +72,15 @@ class ABCClassifier:
         """
         resumo = df.groupby("Curva ABC").agg({
             "SKU": "count",
-            "Faturamento": ["sum", "mean"],
+            "Faturamento": "sum",
             "Preço": "mean",
             "Quantidade Vendida": "sum",
         }).round(2)
 
-        resumo.columns = ["Qtd SKUs", "Faturamento Total", "Faturamento Médio", "Preço Médio", "Qtd Vendas"]
-
-        return resumo.reset_index()
+        resumo.columns = ["Qtd SKUs", "Faturamento", "Preço Médio", "Qtd Vendas"]
+        resumo = resumo.reset_index()
+        
+        return resumo
 
     def identificar_oportunidades(self, df, margem_minima=15):
         """
