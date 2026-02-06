@@ -104,7 +104,7 @@ class PricingCalculatorV2:
             "Frete": frete,
             "Comissão": comissao,
             "Taxa Fixa": taxa_fixa,
-            "Custo Fixo Op.": custo_fixo_operacional,
+            "Custo Fixo Op.": self.custo_fixo_operacional,
             "Impostos": impostos,
             "Publicidade": publicidade,
             "Lucro R$": lucro,
