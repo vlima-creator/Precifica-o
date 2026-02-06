@@ -11,48 +11,45 @@ class MercadoLivreProcessor:
     """Processa relatórios de vendas do Mercado Livre."""
 
     @staticmethod
-    def detectar_formato(df):
-        """
-        Detecta o formato do arquivo enviado
-        
-        Args:
-            df: DataFrame carregado
-            
-        Returns:
-            str com tipo de formato detectado
-        """
-        colunas = df.columns.str.lower().tolist()
-        
-        # Verificar se é relatório de vendas
-        if any(col in colunas for col in ["sku", "produto", "preço", "quantidade"]):
-            return "vendas"
-        
-        return "desconhecido"
-
-    @staticmethod
     def normalizar_relatorio_vendas(df):
         """
         Normaliza relatório de vendas do Mercado Livre
+        Aceita múltiplos formatos de entrada
         
         Args:
             df: DataFrame com dados brutos do Mercado Livre
             
         Returns:
-            DataFrame normalizado
+            DataFrame normalizado com colunas: SKU, Descrição, Custo Produto, Frete, Preço Atual
         """
         df = df.copy()
+        
+        # Normalizar nomes de colunas (lowercase e sem espaços extras)
+        df.columns = df.columns.str.lower().str.strip()
         
         # Mapeamento de colunas comuns do Mercado Livre
         mapeamento_colunas = {
             "sku": "SKU",
-            "n.º de venda": "Venda",
+            "sku/mlb": "SKU",
+            "mlb": "SKU",
             "id": "SKU",
+            "n.º de venda": "Venda",
             "produto": "Descrição",
             "título do anúncio": "Descrição",
-            "preço": "Preço",
-            "preço unitário de venda do anúncio (brl)": "Preço",
-            "preço atual": "Preço",
-            "preço de venda": "Preço",
+            "título": "Descrição",
+            "descrição": "Descrição",
+            "custo produto": "Custo Produto",
+            "custo do produto": "Custo Produto",
+            "custo prod": "Custo Produto",
+            "custo": "Custo Produto",
+            "frete": "Frete",
+            "frete (r$)": "Frete",
+            "preço": "Preço Atual",
+            "preço atual": "Preço Atual",
+            "preço de venda": "Preço Atual",
+            "preço unitário de venda do anúncio (brl)": "Preço Atual",
+            "preço venda (r$)": "Preço Atual",
+            "total (brl)": "Preço Atual",
             "quantidade": "Quantidade Vendida",
             "quantidade vendida": "Quantidade Vendida",
             "unidades": "Quantidade Vendida",
@@ -63,32 +60,78 @@ class MercadoLivreProcessor:
             "total vendido": "Faturamento",
         }
         
-        # Normalizar nomes de colunas
-        df.columns = df.columns.str.lower().str.strip()
+        # Renomear colunas
         df = df.rename(columns=mapeamento_colunas)
+        
+        # Remover colunas duplicadas
+        df = df.loc[:, ~df.columns.duplicated(keep='first')]
+        
+        # Garantir que temos a coluna SKU
+        if "SKU" not in df.columns:
+            raise ValueError("Arquivo deve conter coluna 'SKU' ou 'SKU/MLB'")
         
         # Remover linhas onde SKU está vazio
         df = df[df["SKU"].notna() & (df["SKU"] != "")]
         
-        # Converter tipos de dados
+        # Converter SKU para string
         df["SKU"] = df["SKU"].astype(str).str.strip()
-        df["Preço"] = pd.to_numeric(df["Preço"], errors="coerce")
-        df["Quantidade Vendida"] = pd.to_numeric(df["Quantidade Vendida"], errors="coerce")
         
-        # Garantir que temos dados válidos
-        df = df[df["Preço"].notna() & (df["Preço"] > 0)]
-        df = df[df["Quantidade Vendida"].notna() & (df["Quantidade Vendida"] > 0)]
+        # Adicionar colunas padrão se não existirem
+        if "Descrição" not in df.columns:
+            if "Título do anúncio" in df.columns:
+                df["Descrição"] = df["Título do anúncio"]
+            else:
+                df["Descrição"] = df["SKU"]
         
-        # Calcular faturamento se não existir ou estiver vazio
-        if "Faturamento" not in df.columns or df["Faturamento"].isna().all():
-            df["Faturamento"] = df["Preço"] * df["Quantidade Vendida"]
+        if "Custo Produto" not in df.columns:
+            df["Custo Produto"] = 0.0
+        
+        if "Frete" not in df.columns:
+            df["Frete"] = 0.0
+        
+        if "Preço Atual" not in df.columns:
+            if "Preço unitário de venda do anúncio (brl)" in df.columns:
+                df["Preço Atual"] = df["Preço unitário de venda do anúncio (brl)"]
+            elif "Preço" in df.columns:
+                df["Preço Atual"] = df["Preço"]
+            else:
+                raise ValueError("Arquivo deve conter coluna de preço")
+        
+        # Converter tipos de dados
+        if "Custo Produto" in df.columns:
+            df["Custo Produto"] = pd.to_numeric(df["Custo Produto"], errors="coerce").fillna(0.0)
         else:
-            df["Faturamento"] = pd.to_numeric(df["Faturamento"], errors="coerce")
-            # Se faturamento vazio, calcular
-            df.loc[df["Faturamento"].isna(), "Faturamento"] = df["Preço"] * df["Quantidade Vendida"]
+            df["Custo Produto"] = 0.0
         
-        # Remover linhas com faturamento inválido
-        df = df[df["Faturamento"] > 0]
+        if "Frete" in df.columns:
+            df["Frete"] = pd.to_numeric(df["Frete"], errors="coerce").fillna(0.0)
+        else:
+            df["Frete"] = 0.0
+        
+        if "Preço Atual" not in df.columns:
+            raise ValueError("Coluna de preço não encontrada")
+        
+        # Converter para numérico
+        try:
+            df["Preço Atual"] = df["Preço Atual"].astype(float)
+        except:
+            df["Preço Atual"] = pd.to_numeric(df["Preço Atual"], errors="coerce")
+        
+        # Remover linhas com preço inválido
+        df = df[(df["Preço Atual"].notna()) & (df["Preço Atual"] > 0)].reset_index(drop=True)
+        
+        # Selecionar apenas as colunas necessárias
+        colunas_necessarias = ["SKU", "Descrição", "Custo Produto", "Frete", "Preço Atual"]
+        
+        # Garantir que todas as colunas existem
+        for col in colunas_necessarias:
+            if col not in df.columns:
+                if col == "Descrição":
+                    df[col] = df["SKU"]
+                else:
+                    df[col] = 0.0
+        
+        df = df[colunas_necessarias]
         
         return df.reset_index(drop=True)
 
@@ -103,16 +146,12 @@ class MercadoLivreProcessor:
         Returns:
             DataFrame agregado por SKU
         """
-        # Manter descrição se existir
         agg_dict = {
-            "Preço": "mean",
-            "Quantidade Vendida": "sum",
-            "Faturamento": "sum",
+            "Descrição": "first",
+            "Custo Produto": "mean",
+            "Frete": "mean",
+            "Preço Atual": "mean",
         }
-        
-        # Adicionar descrição se existir
-        if "Descrição" in df.columns:
-            agg_dict["Descrição"] = "first"
         
         df_agg = df.groupby("SKU").agg(agg_dict).reset_index()
         
@@ -132,48 +171,13 @@ class MercadoLivreProcessor:
         if df.empty:
             return False, "Relatório vazio"
         
-        if len(df) < 3:
-            return False, "Relatório deve ter pelo menos 3 produtos"
+        if "SKU" not in df.columns:
+            return False, "Relatório deve conter coluna 'SKU'"
         
-        if "Faturamento" not in df.columns or df["Faturamento"].sum() <= 0:
-            return False, "Faturamento total deve ser maior que zero"
+        if "Preço Atual" not in df.columns:
+            return False, "Relatório deve conter coluna de preço"
         
         return True, "Relatório válido"
-
-    @staticmethod
-    def calcular_periodo_vendas(df, data_col=None):
-        """
-        Calcula período de vendas do relatório
-        
-        Args:
-            df: DataFrame com dados de vendas
-            data_col: Nome da coluna de data (se existir)
-            
-        Returns:
-            str com período estimado
-        """
-        if data_col and data_col in df.columns:
-            try:
-                df[data_col] = pd.to_datetime(df[data_col], errors="coerce")
-                data_min = df[data_col].min()
-                data_max = df[data_col].max()
-                return f"{data_min.date()} a {data_max.date()}"
-            except:
-                pass
-        
-        return "Período não identificado"
-
-    @staticmethod
-    def exportar_para_excel(df, output_path):
-        """
-        Exporta DataFrame para Excel
-        
-        Args:
-            df: DataFrame para exportar
-            output_path: Caminho do arquivo de saída
-        """
-        with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
-            df.to_excel(writer, sheet_name="Relatório", index=False)
 
     @staticmethod
     def carregar_de_excel(file_path, sheet_name=0):
@@ -190,8 +194,7 @@ class MercadoLivreProcessor:
         # Tentar carregar com skiprows=5 (formato padrão do Mercado Livre)
         try:
             df = pd.read_excel(file_path, sheet_name=sheet_name, skiprows=5)
-            # Verificar se tem colunas esperadas
-            if "SKU" in df.columns or "Título do anúncio" in df.columns:
+            if len(df) > 0:
                 return df
         except:
             pass
@@ -199,9 +202,21 @@ class MercadoLivreProcessor:
         # Se não funcionar, tentar sem skiprows
         try:
             df = pd.read_excel(file_path, sheet_name=sheet_name)
-            return df
-        except Exception as e:
-            raise ValueError(f"Erro ao carregar arquivo Excel: {str(e)}")
+            if len(df) > 0:
+                return df
+        except:
+            pass
+        
+        # Tentar com diferentes skiprows
+        for skip in [0, 1, 2, 3, 4, 6, 7, 8]:
+            try:
+                df = pd.read_excel(file_path, sheet_name=sheet_name, skiprows=skip)
+                if len(df) > 0 and len(df.columns) > 0:
+                    return df
+            except:
+                continue
+        
+        raise ValueError("Não foi possível carregar o arquivo Excel")
 
     @staticmethod
     def carregar_de_csv(file_path, encoding="utf-8"):
@@ -215,4 +230,10 @@ class MercadoLivreProcessor:
         Returns:
             DataFrame com dados
         """
-        return pd.read_csv(file_path, encoding=encoding)
+        try:
+            return pd.read_csv(file_path, encoding=encoding)
+        except:
+            try:
+                return pd.read_csv(file_path, encoding="latin-1")
+            except:
+                return pd.read_csv(file_path, encoding="iso-8859-1")
