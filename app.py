@@ -13,6 +13,25 @@ from pricing_calculator_v2 import PricingCalculatorV2
 from price_simulator import PriceSimulator
 from mercado_livre_processor import MercadoLivreProcessor
 
+# ============ FUNÇÕES DE FORMATAÇÃO ============
+def formatar_moeda(valor):
+    """Formata valor em reais no padrão brasileiro: R$ 1.234,50"""
+    if pd.isna(valor) or valor is None:
+        return "R$ 0,00"
+    return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+def formatar_percentual(valor):
+    """Formata percentual no padrão brasileiro: 12,50%"""
+    if pd.isna(valor) or valor is None:
+        return "0,00%"
+    return f"{valor:.2f}%".replace(".", ",")
+
+def formatar_percentual_1casa(valor):
+    """Formata percentual com 1 casa decimal: 12,5%"""
+    if pd.isna(valor) or valor is None:
+        return "0,0%"
+    return f"{valor:.1f}%".replace(".", ",")
+
 # Configurar página
 st.set_page_config(
     page_title="Precifica-o | Minimalista",
@@ -543,9 +562,9 @@ with tab2:
             with col1:
                 st.metric("Total de SKUs", len(df_resultado))
             with col2:
-                st.metric("Margem Média", f"{df_resultado['Margem Bruta %'].mean():.1f}%")
+                st.metric("Margem Média", formatar_percentual_1casa(df_resultado['Margem Bruta %'].mean()))
             with col3:
-                st.metric("Lucro Total", f"R$ {df_resultado['Lucro R$'].sum():,.2f}")
+                st.metric("Lucro Total", formatar_moeda(df_resultado['Lucro R$'].sum()))
             with col4:
                 saudaveis = len(df_resultado[df_resultado['Status'] == '🟢 Saudável'])
                 st.metric("Produtos Saudáveis", f"{saudaveis}/{len(df_resultado)}")
@@ -622,13 +641,13 @@ with tab3:
             # Métricas
             col1, col2, col3, col4 = st.columns(4)
             with col1:
-                st.metric("Preço Médio Sugerido", f"R$ {df_simulacao['Preço Sugerido'].mean():,.2f}")
+                st.metric("Preço Médio Sugerido", formatar_moeda(df_simulacao['Preço Sugerido'].mean()))
             with col2:
-                st.metric("Preço Promo Médio", f"R$ {df_simulacao['Preço Promo Limite'].mean():,.2f}")
+                st.metric("Preço Promo Médio", formatar_moeda(df_simulacao['Preço Promo Limite'].mean()))
             with col3:
-                st.metric("Lucro Bruto Total", f"R$ {df_simulacao['Lucro Bruto'].sum():,.2f}")
+                st.metric("Lucro Bruto Total", formatar_moeda(df_simulacao['Lucro Bruto'].sum()))
             with col4:
-                st.metric("Lucro Líquido Total", f"R$ {df_simulacao['Lucro Líquido'].sum():,.2f}")
+                st.metric("Lucro Líquido Total", formatar_moeda(df_simulacao['Lucro Líquido'].sum()))
             
             st.divider()
             
