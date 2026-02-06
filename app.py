@@ -153,6 +153,51 @@ st.markdown("""
         border-color: #4ade80 !important;
         color: #4ade80 !important;
     }
+    
+    /* PENTE FINO: Legibilidade Global */
+    /* Forçar cor de texto em todos os parágrafos e spans */
+    p, span, label, li, .stMarkdown {
+        color: #fafafa !important;
+    }
+    /* Ajustar métricas */
+    [data-testid="stMetricValue"] {
+        color: #ffffff !important;
+    }
+    [data-testid="stMetricLabel"] p {
+        color: #94a3b8 !important;
+    }
+    /* Ajustar tabelas e dataframes */
+    .stDataFrame, [data-testid="stTable"] {
+        background-color: #0f172a !important;
+    }
+    /* Ajustar legendas e captions */
+    .stCaption, small {
+        color: #94a3b8 !important;
+    }
+    /* Ajustar inputs globais (fora do sidebar também) */
+    .stNumberInput input, .stTextInput input, .stSelectbox div[data-baseweb="select"] {
+        background-color: #0f172a !important;
+        color: #ffffff !important;
+        border-color: #334155 !important;
+    }
+    /* Ajustar Sliders */
+    .stSlider [data-baseweb="slider"] {
+        background-color: transparent !important;
+    }
+    /* Ajustar Warnings e Infos */
+    .stAlert {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        border: 1px solid #334155 !important;
+    }
+    /* Ajustar Divisores */
+    hr {
+        border-color: #334155 !important;
+    }
+    /* Forçar cor branca em títulos de expanders fora do sidebar */
+    .stExpander summary p {
+        color: #ffffff !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
