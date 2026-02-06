@@ -15,8 +15,8 @@ from mercado_livre_processor import MercadoLivreProcessor
 
 # Configurar página
 st.set_page_config(
-    page_title="Dominador De Preços",
-    page_icon="💰",
+    page_title="Precifica-o | Minimalista",
+    page_icon="📉",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -27,10 +27,10 @@ inicializar_sessao()
 # Estilos customizados
 st.markdown("""
     <style>
-    /* Tema Escuro Global */
+    /* Tema Minimalista - Preto & Verde Floresta */
     .stApp {
-        background-color: #0e1117;
-        color: #fafafa;
+        background-color: #000000;
+        color: #E8E8E8;
     }
     .main-header {
         font-size: 2.5rem;
@@ -145,13 +145,14 @@ st.markdown("""
     }
     /* Corrigir botões de upload e outros botões secundários */
     .stButton button {
-        background-color: #1e293b !important;
+        background-color: #228B22 !important;
         color: #ffffff !important;
-        border: 1px solid #334155 !important;
+        border: 1px solid #228B22 !important;
     }
     .stButton button:hover {
-        border-color: #4ade80 !important;
-        color: #4ade80 !important;
+        background-color: #1a6b1a !important;
+        border-color: #1a6b1a !important;
+        color: #ffffff !important;
     }
     
     /* PENTE FINO: Legibilidade Global */
@@ -202,10 +203,68 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============ SIDEBAR ============
-st.sidebar.markdown("# ⚙️ Configurações")
+st.sidebar.markdown("# ⚙️ CONFIGURAÇÕES")
 st.sidebar.markdown("---")
 
-# 1. MARKETPLACES
+# 1. UPLOAD DE ARQUIVO CSV
+with st.sidebar.expander("📤 Carregar Dados", expanded=True):
+    uploaded_file = st.file_uploader(
+        "Carregar arquivo CSV (Produto, Custo, Preço)",
+        type=["csv"],
+        key="file_uploader"
+    )
+    
+    if uploaded_file is not None:
+        try:
+            df_upload = pd.read_csv(uploaded_file)
+            if len(df_upload.columns) >= 3:
+                df_upload.columns = ["Produto", "Custo", "Preço"] + list(df_upload.columns[3:])
+                df_upload["Custo"] = pd.to_numeric(df_upload["Custo"], errors="coerce")
+                df_upload["Preço"] = pd.to_numeric(df_upload["Preço"], errors="coerce")
+                df_upload = df_upload.dropna(subset=["Custo", "Preço"])
+                if len(df_upload) > 0:
+                    st.session_state.relatorio_vendas = df_upload
+                    st.success(f"✅ {len(df_upload)} produtos carregados!")
+                else:
+                    st.error("❌ Nenhum produto válido encontrado")
+            else:
+                st.error("❌ Arquivo deve ter pelo menos 3 colunas: Produto, Custo, Preço")
+        except Exception as e:
+            st.error(f"❌ Erro ao processar arquivo: {str(e)}")
+    
+    if st.button("Usar Dados de Exemplo", use_container_width=True):
+        st.session_state.relatorio_vendas = None
+        st.rerun()
+
+# 2. PRESETS DE CONFIGURAÇÃO
+with st.sidebar.expander("⚡ Presets de Cenários", expanded=True):
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("🔥 Agressivo", use_container_width=True):
+            st.session_state.margem_bruta_alvo = 25
+            st.session_state.margem_liquida_minima = 5
+            st.session_state.percent_publicidade = 5
+            st.success("Cenário Agressivo aplicado!")
+            st.rerun()
+    
+    with col2:
+        if st.button("⚖️ Balanceado", use_container_width=True):
+            st.session_state.margem_bruta_alvo = 30
+            st.session_state.margem_liquida_minima = 10
+            st.session_state.percent_publicidade = 3
+            st.success("Cenário Balanceado aplicado!")
+            st.rerun()
+    
+    with col3:
+        if st.button("🛡️ Conservador", use_container_width=True):
+            st.session_state.margem_bruta_alvo = 40
+            st.session_state.margem_liquida_minima = 15
+            st.session_state.percent_publicidade = 2
+            st.success("Cenário Conservador aplicado!")
+            st.rerun()
+
+# 3. MARKETPLACES
 with st.sidebar.expander("📊 Marketplaces", expanded=False):
     for marketplace, config in st.session_state.marketplaces.items():
         st.markdown(f"**{marketplace}**")
