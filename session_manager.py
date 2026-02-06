@@ -15,7 +15,14 @@ def inicializar_sessao():
     
     # Configurações de Regime Tributário
     if "regimes" not in st.session_state:
-        st.session_state.regimes = DEFAULT_REGIMES.copy()
+        # Adicionar custo fixo operacional a cada regime
+        regimes_com_custo = {}
+        for regime, config in DEFAULT_REGIMES.items():
+            regimes_com_custo[regime] = {
+                **config,
+                "custo_fixo_operacional": 0.0  # Padrão 0
+            }
+        st.session_state.regimes = regimes_com_custo
     
     # Dados da Base
     if "base_dados" not in st.session_state:
@@ -48,6 +55,10 @@ def inicializar_sessao():
     
     if "margem_liquida_minima" not in st.session_state:
         st.session_state.margem_liquida_minima = 10.0
+    
+    # % Publicidade
+    if "percent_publicidade" not in st.session_state:
+        st.session_state.percent_publicidade = 3.0
     
     # Descontos por Curva ABC
     if "desconto_curva_a" not in st.session_state:
@@ -98,7 +109,9 @@ def atualizar_regras_promocao(desconto_a, desconto_b, desconto_c):
     }
 
 
-def atualizar_margens(bruta_alvo, liquida_minima):
-    """Atualiza margens alvo."""
+def atualizar_margens(bruta_alvo, liquida_minima, percent_publicidade=None):
+    """Atualiza margens alvo e % publicidade."""
     st.session_state.margem_bruta_alvo = bruta_alvo
     st.session_state.margem_liquida_minima = liquida_minima
+    if percent_publicidade is not None:
+        st.session_state.percent_publicidade = percent_publicidade
