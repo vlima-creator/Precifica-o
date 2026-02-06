@@ -209,51 +209,58 @@ with tab2:
     
     if uploaded_file is not None:
         try:
-            # Carregar arquivo
-            if uploaded_file.name.endswith(".csv"):
-                df = pd.read_csv(uploaded_file)
-            else:
-                df = pd.read_excel(uploaded_file)
-            
-            st.success("✅ Arquivo carregado com sucesso!")
-            
-            # Mostrar preview
-            st.subheader("Preview dos Dados")
-            st.dataframe(df.head(10), use_container_width=True)
-            
-            # Normalizar relatório
-            processor = MercadoLivreProcessor()
-            df_normalizado = processor.normalizar_relatorio_vendas(df)
-            
-            # Validar
-            valido, mensagem = processor.validar_relatorio(df_normalizado)
-            
-            if valido:
-                st.success(f"✅ {mensagem}")
+            with st.spinner("⏳ Carregando e processando arquivo..."):
+                # Carregar arquivo
+                processor = MercadoLivreProcessor()
                 
-                # Agregar por SKU
-                df_agregado = processor.agregar_por_sku(df_normalizado)
+                if uploaded_file.name.endswith(".csv"):
+                    df = processor.carregar_de_csv(uploaded_file)
+                else:
+                    # Usar processador que detecta skiprows automaticamente
+                    df = processor.carregar_de_excel(uploaded_file)
                 
-                # Salvar na sessão
-                st.session_state.relatorio_vendas = df_agregado
+                st.success("✅ Arquivo carregado com sucesso!")
                 
-                # Mostrar estatísticas
-                col1, col2, col3, col4 = st.columns(4)
-                with col1:
-                    st.metric("Total de SKUs", len(df_agregado))
-                with col2:
-                    st.metric("Faturamento Total", f"R$ {df_agregado['Faturamento'].sum():,.2f}")
-                with col3:
-                    st.metric("Preço Médio", f"R$ {df_agregado['Preço'].mean():,.2f}")
-                with col4:
-                    st.metric("Quantidade Total", int(df_agregado['Quantidade Vendida'].sum()))
+                # Mostrar preview
+                st.subheader("Preview dos Dados (Primeiras 10 linhas)")
+                st.dataframe(df.head(10), use_container_width=True)
                 
-                st.info("✅ Relatório pronto! Vá para **'Análise ABC'** para continuar.")
-            else:
-                st.error(f"❌ Erro: {mensagem}")
+                # Normalizar relatório
+                df_normalizado = processor.normalizar_relatorio_vendas(df)
+                
+                st.info(f"📊 Dados normalizados: {len(df_normalizado)} linhas processadas")
+                
+                # Validar
+                valido, mensagem = processor.validar_relatorio(df_normalizado)
+                
+                if valido:
+                    st.success(f"✅ {mensagem}")
+                    
+                    # Agregar por SKU
+                    df_agregado = processor.agregar_por_sku(df_normalizado)
+                    
+                    # Salvar na sessão
+                    st.session_state.relatorio_vendas = df_agregado
+                    
+                    # Mostrar estatísticas
+                    col1, col2, col3, col4 = st.columns(4)
+                    with col1:
+                        st.metric("Total de SKUs", len(df_agregado))
+                    with col2:
+                        st.metric("Faturamento Total", f"R$ {df_agregado['Faturamento'].sum():,.2f}")
+                    with col3:
+                        st.metric("Preço Médio", f"R$ {df_agregado['Preço'].mean():,.2f}")
+                    with col4:
+                        st.metric("Quantidade Total", int(df_agregado['Quantidade Vendida'].sum()))
+                    
+                    st.divider()
+                    st.info("✅ Relatório pronto! Vá para **'Análise ABC'** para continuar.")
+                else:
+                    st.error(f"❌ Erro: {mensagem}")
         
         except Exception as e:
             st.error(f"❌ Erro ao processar arquivo: {str(e)}")
+            st.info("💡 Dica: Certifique-se que o arquivo é um relatório válido do Mercado Livre com as colunas: SKU, Preço e Quantidade Vendida")
 
 # ============ TAB 3: ANÁLISE ABC ============
 with tab3:
