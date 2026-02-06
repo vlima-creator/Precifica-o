@@ -15,14 +15,7 @@ def inicializar_sessao():
     
     # Configurações de Regime Tributário
     if "regimes" not in st.session_state:
-        # Adicionar custo fixo operacional a cada regime
-        regimes_com_custo = {}
-        for regime, config in DEFAULT_REGIMES.items():
-            regimes_com_custo[regime] = {
-                **config,
-                "custo_fixo_operacional": 0.0  # Padrão 0
-            }
-        st.session_state.regimes = regimes_com_custo
+        st.session_state.regimes = DEFAULT_REGIMES.copy()
     
     # Dados da Base
     if "base_dados" not in st.session_state:
@@ -59,6 +52,14 @@ def inicializar_sessao():
     # % Publicidade
     if "percent_publicidade" not in st.session_state:
         st.session_state.percent_publicidade = 3.0
+    
+    # Custo Fixo Operacional (novo - movido de Regimes)
+    if "custo_fixo_operacional" not in st.session_state:
+        st.session_state.custo_fixo_operacional = 0.0
+    
+    # Taxa de Devoluções e Trocas (novo)
+    if "taxa_devolucao" not in st.session_state:
+        st.session_state.taxa_devolucao = 0.0
     
     # Descontos por Curva ABC
     if "desconto_curva_a" not in st.session_state:
@@ -115,3 +116,9 @@ def atualizar_margens(bruta_alvo, liquida_minima, percent_publicidade=None):
     st.session_state.margem_liquida_minima = liquida_minima
     if percent_publicidade is not None:
         st.session_state.percent_publicidade = percent_publicidade
+
+
+def atualizar_custos_operacionais(custo_fixo, taxa_devolucao):
+    """Atualiza custos operacionais."""
+    st.session_state.custo_fixo_operacional = custo_fixo
+    st.session_state.taxa_devolucao = taxa_devolucao

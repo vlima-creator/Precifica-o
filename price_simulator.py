@@ -11,7 +11,8 @@ from config import MERCADO_LIVRE_AD_TYPES
 class PriceSimulator:
     """Simula preços alvo de forma automática baseado em dados do relatório."""
 
-    def __init__(self, marketplaces, regimes, margem_bruta_alvo, margem_liquida_minima, percent_publicidade):
+    def __init__(self, marketplaces, regimes, margem_bruta_alvo, margem_liquida_minima, percent_publicidade,
+                 custo_fixo_operacional=0.0, taxa_devolucao=0.0):
         """
         Inicializa o simulador
         
@@ -21,12 +22,16 @@ class PriceSimulator:
             margem_bruta_alvo: Margem bruta alvo (%)
             margem_liquida_minima: Margem líquida mínima (%)
             percent_publicidade: % de publicidade
+            custo_fixo_operacional: Custo fixo operacional (R$)
+            taxa_devolucao: Taxa de devoluções e trocas (%)
         """
         self.marketplaces = marketplaces
         self.regimes = regimes
         self.margem_bruta_alvo = margem_bruta_alvo
         self.margem_liquida_minima = margem_liquida_minima
         self.percent_publicidade = percent_publicidade
+        self.custo_fixo_operacional = custo_fixo_operacional
+        self.taxa_devolucao = taxa_devolucao
 
     def obter_config_marketplace(self, marketplace, tipo_anuncio=""):
         """
@@ -70,13 +75,12 @@ class PriceSimulator:
         
         regime_config = self.regimes.get(regime_tributario, {})
         impostos_percent = regime_config.get("impostos_encargos", 0.0)
-        custo_fixo_operacional = regime_config.get("custo_fixo_operacional", 0.0)
         
         # Custo total direto
-        custo_total_direto = custo_produto + frete + taxa_fixa + custo_fixo_operacional
+        custo_total_direto = custo_produto + frete + taxa_fixa + self.custo_fixo_operacional
         
         # Taxas variáveis (em decimal)
-        taxas_variaveis = (comissao_percent + impostos_percent + (self.percent_publicidade / 100))
+        taxas_variaveis = (comissao_percent + impostos_percent + (self.percent_publicidade / 100) + (self.taxa_devolucao / 100))
         
         # Margem alvo (em decimal)
         margem_alvo_decimal = self.margem_bruta_alvo / 100

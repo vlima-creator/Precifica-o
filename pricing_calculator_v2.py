@@ -11,7 +11,8 @@ from config import MERCADO_LIVRE_AD_TYPES
 class PricingCalculatorV2:
     """Calcula precificação automática baseada em dados do relatório."""
 
-    def __init__(self, marketplaces, regimes, margem_bruta_alvo, margem_liquida_minima, percent_publicidade):
+    def __init__(self, marketplaces, regimes, margem_bruta_alvo, margem_liquida_minima, percent_publicidade, 
+                 custo_fixo_operacional=0.0, taxa_devolucao=0.0):
         """
         Inicializa a calculadora
         
@@ -21,12 +22,16 @@ class PricingCalculatorV2:
             margem_bruta_alvo: Margem bruta alvo (%)
             margem_liquida_minima: Margem líquida mínima (%)
             percent_publicidade: % de publicidade
+            custo_fixo_operacional: Custo fixo operacional (R$)
+            taxa_devolucao: Taxa de devoluções e trocas (%)
         """
         self.marketplaces = marketplaces
         self.regimes = regimes
         self.margem_bruta_alvo = margem_bruta_alvo
         self.margem_liquida_minima = margem_liquida_minima
         self.percent_publicidade = percent_publicidade
+        self.custo_fixo_operacional = custo_fixo_operacional
+        self.taxa_devolucao = taxa_devolucao
 
     def obter_config_marketplace(self, marketplace, tipo_anuncio=""):
         """
@@ -72,14 +77,14 @@ class PricingCalculatorV2:
         # Obter configurações do regime tributário
         regime_config = self.regimes.get(regime_tributario, {})
         impostos_percent = regime_config.get("impostos_encargos", 0.0)
-        custo_fixo_operacional = regime_config.get("custo_fixo_operacional", 0.0)
         
         # Cálculos
         comissao = preco_atual * comissao_percent
         impostos = preco_atual * impostos_percent
         publicidade = preco_atual * (self.percent_publicidade / 100)
+        devoluoes = preco_atual * (self.taxa_devolucao / 100)
         
-        lucro = preco_atual - custo_produto - frete - comissao - taxa_fixa - impostos - publicidade - custo_fixo_operacional
+        lucro = preco_atual - custo_produto - frete - comissao - taxa_fixa - impostos - publicidade - devoluoes - self.custo_fixo_operacional
         
         margem_bruta = (lucro / preco_atual * 100) if preco_atual > 0 else 0
         

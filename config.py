@@ -25,6 +25,10 @@ DEFAULT_REGIMES = {
     "MEI": {"ibs": 0.0, "cbs": 0.0, "impostos_encargos": 0.0},
 }
 
+# Custos Operacionais (agora em seção separada)
+DEFAULT_CUSTO_FIXO_OPERACIONAL = 0.0  # R$
+DEFAULT_TAXA_DEVOLUCAO = 0.0  # %
+
 # Limites de Curva ABC (baseado em % de faturamento acumulado)
 CURVA_ABC_LIMITS = {
     "A": 0.80,  # 80% do faturamento
@@ -60,5 +64,5 @@ BASE_DADOS_COLUMNS = [
     "Curva ABC",
     "Margem Bruta (%)",
     "Margem Líquida (%)",
-    "Ads (%)",
+    "Publicidade (%)",
 ]

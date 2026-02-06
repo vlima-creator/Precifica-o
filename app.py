@@ -43,93 +43,107 @@ st.markdown("""
     .status-saudavel { color: #28a745; font-weight: bold; }
     .status-alerta { color: #ffc107; font-weight: bold; }
     .status-prejuizo { color: #dc3545; font-weight: bold; }
+    .config-section {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
     </style>
 """, unsafe_allow_html=True)
 
 # ============ SIDEBAR ============
 st.sidebar.markdown("# ⚙️ Configurações")
 
-# Marketplaces
+# 1. MARKETPLACES
 with st.sidebar.expander("📊 Marketplaces", expanded=False):
-    st.subheader("Taxas de Comissão")
+    st.markdown("**Taxas de Comissão e Custos Fixos**")
     
     for marketplace, config in st.session_state.marketplaces.items():
-        col1, col2 = st.columns(2)
-        with col1:
-            comissao = st.number_input(
-                f"{marketplace} - Comissão (%)",
-                value=config["comissao"] * 100,
-                min_value=0.0,
-                max_value=100.0,
-                step=0.1,
-                key=f"comissao_{marketplace}",
-            ) / 100
-        with col2:
-            taxa_fixa = st.number_input(
-                f"{marketplace} - Taxa Fixa (R$)",
-                value=config["custo_fixo"],
-                min_value=0.0,
-                step=0.1,
-                key=f"taxa_fixa_{marketplace}",
-            )
-        
-        st.session_state.marketplaces[marketplace]["comissao"] = comissao
-        st.session_state.marketplaces[marketplace]["custo_fixo"] = taxa_fixa
+        with st.container():
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                comissao = st.number_input(
+                    f"{marketplace}",
+                    label_visibility="collapsed",
+                    value=config["comissao"] * 100,
+                    min_value=0.0,
+                    max_value=100.0,
+                    step=0.1,
+                    key=f"comissao_{marketplace}",
+                    help=f"Comissão do {marketplace} (%)"
+                ) / 100
+            with col2:
+                taxa_fixa = st.number_input(
+                    f"Taxa Fixa",
+                    label_visibility="collapsed",
+                    value=config["custo_fixo"],
+                    min_value=0.0,
+                    step=0.1,
+                    key=f"taxa_fixa_{marketplace}",
+                    help=f"Taxa fixa do {marketplace} (R$)"
+                )
+            
+            st.session_state.marketplaces[marketplace]["comissao"] = comissao
+            st.session_state.marketplaces[marketplace]["custo_fixo"] = taxa_fixa
+            
+            # Mostrar valores de forma clara
+            st.caption(f"💰 Comissão: {comissao*100:.1f}% | 📌 Taxa Fixa: R$ {taxa_fixa:.2f}")
+            st.divider()
 
-# Regimes Tributários
+# 2. REGIMES TRIBUTÁRIOS
 with st.sidebar.expander("🏛️ Regimes Tributários", expanded=False):
-    st.subheader("Configurações de Impostos e Custos")
+    st.markdown("**Configuração de Impostos e Encargos**")
     
     for regime, config in st.session_state.regimes.items():
         with st.container():
-            st.write(f"**{regime}**")
-            col1, col2, col3, col4 = st.columns(4)
+            st.markdown(f"**{regime}**")
+            
+            # Organizar em 3 colunas
+            col1, col2, col3 = st.columns(3)
             
             with col1:
                 ibs = st.number_input(
-                    f"{regime} - IBS (%)",
+                    "IBS (%)",
                     value=config.get("ibs", 0.0) * 100,
                     min_value=0.0,
                     max_value=100.0,
                     step=0.01,
                     key=f"ibs_{regime}",
                 ) / 100
+            
             with col2:
                 cbs = st.number_input(
-                    f"{regime} - CBS (%)",
+                    "CBS (%)",
                     value=config.get("cbs", 0.0) * 100,
                     min_value=0.0,
                     max_value=100.0,
                     step=0.01,
                     key=f"cbs_{regime}",
                 ) / 100
+            
             with col3:
                 impostos = st.number_input(
-                    f"{regime} - Impostos (%)",
+                    "Impostos (%)",
                     value=config.get("impostos_encargos", 0.0) * 100,
                     min_value=0.0,
                     max_value=100.0,
                     step=0.1,
                     key=f"impostos_{regime}",
                 ) / 100
-            with col4:
-                custo_fixo_op = st.number_input(
-                    f"{regime} - Custo Fixo Op. (R$)",
-                    value=config.get("custo_fixo_operacional", 0.0),
-                    min_value=0.0,
-                    step=0.1,
-                    key=f"custo_fixo_op_{regime}",
-                )
             
             st.session_state.regimes[regime]["ibs"] = ibs
             st.session_state.regimes[regime]["cbs"] = cbs
             st.session_state.regimes[regime]["impostos_encargos"] = impostos
-            st.session_state.regimes[regime]["custo_fixo_operacional"] = custo_fixo_op
+            
+            # Mostrar resumo
+            st.caption(f"📊 IBS: {ibs*100:.2f}% | CBS: {cbs*100:.2f}% | Impostos: {impostos*100:.1f}%")
             st.divider()
 
-# Margens Alvo
+# 3. MARGENS E PUBLICIDADE
 with st.sidebar.expander("📈 Margens e Publicidade", expanded=False):
-    st.subheader("Defina suas margens")
+    st.markdown("**Defina suas Margens Alvo**")
     
     margem_bruta = st.slider(
         "Margem Bruta Alvo (%)",
@@ -156,18 +170,61 @@ with st.sidebar.expander("📈 Margens e Publicidade", expanded=False):
     )
     
     atualizar_margens(margem_bruta, margem_liquida, percent_pub)
+    
+    st.divider()
+    st.markdown("**Resumo**")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Margem Bruta", f"{margem_bruta:.1f}%")
+    with col2:
+        st.metric("Margem Líquida", f"{margem_liquida:.1f}%")
+    with col3:
+        st.metric("Publicidade", f"{percent_pub:.1f}%")
 
-# Carregar Relatório
+# 4. CUSTOS OPERACIONAIS (NOVO)
+with st.sidebar.expander("💼 Custos Operacionais", expanded=False):
+    st.markdown("**Custos Fixos e Devoluções**")
+    
+    custo_fixo_op = st.number_input(
+        "Custo Fixo Operacional (R$)",
+        value=st.session_state.get("custo_fixo_operacional", 0.0),
+        min_value=0.0,
+        step=0.1,
+        help="Custo fixo mensal de operação (aluguel, salários, etc.)"
+    )
+    
+    taxa_devolucao = st.number_input(
+        "Taxa de Devoluções e Trocas (%)",
+        value=st.session_state.get("taxa_devolucao", 0.0) * 100,
+        min_value=0.0,
+        max_value=100.0,
+        step=0.1,
+        help="Percentual de perdas com devoluções e trocas"
+    ) / 100
+    
+    st.session_state.custo_fixo_operacional = custo_fixo_op
+    st.session_state.taxa_devolucao = taxa_devolucao
+    
+    st.divider()
+    st.markdown("**Resumo**")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Custo Fixo", f"R$ {custo_fixo_op:.2f}")
+    with col2:
+        st.metric("Taxa Devoluções", f"{taxa_devolucao*100:.1f}%")
+
+# 5. CARREGAR RELATÓRIO
 with st.sidebar.expander("📥 Carregar Relatório", expanded=True):
-    st.subheader("Importar Vendas")
+    st.markdown("**Importar Vendas**")
     
     st.markdown("""
     **Formato esperado:**
-    - SKU/MLB
-    - Descrição
-    - Custo Produto (R$)
-    - Frete (R$)
-    - Preço Atual (R$)
+    - Coluna A: SKU/MLB
+    - Coluna B: Título
+    - Coluna C: Custo Produto (R$)
+    - Coluna D: Frete (R$)
+    - Coluna E: Preço Atual (R$)
+    - Coluna F: Tipo de Anúncio (opcional)
     """)
     
     uploaded_file = st.file_uploader(
@@ -198,263 +255,205 @@ with st.sidebar.expander("📥 Carregar Relatório", expanded=True):
                     st.error(f"❌ {mensagem}")
         
         except Exception as e:
-            st.error(f"❌ Erro: {str(e)}")
+            st.error(f"❌ Erro ao processar: {str(e)}")
 
-# ============ MAIN CONTENT ============
-st.markdown('<div class="main-header">💰 Carblue Pricing Manager</div>', unsafe_allow_html=True)
-st.write("Precificação inteligente baseada em seus dados")
+# ============ ABAS PRINCIPAIS ============
+tab1, tab2, tab3 = st.tabs(["🏠 Home", "🧮 Calculadora de Precificação", "📊 Simulador de Preço Alvo"])
 
-# Verificar se há relatório carregado
-if st.session_state.relatorio_vendas is None:
-    st.warning("⚠️ Nenhum relatório carregado. Por favor, carregue um arquivo no Sidebar.")
-    st.stop()
-
-# Abas principais
-tab1, tab2, tab3 = st.tabs([
-    "🏠 Home",
-    "🧮 Calculadora de Precificação",
-    "📊 Simulador de Preço Alvo"
-])
-
-# ============ TAB 1: HOME ============
+# ============ ABA 1: HOME ============
 with tab1:
-    st.markdown('<div class="section-header">Bem-vindo ao Carblue!</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">Bem-vindo ao Carblue Pricing Manager</div>', unsafe_allow_html=True)
     
-    col1, col2 = st.columns(2)
+    st.markdown("""
+    ### 📌 Como Funciona
     
-    with col1:
-        st.markdown("""
-        ### 📊 Seu Relatório
-        
-        **Status:** ✅ Carregado
-        
-        - **SKUs:** """ + str(len(st.session_state.relatorio_vendas)) + """
-        - **Faturamento Total:** R$ """ + f"{st.session_state.relatorio_vendas['Preço Atual'].sum():,.2f}" + """
-        - **Quantidade:** """ + str(int(st.session_state.relatorio_vendas.get('Quantidade Vendida', pd.Series([0])).sum())) + """
-        """)
+    Este aplicativo ajuda você a precificar seus produtos de forma inteligente e automática.
     
-    with col2:
-        st.markdown("""
-        ### 🎯 Próximos Passos
-        
-        1. **Calculadora de Precificação**
-           - Selecione Marketplace e Regime
-           - Veja a saúde de cada produto
-        
-        2. **Simulador de Preço Alvo**
-           - Veja os preços sugeridos
-           - Identifique oportunidades
-        """)
+    **Passo 1: Configurar** ⚙️
+    - Defina as taxas de comissão dos marketplaces
+    - Configure os regimes tributários
+    - Estabeleça suas margens alvo
+    - Defina custos operacionais e devoluções
+    
+    **Passo 2: Carregar Relatório** 📥
+    - Importe seu relatório de vendas com: SKU, Título, Custo, Frete, Preço Atual
+    - Opcionalmente, adicione o Tipo de Anúncio (Clássico/Premium para Mercado Livre)
+    
+    **Passo 3: Calcular Precificação** 🧮
+    - Selecione o Marketplace e Regime Tributário
+    - O sistema calcula automaticamente todos os custos
+    - Veja o status de saúde de cada produto
+    
+    **Passo 4: Simular Preços** 📊
+    - Veja os preços sugeridos para atingir suas margens
+    - Compare preço normal vs. preço promocional
+    - Analise o lucro esperado
+    
+    ---
+    
+    ### 🎯 Status de Saúde
+    - 🟢 **Saudável**: Margem acima do alvo
+    - 🟡 **Alerta**: Margem entre alvo e mínima
+    - 🔴 **Prejuízo**: Margem abaixo do mínimo
+    """)
 
-# ============ TAB 2: CALCULADORA DE PRECIFICAÇÃO ============
+# ============ ABA 2: CALCULADORA ============
 with tab2:
-    st.markdown('<div class="section-header">Calculadora de Precificação</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">🧮 Calculadora de Precificação</div>', unsafe_allow_html=True)
     
-    st.markdown("""
-    Selecione o Marketplace e Regime Tributário para calcular a precificação de seus produtos.
-    """)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        marketplace_selecionado = st.selectbox(
-            "Marketplace",
-            options=list(st.session_state.marketplaces.keys()),
-            key="calc_marketplace"
-        )
-    
-    with col2:
-        regime_selecionado = st.selectbox(
-            "Regime Tributário",
-            options=list(st.session_state.regimes.keys()),
-            key="calc_regime"
-        )
-    
-    # Calcular
-    if st.button("🧮 Calcular Precificação", key="calc_button", use_container_width=True):
-        with st.spinner("Calculando..."):
-            calc = PricingCalculatorV2(
-                marketplaces=st.session_state.marketplaces,
-                regimes=st.session_state.regimes,
-                margem_bruta_alvo=st.session_state.margem_bruta_alvo,
-                margem_liquida_minima=st.session_state.margem_liquida_minima,
-                percent_publicidade=st.session_state.percent_publicidade
-            )
-            
-            df_resultado = calc.calcular_dataframe(
-                st.session_state.relatorio_vendas,
-                marketplace_selecionado,
-                regime_selecionado
-            )
-            
-            st.session_state.df_calculadora = df_resultado
-    
-    # Exibir resultado
-    if "df_calculadora" in st.session_state:
-        st.divider()
-        st.subheader("📋 Resultado da Calculadora")
-        
-        df_calc = st.session_state.df_calculadora
-        
-        # Métricas resumidas
-        col1, col2, col3, col4 = st.columns(4)
+    if st.session_state.relatorio_vendas is None or st.session_state.relatorio_vendas.empty:
+        st.warning("⚠️ Nenhum relatório carregado. Carregue um arquivo no Sidebar.")
+    else:
+        col1, col2 = st.columns(2)
         
         with col1:
-            saudaveis = len(df_calc[df_calc["Status"] == "🟢 Saudável"])
-            st.metric("🟢 Saudáveis", saudaveis)
+            marketplace = st.selectbox(
+                "Selecione o Marketplace",
+                options=list(st.session_state.marketplaces.keys()),
+                key="calc_marketplace"
+            )
         
         with col2:
-            alertas = len(df_calc[df_calc["Status"] == "🟡 Alerta"])
-            st.metric("🟡 Alertas", alertas)
+            regime = st.selectbox(
+                "Selecione o Regime Tributário",
+                options=list(st.session_state.regimes.keys()),
+                key="calc_regime"
+            )
         
-        with col3:
-            prejuizos = len(df_calc[df_calc["Status"] == "🔴 Prejuízo/Abaixo"])
-            st.metric("🔴 Prejuízos", prejuizos)
+        if st.button("🔄 Calcular Precificação", use_container_width=True):
+            try:
+                calculator = PricingCalculatorV2(
+                    marketplaces=st.session_state.marketplaces,
+                    regimes=st.session_state.regimes,
+                    margem_bruta_alvo=st.session_state.margem_bruta_alvo,
+                    margem_liquida_minima=st.session_state.margem_liquida_minima,
+                    percent_publicidade=st.session_state.get("percent_publicidade", 3.0),
+                    custo_fixo_operacional=st.session_state.get("custo_fixo_operacional", 0.0),
+                    taxa_devolucao=st.session_state.get("taxa_devolucao", 0.0),
+                )
+                
+                df_resultado = calculator.calcular_dataframe(
+                    st.session_state.relatorio_vendas,
+                    marketplace,
+                    regime
+                )
+                
+                st.session_state.resultado_calculadora = df_resultado
+                st.success("✅ Cálculo realizado com sucesso!")
+            
+            except Exception as e:
+                st.error(f"❌ Erro ao calcular: {str(e)}")
         
-        with col4:
-            lucro_total = df_calc["Lucro R$"].sum()
-            st.metric("💰 Lucro Total", f"R$ {lucro_total:,.2f}")
-        
-        st.divider()
-        
-        # Tabela detalhada
-        st.subheader("📊 Detalhamento por Produto")
-        
-        # Colunas para exibir
-        colunas_exibir = [
-            "SKU", "Descrição", "Preço Atual (R$)", "Custo Produto", "Frete",
-            "Comissão", "Impostos", "Publicidade", "Lucro R$", "Margem Bruta %", "Status"
-        ]
-        
-        df_exibir = df_calc[colunas_exibir].copy()
-        
-        # Formatar valores monetários
-        for col in ["Preço Atual (R$)", "Custo Produto", "Frete", "Comissão", "Impostos", "Publicidade", "Lucro R$"]:
-            df_exibir[col] = df_exibir[col].apply(lambda x: f"R$ {x:.2f}")
-        
-        df_exibir["Margem Bruta %"] = df_exibir["Margem Bruta %"].apply(lambda x: f"{x:.2f}%")
-        
-        st.dataframe(df_exibir, use_container_width=True, hide_index=True)
-        
-        # Download
-        st.divider()
-        
-        output = BytesIO()
-        with pd.ExcelWriter(output, engine="openpyxl") as writer:
-            df_calc.to_excel(writer, sheet_name="Calculadora", index=False)
-        output.seek(0)
-        
-        st.download_button(
-            label="📥 Baixar Resultado (Excel)",
-            data=output.getvalue(),
-            file_name="calculadora_precificacao.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True
-        )
+        if "resultado_calculadora" in st.session_state:
+            df_resultado = st.session_state.resultado_calculadora
+            
+            # Métricas
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Total de SKUs", len(df_resultado))
+            with col2:
+                st.metric("Margem Média", f"{df_resultado['Margem Bruta %'].mean():.1f}%")
+            with col3:
+                st.metric("Lucro Total", f"R$ {df_resultado['Lucro R$'].sum():,.2f}")
+            with col4:
+                saudaveis = len(df_resultado[df_resultado['Status'] == '🟢 Saudável'])
+                st.metric("Produtos Saudáveis", f"{saudaveis}/{len(df_resultado)}")
+            
+            st.divider()
+            
+            # Tabela
+            st.markdown("**Detalhes da Precificação**")
+            st.dataframe(df_resultado, use_container_width=True, hide_index=True)
+            
+            # Download
+            excel_buffer = BytesIO()
+            df_resultado.to_excel(excel_buffer, index=False, sheet_name="Calculadora")
+            excel_buffer.seek(0)
+            
+            st.download_button(
+                label="📥 Baixar Resultado (Excel)",
+                data=excel_buffer,
+                file_name="calculadora_precificacao.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
 
-# ============ TAB 3: SIMULADOR DE PREÇO ALVO ============
+# ============ ABA 3: SIMULADOR ============
 with tab3:
-    st.markdown('<div class="section-header">Simulador de Preço Alvo</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">📊 Simulador de Preço Alvo</div>', unsafe_allow_html=True)
     
-    st.markdown("""
-    Veja os preços sugeridos baseado em suas margens alvo e configurações.
-    """)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        marketplace_sim = st.selectbox(
-            "Marketplace",
-            options=list(st.session_state.marketplaces.keys()),
-            key="sim_marketplace"
-        )
-    
-    with col2:
-        regime_sim = st.selectbox(
-            "Regime Tributário",
-            options=list(st.session_state.regimes.keys()),
-            key="sim_regime"
-        )
-    
-    # Simular
-    if st.button("📊 Simular Preços", key="sim_button", use_container_width=True):
-        with st.spinner("Simulando..."):
-            sim = PriceSimulator(
-                marketplaces=st.session_state.marketplaces,
-                regimes=st.session_state.regimes,
-                margem_bruta_alvo=st.session_state.margem_bruta_alvo,
-                margem_liquida_minima=st.session_state.margem_liquida_minima,
-                percent_publicidade=st.session_state.percent_publicidade
-            )
-            
-            df_resultado_sim = sim.calcular_dataframe(
-                st.session_state.relatorio_vendas,
-                marketplace_sim,
-                regime_sim
-            )
-            
-            st.session_state.df_simulador = df_resultado_sim
-    
-    # Exibir resultado
-    if "df_simulador" in st.session_state:
-        st.divider()
-        st.subheader("📊 Resultado da Simulação")
-        
-        df_sim = st.session_state.df_simulador
-        
-        # Métricas resumidas
-        col1, col2, col3, col4 = st.columns(4)
+    if st.session_state.relatorio_vendas is None or st.session_state.relatorio_vendas.empty:
+        st.warning("⚠️ Nenhum relatório carregado. Carregue um arquivo no Sidebar.")
+    else:
+        col1, col2 = st.columns(2)
         
         with col1:
-            preco_medio = df_sim["Preço Sugerido"].mean()
-            st.metric("Preço Médio Sugerido", f"R$ {preco_medio:,.2f}")
+            marketplace = st.selectbox(
+                "Selecione o Marketplace",
+                options=list(st.session_state.marketplaces.keys()),
+                key="sim_marketplace"
+            )
         
         with col2:
-            preco_promo_medio = df_sim["Preço Promo Limite"].mean()
-            st.metric("Preço Promo Médio", f"R$ {preco_promo_medio:,.2f}")
+            regime = st.selectbox(
+                "Selecione o Regime Tributário",
+                options=list(st.session_state.regimes.keys()),
+                key="sim_regime"
+            )
         
-        with col3:
-            lucro_bruto_total = df_sim["Lucro Bruto"].sum()
-            st.metric("Lucro Bruto Total", f"R$ {lucro_bruto_total:,.2f}")
+        if st.button("📊 Simular Preços", use_container_width=True):
+            try:
+                simulator = PriceSimulator(
+                    marketplaces=st.session_state.marketplaces,
+                    regimes=st.session_state.regimes,
+                    margem_bruta_alvo=st.session_state.margem_bruta_alvo,
+                    margem_liquida_minima=st.session_state.margem_liquida_minima,
+                    percent_publicidade=st.session_state.get("percent_publicidade", 3.0),
+                    custo_fixo_operacional=st.session_state.get("custo_fixo_operacional", 0.0),
+                    taxa_devolucao=st.session_state.get("taxa_devolucao", 0.0),
+                )
+                
+                df_simulacao = simulator.calcular_dataframe(
+                    st.session_state.relatorio_vendas,
+                    marketplace,
+                    regime
+                )
+                
+                st.session_state.resultado_simulador = df_simulacao
+                st.success("✅ Simulação realizada com sucesso!")
+            
+            except Exception as e:
+                st.error(f"❌ Erro ao simular: {str(e)}")
         
-        with col4:
-            lucro_liquido_total = df_sim["Lucro Líquido"].sum()
-            st.metric("Lucro Líquido Total", f"R$ {lucro_liquido_total:,.2f}")
-        
-        st.divider()
-        
-        # Tabela detalhada
-        st.subheader("📊 Detalhamento por Produto")
-        
-        # Colunas para exibir
-        colunas_exibir_sim = [
-            "SKU", "Descrição", "Preço Sugerido", "Preço Promo Limite",
-            "Margem Bruta %", "Margem Líquida %", "Lucro Bruto", "Lucro Líquido"
-        ]
-        
-        df_exibir_sim = df_sim[colunas_exibir_sim].copy()
-        
-        # Formatar valores monetários
-        for col in ["Preço Sugerido", "Preço Promo Limite", "Lucro Bruto", "Lucro Líquido"]:
-            df_exibir_sim[col] = df_exibir_sim[col].apply(lambda x: f"R$ {x:.2f}")
-        
-        df_exibir_sim["Margem Bruta %"] = df_exibir_sim["Margem Bruta %"].apply(lambda x: f"{x:.2f}%")
-        df_exibir_sim["Margem Líquida %"] = df_exibir_sim["Margem Líquida %"].apply(lambda x: f"{x:.2f}%")
-        
-        st.dataframe(df_exibir_sim, use_container_width=True, hide_index=True)
-        
-        # Download
-        st.divider()
-        
-        output = BytesIO()
-        with pd.ExcelWriter(output, engine="openpyxl") as writer:
-            df_sim.to_excel(writer, sheet_name="Simulador", index=False)
-        output.seek(0)
-        
-        st.download_button(
-            label="📥 Baixar Resultado (Excel)",
-            data=output.getvalue(),
-            file_name="simulador_preco_alvo.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True
-        )
+        if "resultado_simulador" in st.session_state:
+            df_simulacao = st.session_state.resultado_simulador
+            
+            # Métricas
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Preço Médio Sugerido", f"R$ {df_simulacao['Preço Sugerido'].mean():,.2f}")
+            with col2:
+                st.metric("Preço Promo Médio", f"R$ {df_simulacao['Preço Promo Limite'].mean():,.2f}")
+            with col3:
+                st.metric("Lucro Bruto Total", f"R$ {df_simulacao['Lucro Bruto'].sum():,.2f}")
+            with col4:
+                st.metric("Lucro Líquido Total", f"R$ {df_simulacao['Lucro Líquido'].sum():,.2f}")
+            
+            st.divider()
+            
+            # Tabela
+            st.markdown("**Simulação de Preços**")
+            st.dataframe(df_simulacao, use_container_width=True, hide_index=True)
+            
+            # Download
+            excel_buffer = BytesIO()
+            df_simulacao.to_excel(excel_buffer, index=False, sheet_name="Simulador")
+            excel_buffer.seek(0)
+            
+            st.download_button(
+                label="📥 Baixar Simulação (Excel)",
+                data=excel_buffer,
+                file_name="simulador_preco_alvo.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
