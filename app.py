@@ -361,11 +361,16 @@ with st.sidebar.expander("Regimes Tributários", expanded=False):
 # 5. MARGENS E PUBLICIDADE
 with st.sidebar.expander("Margens e Publicidade", expanded=False):
     
+    # Garantir que os valores sao validos
+    valor_margem_bruta = float(st.session_state.get("margem_bruta_alvo", 30.0)) if st.session_state.get("margem_bruta_alvo") is not None else 30.0
+    valor_margem_liquida = float(st.session_state.get("margem_liquida_minima", 10.0)) if st.session_state.get("margem_liquida_minima") is not None else 10.0
+    valor_publicidade = float(st.session_state.get("percent_publicidade", 3.0)) if st.session_state.get("percent_publicidade") is not None else 3.0
+    
     margem_bruta = st.slider(
         "Margem Bruta Alvo (%)",
         min_value=0.0,
         max_value=100.0,
-        value=st.session_state.margem_bruta_alvo,
+        value=valor_margem_bruta,
         step=1.0,
         key="slider_margem_bruta"
     )
@@ -377,7 +382,7 @@ with st.sidebar.expander("Margens e Publicidade", expanded=False):
         "Margem Líquida Mínima (%)",
         min_value=0.0,
         max_value=100.0,
-        value=st.session_state.margem_liquida_minima,
+        value=valor_margem_liquida,
         step=1.0,
         key="slider_margem_liquida"
     )
@@ -389,7 +394,7 @@ with st.sidebar.expander("Margens e Publicidade", expanded=False):
         "Percentual de Publicidade",
         min_value=0.0,
         max_value=100.0,
-        value=st.session_state.get("percent_publicidade", 3.0),
+        value=valor_publicidade,
         step=0.1,
         key="slider_publicidade"
     )
