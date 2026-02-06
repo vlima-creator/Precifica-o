@@ -49,6 +49,20 @@ def inicializar_sessao():
     if "margem_liquida_minima" not in st.session_state:
         st.session_state.margem_liquida_minima = 10.0
     
+    # Descontos por Curva ABC
+    if "desconto_curva_a" not in st.session_state:
+        st.session_state.desconto_curva_a = 0.0
+    
+    if "desconto_curva_b" not in st.session_state:
+        st.session_state.desconto_curva_b = 0.0
+    
+    if "desconto_curva_c" not in st.session_state:
+        st.session_state.desconto_curva_c = 0.0
+    
+    # Dados com Promoções
+    if "dados_promocoes" not in st.session_state:
+        st.session_state.dados_promocoes = None
+    
     # Aba ativa
     if "aba_ativa" not in st.session_state:
         st.session_state.aba_ativa = "home"
@@ -71,9 +85,17 @@ def atualizar_regime(nome, config):
     st.session_state.regimes[nome] = config
 
 
-def atualizar_regras_promocao(regras):
+def atualizar_regras_promocao(desconto_a, desconto_b, desconto_c):
     """Atualiza regras de promoção."""
-    st.session_state.regras_promocao = regras
+    st.session_state.desconto_curva_a = desconto_a
+    st.session_state.desconto_curva_b = desconto_b
+    st.session_state.desconto_curva_c = desconto_c
+    st.session_state.regras_promocao = {
+        "A": desconto_a,
+        "B": desconto_b,
+        "C": desconto_c,
+        "Sem Curva": 0.0,
+    }
 
 
 def atualizar_margens(bruta_alvo, liquida_minima):
