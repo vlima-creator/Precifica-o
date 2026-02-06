@@ -226,7 +226,7 @@ st.sidebar.markdown("# ⚙️ CONFIGURAÇÕES")
 st.sidebar.markdown("---")
 
 # 1. UPLOAD DE ARQUIVO CSV
-with st.sidebar.expander("📤 Carregar Dados", expanded=True):
+with st.sidebar.expander("Carregar Dados", expanded=True):
     uploaded_file = st.file_uploader(
         "Carregar arquivo CSV (Produto, Custo, Preço)",
         type=["csv"],
@@ -255,12 +255,12 @@ with st.sidebar.expander("📤 Carregar Dados", expanded=True):
         st.session_state.relatorio_vendas = None
         st.rerun()
 
-# 2. PRESETS DE CONFIGURAÇÃO
-with st.sidebar.expander("⚡ Presets de Cenários", expanded=True):
+# 2. SIMULADOR DE CENÁRIOS
+with st.sidebar.expander("Simulador de Cenários", expanded=True):
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("🔥 Agressivo", use_container_width=True):
+        if st.button("Agressivo", use_container_width=True):
             st.session_state.margem_bruta_alvo = 25
             st.session_state.margem_liquida_minima = 5
             st.session_state.percent_publicidade = 5
@@ -268,7 +268,7 @@ with st.sidebar.expander("⚡ Presets de Cenários", expanded=True):
             st.rerun()
     
     with col2:
-        if st.button("⚖️ Balanceado", use_container_width=True):
+        if st.button("Balanceado", use_container_width=True):
             st.session_state.margem_bruta_alvo = 30
             st.session_state.margem_liquida_minima = 10
             st.session_state.percent_publicidade = 3
@@ -276,7 +276,7 @@ with st.sidebar.expander("⚡ Presets de Cenários", expanded=True):
             st.rerun()
     
     with col3:
-        if st.button("🛡️ Conservador", use_container_width=True):
+        if st.button("Conservador", use_container_width=True):
             st.session_state.margem_bruta_alvo = 40
             st.session_state.margem_liquida_minima = 15
             st.session_state.percent_publicidade = 2
@@ -284,7 +284,7 @@ with st.sidebar.expander("⚡ Presets de Cenários", expanded=True):
             st.rerun()
 
 # 3. MARKETPLACES
-with st.sidebar.expander("📊 Marketplaces", expanded=False):
+with st.sidebar.expander("Marketplaces", expanded=False):
     for marketplace, config in st.session_state.marketplaces.items():
         st.markdown(f"**{marketplace}**")
         col1, col2 = st.columns([1, 1])
@@ -314,8 +314,8 @@ with st.sidebar.expander("📊 Marketplaces", expanded=False):
         st.markdown("")
         st.divider()
 
-# 2. REGIMES TRIBUTÁRIOS
-with st.sidebar.expander("🏛️ Regimes Tributários", expanded=False):
+# 4. REGIMES TRIBUTÁRIOS
+with st.sidebar.expander("Regimes Tributários", expanded=False):
     for regime, config in st.session_state.regimes.items():
         st.markdown(f"**{regime}**")
         
@@ -358,8 +358,8 @@ with st.sidebar.expander("🏛️ Regimes Tributários", expanded=False):
         st.markdown("")
         st.divider()
 
-# 3. MARGENS E PUBLICIDADE
-with st.sidebar.expander("📈 Margens e Publicidade", expanded=False):
+# 5. MARGENS E PUBLICIDADE
+with st.sidebar.expander("Margens e Publicidade", expanded=False):
     
     margem_bruta = st.slider(
         "Margem Bruta Alvo (%)",
@@ -367,8 +367,9 @@ with st.sidebar.expander("📈 Margens e Publicidade", expanded=False):
         max_value=100.0,
         value=st.session_state.margem_bruta_alvo,
         step=1.0,
+        key="slider_margem_bruta"
     )
-    st.caption(f"💰 Margem Bruta: {margem_bruta:.1f}%")
+    st.caption(f"Margem Bruta: {formatar_percentual_1casa(margem_bruta)}")
     
     st.markdown("")
     
@@ -378,24 +379,26 @@ with st.sidebar.expander("📈 Margens e Publicidade", expanded=False):
         max_value=100.0,
         value=st.session_state.margem_liquida_minima,
         step=1.0,
+        key="slider_margem_liquida"
     )
-    st.caption(f"💵 Margem Líquida: {margem_liquida:.1f}%")
+    st.caption(f"Margem Líquida: {formatar_percentual_1casa(margem_liquida)}")
     
     st.markdown("")
     
     percent_pub = st.slider(
-        "% Publicidade",
+        "Percentual de Publicidade",
         min_value=0.0,
         max_value=100.0,
         value=st.session_state.get("percent_publicidade", 3.0),
         step=0.1,
+        key="slider_publicidade"
     )
-    st.caption(f"📢 Publicidade: {percent_pub:.1f}%")
+    st.caption(f"Publicidade: {formatar_percentual_1casa(percent_pub)}")
     
     atualizar_margens(margem_bruta, margem_liquida, percent_pub)
 
-# 4. CUSTOS OPERACIONAIS (NOVO)
-with st.sidebar.expander("💼 Custos Operacionais", expanded=False):
+# 6. CUSTOS OPERACIONAIS
+with st.sidebar.expander("Custos Operacionais", expanded=False):
     
     custo_fixo_op = st.number_input(
         "Custo Fixo Operacional (R$)",
@@ -403,7 +406,7 @@ with st.sidebar.expander("💼 Custos Operacionais", expanded=False):
         min_value=0.0,
         step=0.1,
     )
-    st.caption("💰 Custo fixo mensal (aluguel, salários, etc.)")
+    st.caption("Custo fixo mensal (aluguel, salários, etc.)")
     
     st.markdown("")
     
@@ -414,13 +417,13 @@ with st.sidebar.expander("💼 Custos Operacionais", expanded=False):
         max_value=100.0,
         step=0.1,
     ) / 100
-    st.caption("📦 Percentual de perdas com devoluções")
+    st.caption("Percentual de perdas com devoluções")
     
     st.session_state.custo_fixo_operacional = custo_fixo_op
     st.session_state.taxa_devolucao = taxa_devolucao
 
-# 5. CARREGAR RELATÓRIO
-with st.sidebar.expander("📥 Carregar Relatório", expanded=True):
+# 7. CARREGAR RELATÓRIO
+with st.sidebar.expander("Carregar Relatório de Vendas", expanded=False):
     
     st.markdown("""
     **Formato esperado:**
