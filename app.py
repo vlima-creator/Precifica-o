@@ -32,6 +32,66 @@ def formatar_percentual_1casa(valor):
         return "0,0%"
     return f"{valor:.1f}%".replace(".", ",")
 
+def formatar_excel_profissional(df, nome_sheet="Relatorio"):
+    """Formata um DataFrame para Excel com estilos profissionais"""
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        from openpyxl.utils.dataframe import dataframe_to_rows
+        
+        wb = Workbook()
+        ws = wb.active
+        ws.title = nome_sheet
+        
+        for r_idx, row in enumerate(dataframe_to_rows(df, index=False, header=True), 1):
+            for c_idx, value in enumerate(row, 1):
+                cell = ws.cell(row=r_idx, column=c_idx, value=value)
+                
+                if r_idx == 1:
+                    cell.font = Font(bold=True, color="FFFFFF", size=11)
+                    cell.fill = PatternFill(start_color="556B2F", end_color="556B2F", fill_type="solid")
+                    cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                else:
+                    cell.alignment = Alignment(horizontal="left", vertical="center")
+                    if r_idx % 2 == 0:
+                        cell.fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5", fill_type="solid")
+                    if isinstance(value, (int, float)):
+                        cell.alignment = Alignment(horizontal="right", vertical="center")
+                        cell.number_format = '#,##0.00'
+                
+                thin_border = Border(
+                    left=Side(style="thin", color="CCCCCC"),
+                    right=Side(style="thin", color="CCCCCC"),
+                    top=Side(style="thin", color="CCCCCC"),
+                    bottom=Side(style="thin", color="CCCCCC")
+                )
+                cell.border = thin_border
+        
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        ws.freeze_panes = "A2"
+        
+        buffer = BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        return buffer
+    
+    except ImportError:
+        buffer = BytesIO()
+        df.to_excel(buffer, index=False, sheet_name=nome_sheet)
+        buffer.seek(0)
+        return buffer
+
 # Configurar página
 st.set_page_config(
     page_title="Precifica-o | Minimalista",
@@ -526,12 +586,10 @@ with tab2:
             st.dataframe(df_resultado, use_container_width=True, hide_index=True)
             
             # Download
-            excel_buffer = BytesIO()
-            df_resultado.to_excel(excel_buffer, index=False, sheet_name="Calculadora")
-            excel_buffer.seek(0)
+            excel_buffer = formatar_excel_profissional(df_resultado, "Calculadora")
             
             st.download_button(
-                label="📥 Baixar Resultado (Excel)",
+                label="Baixar Resultado (Excel)",
                 data=excel_buffer,
                 file_name="calculadora_precificacao.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -606,12 +664,10 @@ with tab3:
             st.dataframe(df_simulacao, use_container_width=True, hide_index=True)
             
             # Download
-            excel_buffer = BytesIO()
-            df_simulacao.to_excel(excel_buffer, index=False, sheet_name="Simulador")
-            excel_buffer.seek(0)
+            excel_buffer = formatar_excel_profissional(df_simulacao, "Simulador")
             
             st.download_button(
-                label="📥 Baixar Simulação (Excel)",
+                label="Baixar Simulacao (Excel)",
                 data=excel_buffer,
                 file_name="simulador_preco_alvo.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
