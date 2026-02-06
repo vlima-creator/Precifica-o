@@ -146,6 +146,39 @@ with st.sidebar.expander("📈 Margens Alvo", expanded=False):
     
     atualizar_margens(margem_bruta, margem_liquida)
 
+with st.sidebar.expander("📥 Carregar Relatório", expanded=True):
+    st.subheader("Importar Vendas")
+    
+    uploaded_file = st.file_uploader(
+        "Escolha um arquivo",
+        type=["xlsx", "xls", "csv"],
+        help="Relatório de vendas do Mercado Livre",
+        key="sidebar_upload"
+    )
+    
+    if uploaded_file is not None:
+        try:
+            with st.spinner("⏳ Processando..."):
+                processor = MercadoLivreProcessor()
+                
+                if uploaded_file.name.endswith(".csv"):
+                    df = processor.carregar_de_csv(uploaded_file)
+                else:
+                    df = processor.carregar_de_excel(uploaded_file)
+                
+                df_normalizado = processor.normalizar_relatorio_vendas(df)
+                valido, mensagem = processor.validar_relatorio(df_normalizado)
+                
+                if valido:
+                    df_agregado = processor.agregar_por_sku(df_normalizado)
+                    st.session_state.relatorio_vendas = df_agregado
+                    st.success(f"✅ {len(df_agregado)} SKUs carregados")
+                else:
+                    st.error(f"❌ {mensagem}")
+        
+        except Exception as e:
+            st.error(f"❌ Erro: {str(e)}")
+
 # Main Content
 st.markdown('<div class="main-header">💰 Carblue Pricing & Promo Manager</div>', unsafe_allow_html=True)
 st.write("Precificação inteligente + Gestão de Promoções para Mercado Livre")
@@ -193,81 +226,35 @@ with tab1:
     st.divider()
     
     st.markdown("### 📝 Próximos Passos")
-    st.info("👉 Clique em **'Carregar Relatório'** para começar!")
+    st.info("👉 Carregue um relatório no **Sidebar** para começar!")
 
 # ============ TAB 2: CARREGAR RELATÓRIO ============
 with tab2:
-    st.markdown('<div class="section-header">Carregar Relatório de Vendas</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Relatório de Vendas</div>', unsafe_allow_html=True)
     
-    st.write("Importe seu relatório de vendas do Mercado Livre em formato Excel ou CSV")
-    
-    uploaded_file = st.file_uploader(
-        "Escolha um arquivo",
-        type=["xlsx", "xls", "csv"],
-        help="Arquivo deve conter: SKU, Preço, Quantidade Vendida"
-    )
-    
-    if uploaded_file is not None:
-        try:
-            with st.spinner("⏳ Carregando e processando arquivo..."):
-                # Carregar arquivo
-                processor = MercadoLivreProcessor()
-                
-                if uploaded_file.name.endswith(".csv"):
-                    df = processor.carregar_de_csv(uploaded_file)
-                else:
-                    # Usar processador que detecta skiprows automaticamente
-                    df = processor.carregar_de_excel(uploaded_file)
-                
-                st.success("✅ Arquivo carregado com sucesso!")
-                
-                # Mostrar preview
-                st.subheader("Preview dos Dados (Primeiras 10 linhas)")
-                st.dataframe(df.head(10), use_container_width=True)
-                
-                # Normalizar relatório
-                df_normalizado = processor.normalizar_relatorio_vendas(df)
-                
-                st.info(f"📊 Dados normalizados: {len(df_normalizado)} linhas processadas")
-                
-                # Validar
-                valido, mensagem = processor.validar_relatorio(df_normalizado)
-                
-                if valido:
-                    st.success(f"✅ {mensagem}")
-                    
-                    # Agregar por SKU
-                    df_agregado = processor.agregar_por_sku(df_normalizado)
-                    
-                    # Salvar na sessão
-                    st.session_state.relatorio_vendas = df_agregado
-                    
-                    # Mostrar estatísticas
-                    col1, col2, col3, col4 = st.columns(4)
-                    with col1:
-                        st.metric("Total de SKUs", len(df_agregado))
-                    with col2:
-                        st.metric("Faturamento Total", f"R$ {df_agregado['Faturamento'].sum():,.2f}")
-                    with col3:
-                        st.metric("Preço Médio", f"R$ {df_agregado['Preço'].mean():,.2f}")
-                    with col4:
-                        st.metric("Quantidade Total", int(df_agregado['Quantidade Vendida'].sum()))
-                    
-                    st.divider()
-                    st.info("✅ Relatório pronto! Vá para **'Análise ABC'** para continuar.")
-                else:
-                    st.error(f"❌ Erro: {mensagem}")
+    if st.session_state.relatorio_vendas is None:
+        st.info("📥 Carregue um relatório no **Sidebar** para começar")
+    else:
+        df_vendas = st.session_state.relatorio_vendas.copy()
         
-        except Exception as e:
-            st.error(f"❌ Erro ao processar arquivo: {str(e)}")
-            st.info("💡 Dica: Certifique-se que o arquivo é um relatório válido do Mercado Livre com as colunas: SKU, Preço e Quantidade Vendida")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Total de SKUs", len(df_vendas))
+        with col2:
+            st.metric("Faturamento", f"R$ {df_vendas['Faturamento'].sum():,.2f}")
+        with col3:
+            st.metric("Quantidade", int(df_vendas['Quantidade Vendida'].sum()))
+        
+        st.divider()
+        st.subheader("Dados Carregados")
+        st.dataframe(df_vendas, use_container_width=True)
 
 # ============ TAB 3: ANÁLISE ABC ============
 with tab3:
     st.markdown('<div class="section-header">Análise ABC de Produtos</div>', unsafe_allow_html=True)
     
     if st.session_state.relatorio_vendas is None:
-        st.warning("⚠️ Carregue um relatório primeiro em **'Carregar Relatório'**")
+        st.warning("⚠️ Carregue um relatório primeiro no **Sidebar**")
     else:
         df_vendas = st.session_state.relatorio_vendas.copy()
         
@@ -288,201 +275,212 @@ with tab3:
         curva_c = resumo[resumo["Curva ABC"] == "C"]
         
         with col1:
-            if not curva_a.empty:
-                st.metric("Curva A", f"{int(curva_a['Qtd SKUs'].values[0])} SKUs", 
-                         f"R$ {curva_a['Faturamento Total'].values[0]:,.0f}")
-            else:
-                st.metric("Curva A", "0 SKUs", "R$ 0")
+            st.metric(
+                "Curva A",
+                f"{len(curva_a)} SKUs",
+                f"R$ {curva_a['Faturamento'].sum():,.2f}"
+            )
         
         with col2:
-            if not curva_b.empty:
-                st.metric("Curva B", f"{int(curva_b['Qtd SKUs'].values[0])} SKUs",
-                         f"R$ {curva_b['Faturamento Total'].values[0]:,.0f}")
-            else:
-                st.metric("Curva B", "0 SKUs", "R$ 0")
+            st.metric(
+                "Curva B",
+                f"{len(curva_b)} SKUs",
+                f"R$ {curva_b['Faturamento'].sum():,.2f}"
+            )
         
         with col3:
-            if not curva_c.empty:
-                st.metric("Curva C", f"{int(curva_c['Qtd SKUs'].values[0])} SKUs",
-                         f"R$ {curva_c['Faturamento Total'].values[0]:,.0f}")
-            else:
-                st.metric("Curva C", "0 SKUs", "R$ 0")
+            st.metric(
+                "Curva C",
+                f"{len(curva_c)} SKUs",
+                f"R$ {curva_c['Faturamento'].sum():,.2f}"
+            )
+        
+        st.divider()
         
         # Gráfico de distribuição
         st.subheader("📈 Distribuição de Faturamento")
         
-        fig = px.pie(
+        fig_pie = px.pie(
             resumo,
-            values="Faturamento Total",
+            values="Faturamento",
             names="Curva ABC",
             color="Curva ABC",
-            color_discrete_map={"A": "#28a745", "B": "#ffc107", "C": "#dc3545", "Sem Curva": "#6c757d"},
+            color_discrete_map={"A": "#28a745", "B": "#ffc107", "C": "#dc3545"},
             title="Faturamento por Curva ABC"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig_pie, use_container_width=True)
+        
+        st.divider()
         
         # Tabela detalhada
         st.subheader("📋 Produtos por Curva")
         
-        for curva in ["A", "B", "C", "Sem Curva"]:
-            df_curva = df_abc[df_abc["Curva ABC"] == curva]
-            
-            if not df_curva.empty:
-                with st.expander(f"Curva {curva} ({len(df_curva)} produtos)"):
-                    cols_mostrar = ["SKU", "Descrição", "Preço", "Quantidade Vendida", "Faturamento"]
-                    cols_disponiveis = [col for col in cols_mostrar if col in df_curva.columns]
-                    st.dataframe(df_curva[cols_disponiveis], use_container_width=True)
+        curva_filtro = st.selectbox(
+            "Filtrar por Curva",
+            ["Todas", "A", "B", "C"]
+        )
+        
+        if curva_filtro == "Todas":
+            df_exibir = df_abc.sort_values("Faturamento", ascending=False)
+        else:
+            df_exibir = df_abc[df_abc["Curva ABC"] == curva_filtro].sort_values("Faturamento", ascending=False)
+        
+        st.dataframe(df_exibir, use_container_width=True)
 
 # ============ TAB 4: PROMOÇÕES ============
 with tab4:
     st.markdown('<div class="section-header">Configurar Promoções</div>', unsafe_allow_html=True)
     
-    if st.session_state.dados_processados is None:
-        st.warning("⚠️ Execute a **'Análise ABC'** primeiro")
+    if st.session_state.relatorio_vendas is None:
+        st.warning("⚠️ Carregue um relatório primeiro no **Sidebar**")
     else:
-        st.write("Defina o desconto que deseja aplicar em cada curva ABC")
+        st.markdown("""
+        Defina os descontos que deseja aplicar em cada curva ABC.
+        O sistema calculará automaticamente o impacto nas margens.
+        """)
         
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            desconto_a = st.number_input(
-                "Desconto Curva A (%)",
-                min_value=0.0,
-                max_value=100.0,
-                value=st.session_state.regras_promocao["A"] * 100,
-                step=0.1,
-            ) / 100
-        
-        with col2:
-            desconto_b = st.number_input(
-                "Desconto Curva B (%)",
-                min_value=0.0,
-                max_value=100.0,
-                value=st.session_state.regras_promocao["B"] * 100,
-                step=0.1,
-            ) / 100
-        
-        with col3:
-            desconto_c = st.number_input(
-                "Desconto Curva C (%)",
-                min_value=0.0,
-                max_value=100.0,
-                value=st.session_state.regras_promocao["C"] * 100,
-                step=0.1,
-            ) / 100
-        
-        with col4:
-            desconto_sem = st.number_input(
-                "Desconto Sem Curva (%)",
-                min_value=0.0,
-                max_value=100.0,
-                value=st.session_state.regras_promocao["Sem Curva"] * 100,
-                step=0.1,
-            ) / 100
-        
-        # Atualizar regras
-        regras = {
-            "A": desconto_a,
-            "B": desconto_b,
-            "C": desconto_c,
-            "Sem Curva": desconto_sem,
-        }
-        atualizar_regras_promocao(regras)
-        
-        # Aplicar promoções
-        promotion_manager = PromotionManager()
-        df_com_promo = promotion_manager.aplicar_promocoes(
-            st.session_state.dados_processados,
-            regras=regras
-        )
-        
-        st.session_state.dados_com_promocoes = df_com_promo
-        
-        # Resumo de impacto
-        st.subheader("💡 Impacto das Promoções")
-        
-        relatorio_promo = promotion_manager.gerar_relatorio_promocoes(df_com_promo)
+        st.subheader("💰 Descontos por Curva")
         
         col1, col2, col3 = st.columns(3)
         
         with col1:
+            desconto_a = st.slider(
+                "Desconto Curva A (%)",
+                min_value=0.0,
+                max_value=50.0,
+                value=st.session_state.desconto_curva_a,
+                step=0.5,
+                key="desconto_a_slider"
+            )
+        
+        with col2:
+            desconto_b = st.slider(
+                "Desconto Curva B (%)",
+                min_value=0.0,
+                max_value=50.0,
+                value=st.session_state.desconto_curva_b,
+                step=0.5,
+                key="desconto_b_slider"
+            )
+        
+        with col3:
+            desconto_c = st.slider(
+                "Desconto Curva C (%)",
+                min_value=0.0,
+                max_value=50.0,
+                value=st.session_state.desconto_curva_c,
+                step=0.5,
+                key="desconto_c_slider"
+            )
+        
+        # Atualizar regras
+        atualizar_regras_promocao(desconto_a, desconto_b, desconto_c)
+        
+        st.divider()
+        
+        # Processar dados com promoções
+        df_abc = st.session_state.dados_processados.copy()
+        
+        promotion_manager = PromotionManager()
+        df_com_promocoes = promotion_manager.aplicar_descontos(
+            df_abc,
+            desconto_a / 100,
+            desconto_b / 100,
+            desconto_c / 100
+        )
+        
+        # Resumo de impacto
+        st.subheader("📊 Impacto das Promoções")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        economia_total = (df_com_promocoes['Desconto'] * df_com_promocoes['Quantidade Vendida']).sum()
+        
+        with col1:
             st.metric(
-                "Total de Economia",
-                f"R$ {relatorio_promo['total_economia']:,.2f}",
-                f"{relatorio_promo['produtos_com_promocao']} produtos"
+                "Economia Total",
+                f"R$ {economia_total:,.2f}",
+                delta=f"{(economia_total / df_com_promocoes['Faturamento'].sum() * 100):.2f}%"
             )
         
         with col2:
             st.metric(
-                "Economia Média por Produto",
-                f"R$ {relatorio_promo['economia_media']:,.2f}"
+                "Produtos com Promoção",
+                int((df_com_promocoes['Desconto'] > 0).sum())
             )
         
         with col3:
             st.metric(
-                "Produtos com Promoção",
-                relatorio_promo['produtos_com_promocao']
+                "Economia Média",
+                f"R$ {economia_total / (df_com_promocoes['Desconto'] > 0).sum():,.2f}"
             )
         
-        # Tabela de promoções
-        st.subheader("📊 Detalhes das Promoções")
+        st.divider()
         
-        df_promo_view = df_com_promo[
-            df_com_promo["Desconto %"] > 0
-        ][["SKU", "Descrição", "Preço", "Preço Promocional", "Desconto %", "Economia R$", "Curva ABC"]].copy()
+        # Tabela com promoções
+        st.subheader("📋 Produtos com Promoções")
         
-        if not df_promo_view.empty:
-            df_promo_view["Preço"] = df_promo_view["Preço"].apply(lambda x: f"R$ {x:.2f}")
-            df_promo_view["Preço Promocional"] = df_promo_view["Preço Promocional"].apply(lambda x: f"R$ {x:.2f}")
-            df_promo_view["Desconto %"] = df_promo_view["Desconto %"].apply(lambda x: f"{x*100:.1f}%")
-            df_promo_view["Economia R$"] = df_promo_view["Economia R$"].apply(lambda x: f"R$ {x:.2f}")
-            
-            st.dataframe(df_promo_view, use_container_width=True)
-        else:
-            st.info("Nenhuma promoção configurada. Ajuste os descontos acima.")
+        df_promocoes = df_com_promocoes[df_com_promocoes['Desconto'] > 0].sort_values("Faturamento", ascending=False)
+        
+        st.dataframe(df_promocoes, use_container_width=True)
+        
+        # Salvar para próxima aba
+        st.session_state.dados_promocoes = df_com_promocoes
 
 # ============ TAB 5: RELATÓRIO FINAL ============
 with tab5:
-    st.markdown('<div class="section-header">Gerar Relatório Final</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Relatório Final</div>', unsafe_allow_html=True)
     
-    if st.session_state.dados_com_promocoes is None:
-        st.warning("⚠️ Configure as **'Promoções'** primeiro")
+    if st.session_state.relatorio_vendas is None:
+        st.warning("⚠️ Carregue um relatório primeiro no **Sidebar**")
+    elif st.session_state.dados_promocoes is None:
+        st.warning("⚠️ Configure as promoções primeiro na aba **'Promoções'**")
     else:
-        st.write("Relatório pronto para upload no Mercado Livre")
+        st.markdown("""
+        Seu relatório está pronto para download e upload no Mercado Livre.
+        Ele contém todos os produtos com os descontos configurados.
+        """)
         
-        df_final = st.session_state.dados_com_promocoes.copy()
+        df_final = st.session_state.dados_promocoes.copy()
         
-        # Preparar dados para exportação
-        df_export = df_final[["SKU", "Descrição", "Preço", "Preço Promocional", "Desconto %", "Curva ABC"]].copy()
-        df_export.columns = ["SKU/MLB", "Título", "Preço Atual", "Preço Promoção", "Desconto %", "Curva"]
+        # Estatísticas finais
+        st.subheader("📊 Resumo Final")
         
-        # Preview
-        st.subheader("📋 Preview do Relatório")
-        st.dataframe(df_export, use_container_width=True)
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("Total de SKUs", len(df_final))
+        with col2:
+            st.metric("Faturamento Original", f"R$ {df_final['Faturamento'].sum():,.2f}")
+        with col3:
+            economia = (df_final['Desconto'] * df_final['Quantidade Vendida']).sum()
+            st.metric("Economia Total", f"R$ {economia:,.2f}")
+        with col4:
+            st.metric("Faturamento com Promoção", f"R$ {(df_final['Faturamento'] - (df_final['Desconto'] * df_final['Quantidade Vendida'])).sum():,.2f}")
+        
+        st.divider()
+        
+        # Tabela final
+        st.subheader("📋 Dados para Upload")
+        st.dataframe(df_final, use_container_width=True)
+        
+        st.divider()
         
         # Download
         st.subheader("📥 Download")
         
-        # Converter para Excel
+        # Preparar arquivo para download
         output = BytesIO()
         with pd.ExcelWriter(output, engine="openpyxl") as writer:
-            df_export.to_excel(writer, sheet_name="Promoções", index=False)
+            df_final.to_excel(writer, sheet_name="Relatório", index=False)
         
         output.seek(0)
         
         st.download_button(
             label="📥 Baixar Relatório (Excel)",
             data=output.getvalue(),
-            file_name="carblue_promocoes_mercado_livre.xlsx",
+            file_name="relatorio_promocoes_mercado_livre.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
         
-        st.success("✅ Relatório pronto! Baixe e importe no Mercado Livre.")
-
-# Footer
-st.divider()
-st.markdown("""
-    <div style="text-align: center; color: #999; font-size: 0.9rem; margin-top: 2rem;">
-        <p>Carblue Pricing & Promo Manager v1.0 | Desenvolvido com ❤️ para sua precificação inteligente</p>
-    </div>
-""", unsafe_allow_html=True)
+        st.info("✅ Arquivo pronto para upload no Mercado Livre!")
