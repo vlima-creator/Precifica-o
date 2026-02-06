@@ -128,6 +128,31 @@ st.markdown("""
         background-color: #334155 !important;
         color: #ffffff !important;
     }
+    /* Remover tarja branca no topo */
+    header[data-testid="stHeader"] {
+        background-color: rgba(0,0,0,0) !important;
+        color: #ffffff !important;
+    }
+    /* Corrigir legibilidade do File Uploader */
+    [data-testid="stFileUploadDropzone"] {
+        background-color: #0f172a !important;
+        border: 1px dashed #334155 !important;
+    }
+    [data-testid="stFileUploadDropzone"] p, 
+    [data-testid="stFileUploadDropzone"] span,
+    [data-testid="stFileUploadDropzone"] small {
+        color: #ffffff !important;
+    }
+    /* Corrigir botões de upload e outros botões secundários */
+    .stButton button {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        border: 1px solid #334155 !important;
+    }
+    .stButton button:hover {
+        border-color: #4ade80 !important;
+        color: #4ade80 !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
