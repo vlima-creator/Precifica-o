@@ -225,65 +225,7 @@ st.markdown("""
 st.sidebar.markdown("# ⚙️ CONFIGURAÇÕES")
 st.sidebar.markdown("---")
 
-# 1. UPLOAD DE ARQUIVO CSV
-with st.sidebar.expander("Carregar Dados", expanded=True):
-    uploaded_file = st.file_uploader(
-        "Carregar arquivo CSV (Produto, Custo, Preço)",
-        type=["csv"],
-        key="file_uploader"
-    )
-    
-    if uploaded_file is not None:
-        try:
-            df_upload = pd.read_csv(uploaded_file)
-            if len(df_upload.columns) >= 3:
-                df_upload.columns = ["Produto", "Custo", "Preço"] + list(df_upload.columns[3:])
-                df_upload["Custo"] = pd.to_numeric(df_upload["Custo"], errors="coerce")
-                df_upload["Preço"] = pd.to_numeric(df_upload["Preço"], errors="coerce")
-                df_upload = df_upload.dropna(subset=["Custo", "Preço"])
-                if len(df_upload) > 0:
-                    st.session_state.relatorio_vendas = df_upload
-                    st.success(f"✅ {len(df_upload)} produtos carregados!")
-                else:
-                    st.error("❌ Nenhum produto válido encontrado")
-            else:
-                st.error("❌ Arquivo deve ter pelo menos 3 colunas: Produto, Custo, Preço")
-        except Exception as e:
-            st.error(f"❌ Erro ao processar arquivo: {str(e)}")
-    
-    if st.button("Usar Dados de Exemplo", use_container_width=True):
-        st.session_state.relatorio_vendas = None
-        st.rerun()
-
-# 2. SIMULADOR DE CENÁRIOS
-with st.sidebar.expander("Simulador de Cenários", expanded=True):
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        if st.button("Agressivo", use_container_width=True):
-            st.session_state.margem_bruta_alvo = 25
-            st.session_state.margem_liquida_minima = 5
-            st.session_state.percent_publicidade = 5
-            st.success("Cenário Agressivo aplicado!")
-            st.rerun()
-    
-    with col2:
-        if st.button("Balanceado", use_container_width=True):
-            st.session_state.margem_bruta_alvo = 30
-            st.session_state.margem_liquida_minima = 10
-            st.session_state.percent_publicidade = 3
-            st.success("Cenário Balanceado aplicado!")
-            st.rerun()
-    
-    with col3:
-        if st.button("Conservador", use_container_width=True):
-            st.session_state.margem_bruta_alvo = 40
-            st.session_state.margem_liquida_minima = 15
-            st.session_state.percent_publicidade = 2
-            st.success("Cenário Conservador aplicado!")
-            st.rerun()
-
-# 3. MARKETPLACES
+# 1. MARKETPLACES
 with st.sidebar.expander("Marketplaces", expanded=False):
     for marketplace, config in st.session_state.marketplaces.items():
         st.markdown(f"**{marketplace}**")
@@ -314,7 +256,7 @@ with st.sidebar.expander("Marketplaces", expanded=False):
         st.markdown("")
         st.divider()
 
-# 4. REGIMES TRIBUTÁRIOS
+# 2. REGIMES TRIBUTÁRIOS
 with st.sidebar.expander("Regimes Tributários", expanded=False):
     for regime, config in st.session_state.regimes.items():
         st.markdown(f"**{regime}**")
@@ -358,7 +300,7 @@ with st.sidebar.expander("Regimes Tributários", expanded=False):
         st.markdown("")
         st.divider()
 
-# 5. MARGENS E PUBLICIDADE
+# 3. MARGENS E PUBLICIDADE
 with st.sidebar.expander("Margens e Publicidade", expanded=False):
     
     # Garantir que os valores sao validos
@@ -402,7 +344,7 @@ with st.sidebar.expander("Margens e Publicidade", expanded=False):
     
     atualizar_margens(margem_bruta, margem_liquida, percent_pub)
 
-# 6. CUSTOS OPERACIONAIS
+# 4. CUSTOS OPERACIONAIS
 with st.sidebar.expander("Custos Operacionais", expanded=False):
     
     custo_fixo_op = st.number_input(
@@ -427,7 +369,7 @@ with st.sidebar.expander("Custos Operacionais", expanded=False):
     st.session_state.custo_fixo_operacional = custo_fixo_op
     st.session_state.taxa_devolucao = taxa_devolucao
 
-# 7. CARREGAR RELATÓRIO
+# 5. CARREGAR RELATÓRIO
 with st.sidebar.expander("Carregar Relatório de Vendas", expanded=False):
     
     st.markdown("""
