@@ -975,7 +975,7 @@ with tab2:
                 saudaveis = len(df_resultado[df_resultado['Status'] == ' Saudável'])
                 st.markdown(f"""
                 <div class="metric-card-calc" style="border-top-color: #22C55E;">
-                    <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Saudáveis</div>
+                    <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">🟢 Saudáveis</div>
                     <div style="font-size: 2em; font-weight: 700; color: #22C55E; margin: 10px 0;">{saudaveis}/{len(df_resultado)}</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -1050,9 +1050,9 @@ with tab2:
             with col2:
                 df_saudaveis = df_resultado[df_resultado['Status'] == ' Saudável']
                 if len(df_saudaveis) > 0:
-                    excel_saudaveis = formatar_excel_profissional(df_saudaveis, "Saudáveis")
+                    excel_saudaveis = formatar_excel_profissional(df_saudaveis, "🟢 Saudáveis")
                     st.download_button(
-                        label=" Saudáveis",
+                        label=" 🟢 Saudáveis",
                         data=excel_saudaveis,
                         file_name="calculadora_saudaveis.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1060,11 +1060,11 @@ with tab2:
                     )
             
             with col3:
-                df_alerta = df_resultado[df_resultado['Status'].str.contains('Alerta', na=False)]
+                df_alerta = df_resultado[df_resultado['Status'].str.contains('🟡 Alerta', na=False)]
                 if len(df_alerta) > 0:
                     excel_alerta = formatar_excel_profissional(df_alerta, "Alerta")
                     st.download_button(
-                        label=" Em Alerta",
+                        label=" 🟡 Em Alerta",
                         data=excel_alerta,
                         file_name="calculadora_alerta.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1076,7 +1076,7 @@ with tab2:
                 if len(df_prejuizo) > 0:
                     excel_prejuizo = formatar_excel_profissional(df_prejuizo, "Prejuízo")
                     st.download_button(
-                        label=" Em Prejuízo",
+                        label=" 🔴 Em Prejuízo",
                         data=excel_prejuizo,
                         file_name="calculadora_prejuizo.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
