@@ -342,3 +342,58 @@ class PricingCalculatorV2:
                 "Margem Bruta %",
                 "Status",
             ]
+
+    def calcular_dataframe(self, df, marketplace, regime_tributario):
+        """
+        Calcula precificação para múltiplas linhas
+        
+        Args:
+            df: DataFrame com colunas: SKU, Descrição, Custo Produto, Frete, Preço Atual, Tipo de Anúncio (opcional), Peso (opcional para ML)
+            marketplace: Marketplace selecionado
+            regime_tributario: Regime tributário selecionado
+                
+        Returns:
+            DataFrame com cálculos completos
+        """
+        resultados = []
+        
+        for _, row in df.iterrows():
+            tipo_anuncio = row.get("Tipo de Anúncio", "")
+            
+            # Novos parâmetros para Mercado Livre (válido a partir de 02/03/2026)
+            peso_kg = float(row.get("Peso", 0.0) or 0.0) if "Peso" in row else 0.0
+            tipo_logistica_ml = row.get("Tipo de Logística", "Full") if "Tipo de Logística" in row else "Full"
+            categoria_ml = row.get("Categoria", "Produtos Comuns") if "Categoria" in row else "Produtos Comuns"
+            
+            resultado = self.calcular_linha(
+                sku=row.get("SKU", ""),
+                descricao=row.get("Descrição", ""),
+                custo_produto=float(row.get("Custo Produto", 0) or 0),
+                frete=float(row.get("Frete", 0) or 0),
+                preco_atual=float(row.get("Preço Atual", 0) or 0),
+                marketplace=marketplace,
+                regime_tributario=regime_tributario,
+                tipo_anuncio=tipo_anuncio,
+                peso_kg=peso_kg,
+                tipo_logistica_ml=tipo_logistica_ml,
+                categoria_ml=categoria_ml,
+            )
+            resultados.append(resultado)
+        
+        df_resultado = pd.DataFrame(resultados)
+        
+        # Calcular Curva ABC se houver coluna de Quantidade Vendida
+        if "Quantidade Vendida" in df.columns:
+            # Calcular faturamento (preco_atual * quantidade_vendida)
+            df_temp = df.copy()
+            df_temp['Faturamento'] = df_temp['Preço Atual'] * df_temp['Quantidade Vendida']
+            
+            # Calcular Curva ABC
+            curva_abc = self.calcular_curva_abc(df_temp)
+            df_resultado['Curva ABC'] = curva_abc['Curva ABC']
+        
+        # Filtrar colunas baseado no marketplace
+        colunas_exibir = self.obter_colunas_por_marketplace(marketplace)
+        colunas_existentes = [col for col in colunas_exibir if col in df_resultado.columns]
+        
+        return df_resultado[colunas_existentes]
