@@ -1806,11 +1806,12 @@ with tab5:
                     # Inicializar exportador com o marketplace selecionado
                     exporter = PromotionExporter(marketplace=marketplace_selecionado)
                     
-                    # Filtrar dados
+                    # Filtrar dados (sincronizado com Dashboard)
                     df_filtrado = exporter.filtrar_por_categoria(
                         df_base,
                         categoria=categoria_filtro,
-                        margem_minima=margem_minima
+                        margem_minima=margem_minima,
+                        margem_alvo=st.session_state.get("slider_margem_bruta", 30.0)
                     )
                     
                     if len(df_filtrado) == 0:

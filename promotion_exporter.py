@@ -132,14 +132,15 @@ class PromotionExporter:
         
         return df_norm
     
-    def filtrar_por_categoria(self, df, categoria="oportunidade", margem_minima=15.0):
+    def filtrar_por_categoria(self, df, categoria="oportunidade", margem_minima=15.0, margem_alvo=30.0):
         """
         Filtra produtos por categoria (Curva ABC ou Oportunidades)
         
         Args:
             df: DataFrame com dados de produtos
             categoria: "oportunidade", "curva_a", "curva_b", "curva_c", "saudavel", "alerta", "prejuizo"
-            margem_minima: Margem mínima para considerar como oportunidade
+            margem_minima: Margem minima (DEPRECADO - usar margem_alvo + 5%)
+            margem_alvo: Margem alvo configurada no dashboard (padrao 30%)
             
         Returns:
             DataFrame filtrado
@@ -147,16 +148,16 @@ class PromotionExporter:
         df_filtrado = df.copy()
         
         if categoria.lower() == "oportunidade":
-            # Produtos de oportunidade (Curva B/C com margem alta e saudáveis)
+            # Produtos de oportunidade (Curva B/C com margem 5% acima da alvo e saudaveis)
             if "Curva ABC" in df_filtrado.columns and "Status" in df_filtrado.columns:
                 curva_bc = (df_filtrado["Curva ABC"].astype(str).str.contains("B", na=False)) | \
                            (df_filtrado["Curva ABC"].astype(str).str.contains("C", na=False))
-                status_saudavel = df_filtrado["Status"] == "🟢 Saudável"
+                status_saudavel = df_filtrado["Status"] == "🟢 Saudavel"
                 
-                # Se temos coluna de margem, filtrar por margem
+                # Margem deve ser 5% ou mais acima da margem alvo
                 if "Margem Bruta %" in df_filtrado.columns:
-                    margem_alta = df_filtrado["Margem Bruta %"] >= margem_minima
-                    df_filtrado = df_filtrado[curva_bc & status_saudavel & margem_alta]
+                    margem_qualificada = df_filtrado["Margem Bruta %"] >= (margem_alvo + 5.0)
+                    df_filtrado = df_filtrado[curva_bc & status_saudavel & margem_qualificada]
                 else:
                     df_filtrado = df_filtrado[curva_bc & status_saudavel]
         
