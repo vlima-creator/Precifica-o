@@ -568,7 +568,7 @@ with tab1:
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         margin-bottom: 20px;
         transition: all 0.3s ease;
-        color: #333;
+        color: white;
     }
     .feature-card:hover {
         box-shadow: 0 4px 15px rgba(0,0,0,0.12);
@@ -729,7 +729,7 @@ with tab1:
             <div style="font-size: 2em; margin-bottom: 10px;">🟢</div>
             <div class="feature-title">Saudável</div>
             <p><strong>Margem ≥ Alvo</strong></p>
-            <p style="font-size: 0.9em; color: #666;">Boa rentabilidade. Mantenha ou aumente volume.</p>
+            <p style="font-size: 0.9em; color: white;">Boa rentabilidade. Mantenha ou aumente volume.</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -739,7 +739,7 @@ with tab1:
             <div style="font-size: 2em; margin-bottom: 10px;">🟡</div>
             <div class="feature-title">Alerta</div>
             <p><strong>Alvo > Margem ≥ Mínima</strong></p>
-            <p style="font-size: 0.9em; color: #666;">Rentabilidade aceitável. Monitore custos.</p>
+            <p style="font-size: 0.9em; color: white;">Rentabilidade aceitável. Monitore custos.</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -749,7 +749,7 @@ with tab1:
             <div style="font-size: 2em; margin-bottom: 10px;">🔴</div>
             <div class="feature-title">Prejuízo</div>
             <p><strong>Margem < Mínima</strong></p>
-            <p style="font-size: 0.9em; color: #666;">Rentabilidade insuficiente. Revise preço.</p>
+            <p style="font-size: 0.9em; color: white;">Rentabilidade insuficiente. Revise preço.</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -766,7 +766,7 @@ with tab1:
             <div style="font-size: 2em; margin-bottom: 10px;">🔵</div>
             <div class="feature-title">Curva A</div>
             <p><strong>80% do faturamento</strong></p>
-            <p style="font-size: 0.9em; color: #666;">Produtos principais. Máxima atenção.</p>
+            <p style="font-size: 0.9em; color: white;">Produtos principais. Máxima atenção.</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -776,7 +776,7 @@ with tab1:
             <div style="font-size: 2em; margin-bottom: 10px;">🟡</div>
             <div class="feature-title">Curva B</div>
             <p><strong>15% do faturamento</strong></p>
-            <p style="font-size: 0.9em; color: #666;">Produtos secundários. Oportunidades.</p>
+            <p style="font-size: 0.9em; color: white;">Produtos secundários. Oportunidades.</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -786,7 +786,7 @@ with tab1:
             <div style="font-size: 2em; margin-bottom: 10px;">🔴</div>
             <div class="feature-title">Curva C</div>
             <p><strong>5% do faturamento</strong></p>
-            <p style="font-size: 0.9em; color: #666;">Produtos de baixa relevância.</p>
+            <p style="font-size: 0.9em; color: white;">Produtos de baixa relevância.</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -870,9 +870,10 @@ with tab2:
         text-align: center;
     }
     .section-title-calc {
+        color: white;
         font-size: 1.3em;
         font-weight: 700;
-        color: #333;
+        color: white;
         margin: 30px 0 20px 0;
         padding-bottom: 10px;
         border-bottom: 3px solid #667eea;
@@ -952,21 +953,21 @@ with tab2:
             with col1:
                 st.markdown(f"""
                 <div class="metric-card-calc">
-                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Total de SKUs</div>
+                    <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Total de SKUs</div>
                     <div style="font-size: 2em; font-weight: 700; color: #667eea; margin: 10px 0;">{len(df_resultado)}</div>
                 </div>
                 """, unsafe_allow_html=True)
             with col2:
                 st.markdown(f"""
                 <div class="metric-card-calc">
-                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Margem Média</div>
+                    <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Margem Média</div>
                     <div style="font-size: 2em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_percentual_1casa(df_resultado['Margem Bruta %'].mean())}</div>
                 </div>
                 """, unsafe_allow_html=True)
             with col3:
                 st.markdown(f"""
                 <div class="metric-card-calc">
-                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Lucro Total</div>
+                    <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Lucro Total</div>
                     <div style="font-size: 2em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_moeda(df_resultado['Lucro R$'].sum())}</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -974,7 +975,7 @@ with tab2:
                 saudaveis = len(df_resultado[df_resultado['Status'] == '🟢 Saudável'])
                 st.markdown(f"""
                 <div class="metric-card-calc" style="border-top-color: #22C55E;">
-                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Saudáveis</div>
+                    <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Saudáveis</div>
                     <div style="font-size: 2em; font-weight: 700; color: #22C55E; margin: 10px 0;">{saudaveis}/{len(df_resultado)}</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -1115,9 +1116,10 @@ with tab3:
         text-align: center;
     }
     .section-title-sim {
+        color: white;
         font-size: 1.3em;
         font-weight: 700;
-        color: #333;
+        color: white;
         margin: 30px 0 20px 0;
         padding-bottom: 10px;
         border-bottom: 3px solid #667eea;
@@ -1188,28 +1190,28 @@ with tab3:
             with col1:
                 st.markdown(f"""
                 <div class="metric-card-sim">
-                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Preço Médio</div>
+                    <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Preço Médio</div>
                     <div style="font-size: 1.8em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_moeda(df_simulacao['Preço Sugerido'].mean())}</div>
                 </div>
                 """, unsafe_allow_html=True)
             with col2:
                 st.markdown(f"""
                 <div class="metric-card-sim">
-                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Preço Promo</div>
+                    <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Preço Promo</div>
                     <div style="font-size: 1.8em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_moeda(df_simulacao['Preço Promo Limite'].mean())}</div>
                 </div>
                 """, unsafe_allow_html=True)
             with col3:
                 st.markdown(f"""
                 <div class="metric-card-sim">
-                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Lucro Bruto</div>
+                    <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Lucro Bruto</div>
                     <div style="font-size: 1.8em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_moeda(df_simulacao['Lucro Bruto'].sum())}</div>
                 </div>
                 """, unsafe_allow_html=True)
             with col4:
                 st.markdown(f"""
                 <div class="metric-card-sim">
-                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Lucro Líquido</div>
+                    <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Lucro Líquido</div>
                     <div style="font-size: 1.8em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_moeda(df_simulacao['Lucro Líquido'].sum())}</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -1217,7 +1219,7 @@ with tab3:
                 margem_media = df_simulacao['Margem Líquida %'].mean() if 'Margem Líquida %' in df_simulacao.columns else df_simulacao['Margem Bruta %'].mean()
                 st.markdown(f"""
                 <div class="metric-card-sim">
-                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Margem Média</div>
+                    <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Margem Média</div>
                     <div style="font-size: 1.8em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_percentual_1casa(margem_media)}</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -1335,7 +1337,7 @@ with tab4:
     }
     .metric-label {
         font-size: 0.9em;
-        color: #666;
+        color: white;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
@@ -1349,9 +1351,10 @@ with tab4:
         margin-bottom: 20px;
     }
     .section-title {
+        color: white;
         font-size: 1.3em;
         font-weight: 700;
-        color: #333;
+        color: white;
         margin: 30px 0 20px 0;
         padding-bottom: 10px;
         border-bottom: 3px solid #667eea;
@@ -1459,7 +1462,7 @@ with tab4:
                         showlegend=False,
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
-                        font=dict(color='#333', size=11),
+                        font=dict(color='white', size=11),
                         hovermode='closest'
                     )
                     st.plotly_chart(fig_status, use_container_width=True)
@@ -1500,7 +1503,7 @@ with tab4:
                         showlegend=False,
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
-                        font=dict(color='#333', size=11),
+                        font=dict(color='white', size=11),
                         hovermode='closest'
                     )
                     st.plotly_chart(fig_curva, use_container_width=True)
