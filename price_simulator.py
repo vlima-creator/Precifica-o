@@ -147,4 +147,55 @@ class PriceSimulator:
             )
             resultados.append(resultado)
         
-        return pd.DataFrame(resultados)
+        df_resultado = pd.DataFrame(resultados)
+        
+        # Calcular Curva ABC se houver coluna de Quantidade Vendida
+        if "Quantidade Vendida" in df.columns:
+            # Calcular faturamento (preco_atual * quantidade_vendida)
+            df_temp = df.copy()
+            df_temp['Faturamento'] = df_temp['Preço Atual'] * df_temp['Quantidade Vendida']
+            
+            # Calcular Curva ABC
+            curva_abc = self.calcular_curva_abc(df_temp)
+            df_resultado['Curva ABC'] = curva_abc['Curva ABC']
+        
+        return df_resultado
+    
+    def calcular_curva_abc(self, df):
+        """
+        Calcula a Curva ABC baseado no faturamento
+        
+        Args:
+            df: DataFrame com coluna 'Faturamento'
+            
+        Returns:
+            DataFrame com coluna 'Curva ABC' (A, B ou C)
+        """
+        if 'Faturamento' not in df.columns or len(df) == 0:
+            return pd.DataFrame({'Curva ABC': ['C'] * len(df)})
+        
+        # Ordenar por faturamento (maior para menor)
+        df_sorted = df.sort_values('Faturamento', ascending=False).reset_index(drop=True)
+        
+        # Calcular faturamento total
+        total_faturamento = df_sorted['Faturamento'].sum()
+        
+        if total_faturamento == 0:
+            return pd.DataFrame({'Curva ABC': ['C'] * len(df)})
+        
+        # Calcular faturamento acumulado em percentual
+        df_sorted['Faturamento Acumulado %'] = (df_sorted['Faturamento'].cumsum() / total_faturamento * 100)
+        
+        # Classificar em Curva A (80%), B (15%), C (5%)
+        def classificar_curva(percentual):
+            if percentual <= 80:
+                return 'A'
+            elif percentual <= 95:
+                return 'B'
+            else:
+                return 'C'
+        
+        df_sorted['Curva ABC'] = df_sorted['Faturamento Acumulado %'].apply(classificar_curva)
+        
+        # Retornar na ordem original
+        return df_sorted[['Curva ABC']].reset_index(drop=True)
