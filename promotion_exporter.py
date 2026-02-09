@@ -413,8 +413,15 @@ class PromotionExporter:
         Returns:
             dict com métricas de impacto
         """
-        preco_original = pd.to_numeric(df_marketplace["Preço original (opcional)"], errors='coerce')
-        preco_desconto = pd.to_numeric(df_marketplace["Preço de desconto"], errors='coerce')
+        if self.marketplace == "Mercado Livre":
+            col_preco_original = "ORIGINAL_PRICE"
+            col_preco_desconto = "FINAL_PRICE"
+        else:
+            col_preco_original = "Preço original (opcional)"
+            col_preco_desconto = "Preço de desconto"
+        
+        preco_original = pd.to_numeric(df_marketplace[col_preco_original], errors='coerce')
+        preco_desconto = pd.to_numeric(df_marketplace[col_preco_desconto], errors='coerce')
         
         economia_por_produto = preco_original - preco_desconto
         desconto_medio_percent = (economia_por_produto / preco_original * 100).mean()
@@ -439,8 +446,15 @@ class PromotionExporter:
         """
         impacto = self.calcular_impacto(df_marketplace, df_original)
         
-        preco_original = pd.to_numeric(df_marketplace["Preço original (opcional)"], errors='coerce')
-        preco_desconto = pd.to_numeric(df_marketplace["Preço de desconto"], errors='coerce')
+        if self.marketplace == "Mercado Livre":
+            col_preco_original = "ORIGINAL_PRICE"
+            col_preco_desconto = "FINAL_PRICE"
+        else:
+            col_preco_original = "Preço original (opcional)"
+            col_preco_desconto = "Preço de desconto"
+        
+        preco_original = pd.to_numeric(df_marketplace[col_preco_original], errors='coerce')
+        preco_desconto = pd.to_numeric(df_marketplace[col_preco_desconto], errors='coerce')
         
         return {
             "total_produtos": len(df_marketplace),
