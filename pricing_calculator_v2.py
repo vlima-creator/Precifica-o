@@ -206,6 +206,77 @@ class PricingCalculatorV2:
             "Status": status,
         }
 
+    def obter_colunas_por_marketplace(self, marketplace):
+        """
+        Retorna as colunas que devem ser exibidas baseado no marketplace
+        
+        Args:
+            marketplace: Nome do marketplace
+            
+        Returns:
+            Lista de colunas a exibir
+        """
+        if marketplace == "Mercado Livre":
+            # Colunas especificas do Mercado Livre
+            return [
+                "SKU",
+                "Descricao",
+                "Tipo de Anuncio",
+                "Taxa Comissao %",
+                "Taxa Fixa R$",
+                "Taxa Fixa Cobrada",
+                "Faixa Taxa Fixa",
+                "Preco Atual (R$)",
+                "Custo Produto",
+                "Frete",
+                "Comissao R$",
+                "Impostos",
+                "Publicidade",
+                "Lucro R$",
+                "Margem Bruta %",
+                "Margem Liquida %",
+                "Status",
+            ]
+        elif marketplace == "Shopee":
+            # Colunas especificas da Shopee
+            return [
+                "SKU",
+                "Descricao",
+                "Taxa Comissao %",
+                "Taxa Fixa R$",
+                "Faixa Shopee",
+                "Subsidio Pix %",
+                "Subsidio Pix R$",
+                "Preco Atual (R$)",
+                "Custo Produto",
+                "Frete",
+                "Comissao R$",
+                "Impostos",
+                "Publicidade",
+                "Subsidio Pix (Credito)",
+                "Lucro R$",
+                "Margem Bruta %",
+                "Margem Liquida %",
+                "Status",
+            ]
+        else:
+            # Para outros marketplaces, usar colunas comuns
+            return [
+                "SKU",
+                "Descricao",
+                "Taxa Comissao %",
+                "Preco Atual (R$)",
+                "Custo Produto",
+                "Frete",
+                "Comissao R$",
+                "Impostos",
+                "Publicidade",
+                "Lucro R$",
+                "Margem Bruta %",
+                "Margem Liquida %",
+                "Status",
+            ]
+    
     def calcular_dataframe(self, df, marketplace, regime_tributario):
         """
         Calcula precificação para múltiplas linhas
@@ -235,4 +306,10 @@ class PricingCalculatorV2:
             )
             resultados.append(resultado)
         
-        return pd.DataFrame(resultados)
+        df_resultado = pd.DataFrame(resultados)
+        
+        # Filtrar colunas baseado no marketplace
+        colunas_exibir = self.obter_colunas_por_marketplace(marketplace)
+        colunas_existentes = [col for col in colunas_exibir if col in df_resultado.columns]
+        
+        return df_resultado[colunas_existentes]
