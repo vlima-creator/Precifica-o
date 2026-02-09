@@ -1,3 +1,4 @@
+import re
 """
 Módulo genérico para exportação de promoções por marketplace
 Suporta múltiplos canais (Shopee, Mercado Livre, etc) com templates específicos
@@ -18,9 +19,9 @@ class PromotionExporter:
     
     # Mapeamento de sinônimos de colunas de ENTRADA (para identificar dados)
     COLUMN_SYNONYMS = {
-        "id": ["sku", "mlb", "id do produto", "id_produto", "product_id", "item_id", "codigo", "product id", "item id"],
+        "id": ["sku", "mlb", "id do produto", "id_produto", "product_id", "item_id", "codigo", "product id", "item id", "sku ou mlb"],
         "descricao": ["descricao", "titulo", "nome do produto", "nome_produto", "product_name", "name", "product name"],
-        "preco": ["preco", "price", "valor", "valor_venda", "preco_venda", "valor venda", "preco venda", "preco sugerido", "preço sugerido", "preco limite", "preço limite", "preco promo limite", "preço promo limite"]
+        "preco": ["preco", "price", "valor", "valor_venda", "preco_venda", "valor venda", "preco venda", "preco sugerido", "preço sugerido", "preco limite", "preço limite", "preco promo limite", "preço promo limite", "preco atual", "preço atual", "preco atual r", "preço atual r"]
     }
     
     # Templates de SAÍDA por marketplace (estrutura exata que será exportada)
@@ -56,21 +57,18 @@ class PromotionExporter:
     def _normalizar_nome_coluna(self, nome):
         """
         Normaliza o nome de uma coluna para comparação
-        Remove espaços, acentos e converte para minúsculas
-        
-        Args:
-            nome: Nome da coluna
-            
-        Returns:
-            Nome normalizado
+        Remove espaços, acentos, caracteres especiais e converte para minúsculas
         """
         # Remover acentos
-        nome_sem_acentos = ''.join(
+        nome = ''.join(
             c for c in unicodedata.normalize('NFD', str(nome))
             if unicodedata.category(c) != 'Mn'
         )
-        # Converter para minúsculas e remover espaços
-        return nome_sem_acentos.lower().strip()
+        # Converter para minúsculas
+        nome = nome.lower()
+        # Remover tudo que não for letra ou número
+        nome = re.sub(r'[^a-z0-9]', '', nome)
+        return nome.strip()
     
     def _encontrar_coluna(self, df, tipo_coluna):
         """
