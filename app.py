@@ -534,7 +534,7 @@ with st.sidebar.expander("Carregar Relatório de Vendas", expanded=False):
 
 # ============ ABAS PRINCIPAIS ============
 st.markdown("---")
-tab1, tab2, tab3 = st.tabs(["🏠 Home", "🧮 Calculadora de Precificação", "📊 Simulador de Preço Alvo"])
+tab1, tab2, tab3, tab4 = st.tabs(["🏠 Home", "🧮 Calculadora de Precificação", "📊 Simulador de Preço Alvo", "📈 Dashboard"])
 
 # ============ ABA 1: HOME ============
 with tab1:
@@ -903,8 +903,8 @@ with tab3:
             
 
 
-# ============ ABA DASHBOARD ============
-with tab_dashboard:
+# ============ ABA 4: DASHBOARD ============
+with tab4:
     st.markdown("### Dashboard de Análise")
     
     if df_calculadora is None or len(df_calculadora) == 0:
