@@ -1099,7 +1099,7 @@ with tab4:
                     st.download_button(
                         label="Baixar Oportunidades em Excel",
                         data=buffer,
-                        file_name=f"oportunidades_{marketplace_selecionado}.xlsx",
+                        file_name=f"oportunidades_curva_bc.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         key="btn_download_oportunidades"
                     )
