@@ -89,6 +89,40 @@ class PricingCalculatorV2:
         # Fallback (não deve chegar aqui)
         return {"taxa_fixa": 0.0, "cobrada": False, "faixa": "Não identificada"}
     
+    def calcular_curva_abc(self, df_com_faturamento):
+        """
+        Calcula a Curva ABC baseado no faturamento de cada produto
+        
+        Args:
+            df_com_faturamento: DataFrame com coluna Faturamento calculada
+            
+        Returns:
+            Series com classificacao ABC para cada linha
+        """
+        # Calcular faturamento total
+        faturamento_total = df_com_faturamento['Faturamento'].sum()
+        
+        # Ordenar por faturamento em ordem decrescente
+        df_ordenado = df_com_faturamento.sort_values('Faturamento', ascending=False).reset_index(drop=True)
+        
+        # Calcular faturamento acumulado
+        df_ordenado['Faturamento_Acumulado'] = df_ordenado['Faturamento'].cumsum()
+        df_ordenado['Percentual_Acumulado'] = (df_ordenado['Faturamento_Acumulado'] / faturamento_total) * 100
+        
+        # Classificar em A, B ou C
+        def classificar_abc(percentual):
+            if percentual <= 80:
+                return "Curva A"
+            elif percentual <= 95:
+                return "Curva B"
+            else:
+                return "Curva C"
+        
+        df_ordenado['Curva ABC'] = df_ordenado['Percentual_Acumulado'].apply(classificar_abc)
+        
+        # Retornar em ordem original
+        return df_ordenado[['Curva ABC']].reset_index(drop=True)
+    
     def obter_config_marketplace(self, marketplace, tipo_anuncio=""):
         """
         Obtém configuração do marketplace, considerando tipo de anúncio para Mercado Livre
@@ -235,6 +269,7 @@ class PricingCalculatorV2:
                 "Lucro R$",
                 "Margem Bruta %",
                 "Margem Liquida %",
+                "Curva ABC",
                 "Status",
             ]
         elif marketplace == "Shopee":
@@ -257,6 +292,7 @@ class PricingCalculatorV2:
                 "Lucro R$",
                 "Margem Bruta %",
                 "Margem Liquida %",
+                "Curva ABC",
                 "Status",
             ]
         else:
@@ -274,6 +310,7 @@ class PricingCalculatorV2:
                 "Lucro R$",
                 "Margem Bruta %",
                 "Margem Liquida %",
+                "Curva ABC",
                 "Status",
             ]
     
@@ -307,6 +344,16 @@ class PricingCalculatorV2:
             resultados.append(resultado)
         
         df_resultado = pd.DataFrame(resultados)
+        
+        # Calcular Curva ABC se houver coluna de Quantidade Vendida
+        if "Quantidade Vendida" in df.columns:
+            # Calcular faturamento (preco_atual * quantidade_vendida)
+            df_temp = df.copy()
+            df_temp['Faturamento'] = df_temp['Preco Atual'] * df_temp['Quantidade Vendida']
+            
+            # Calcular Curva ABC
+            curva_abc = self.calcular_curva_abc(df_temp)
+            df_resultado['Curva ABC'] = curva_abc['Curva ABC']
         
         # Filtrar colunas baseado no marketplace
         colunas_exibir = self.obter_colunas_por_marketplace(marketplace)
