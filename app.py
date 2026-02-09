@@ -12,6 +12,7 @@ from session_manager import inicializar_sessao, atualizar_margens
 from pricing_calculator_v2 import PricingCalculatorV2
 from price_simulator import PriceSimulator
 from mercado_livre_processor import MercadoLivreProcessor
+from promotion_exporter import PromotionExporter
 
 # ============ FUNÇÕES DE FORMATAÇÃO ============
 def formatar_moeda(valor):
@@ -534,7 +535,7 @@ with st.sidebar.expander("Carregar Relatório de Vendas", expanded=False):
 
 # ============ ABAS PRINCIPAIS ============
 st.markdown("---")
-tab1, tab2, tab3, tab4 = st.tabs([" Home", "Calculadora de Precificação", "Simulador de Preço Alvo", " Dashboard"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs([" Home", "Calculadora de Precificação", "Simulador de Preço Alvo", " Dashboard", " Estratégias Promocionais"])
 
 # ============ ABA 1: HOME ============
 with tab1:
@@ -1657,3 +1658,247 @@ with tab4:
         
         except Exception as e:
             st.error(f"Erro ao gerar dashboard: {str(e)}")
+
+
+
+# ============ ABA 5: ESTRATÉGIAS PROMOCIONAIS ============
+with tab5:
+    # CSS para Estratégias Promocionais
+    st.markdown("""
+    <style>
+    .promo-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 30px 20px;
+        border-radius: 12px;
+        color: white;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .promo-title {
+        font-size: 2em;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    .promo-subtitle {
+        font-size: 0.95em;
+        opacity: 0.9;
+    }
+    .section-title-promo {
+        color: white;
+        font-size: 1.3em;
+        font-weight: 700;
+        margin: 30px 0 20px 0;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #667eea;
+    }
+    .metric-card-promo {
+        background: rgba(102, 126, 234, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+        border-radius: 12px;
+        border-top: 4px solid #667eea;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Header
+    st.markdown("""
+    <div class="promo-header">
+        <div class="promo-title">🎯 Estratégias Promocionais</div>
+        <div class="promo-subtitle">Configure descontos por categoria e exporte para o marketplace selecionado</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if st.session_state.relatorio_vendas is None or st.session_state.relatorio_vendas.empty:
+        st.info("📊 Carregue um relatório na sidebar para começar")
+    else:
+        # Seção 1: Seleção de Marketplace
+        st.markdown('<div class="section-title-promo">1. Selecione o Marketplace</div>', unsafe_allow_html=True)
+        
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            marketplace_selecionado = st.selectbox(
+                "Marketplace",
+                options=["Shopee"],  # Começar com Shopee, adicionar outros depois
+                key="promo_marketplace"
+            )
+        
+        with col2:
+            st.markdown("")
+            st.markdown("")
+            st.info(f"📦 Canal: **{marketplace_selecionado}**")
+        
+        # Seção 2: Seleção de Categoria
+        st.markdown('<div class="section-title-promo">2. Selecione a Categoria de Produtos</div>', unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            tipo_filtro = st.radio(
+                "Tipo de Filtro",
+                options=["Oportunidades", "Curva ABC"],
+                key="promo_tipo_filtro"
+            )
+        
+        with col2:
+            if tipo_filtro == "Oportunidades":
+                categoria_selecionada = "Oportunidades"
+                st.markdown("")
+                st.markdown("")
+                st.info("Produtos Curva B/C com margem saudável")
+            else:
+                categoria_selecionada = st.selectbox(
+                    "Selecione a Curva",
+                    options=["Curva A", "Curva B", "Curva C"],
+                    key="promo_curva"
+                )
+        
+        # Mapeamento de categorias
+        categoria_map = {
+            "Oportunidades": "oportunidade",
+            "Curva A": "curva_a",
+            "Curva B": "curva_b",
+            "Curva C": "curva_c",
+        }
+        categoria_filtro = categoria_map[categoria_selecionada]
+        
+        # Seção 3: Configuração de Desconto e Margem
+        st.markdown('<div class="section-title-promo">3. Configure o Desconto e Critérios</div>', unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            desconto_percent = st.slider(
+                "Percentual de Desconto (%)",
+                min_value=0.0,
+                max_value=50.0,
+                value=5.0,
+                step=0.5,
+                key="promo_desconto"
+            ) / 100
+        
+        with col2:
+            margem_minima = st.number_input(
+                "Margem Mínima (%)",
+                min_value=0.0,
+                max_value=100.0,
+                value=15.0,
+                step=1.0,
+                key="promo_margem_minima"
+            )
+        
+        with col3:
+            st.markdown("")
+            st.markdown("")
+            st.info(f"💰 Desconto: **{desconto_percent*100:.1f}%**")
+        
+        # Botão para processar
+        if st.button("Processar e Visualizar", use_container_width=True, key="btn_promo_processar"):
+            try:
+                with st.spinner("⏳ Processando dados..."):
+                    # Usar dados do simulador se disponível
+                    df_base = st.session_state.resultado_simulador if "resultado_simulador" in st.session_state else st.session_state.relatorio_vendas
+                    
+                    # Inicializar exportador com o marketplace selecionado
+                    exporter = PromotionExporter(marketplace=marketplace_selecionado)
+                    
+                    # Filtrar dados
+                    df_filtrado = exporter.filtrar_por_categoria(
+                        df_base,
+                        categoria=categoria_filtro,
+                        margem_minima=margem_minima
+                    )
+                    
+                    if len(df_filtrado) == 0:
+                        st.warning(f"⚠️ Nenhum produto encontrado na categoria '{categoria_selecionada}'")
+                    else:
+                        # Mapear para marketplace
+                        df_marketplace = exporter.mapear_dados_para_marketplace(df_filtrado, desconto_percent=desconto_percent)
+                        
+                        # Armazenar em session_state
+                        st.session_state.df_marketplace_processado = df_marketplace
+                        st.session_state.df_marketplace_original = df_filtrado
+                        st.session_state.marketplace_ativo = marketplace_selecionado
+                        
+                        # Calcular impacto
+                        relatorio = exporter.gerar_relatorio_impacto(df_marketplace, df_filtrado)
+                        
+                        # Exibir métricas
+                        st.markdown('<div class="section-title-promo">4. Resumo do Impacto</div>', unsafe_allow_html=True)
+                        
+                        col1, col2, col3, col4, col5 = st.columns(5)
+                        
+                        with col1:
+                            st.markdown(f"""
+                            <div class="metric-card-promo">
+                                <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Produtos</div>
+                                <div style="font-size: 1.8em; font-weight: 700; color: #667eea; margin: 10px 0;">{relatorio['total_produtos']}</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col2:
+                            st.markdown(f"""
+                            <div class="metric-card-promo">
+                                <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Economia Total</div>
+                                <div style="font-size: 1.8em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_moeda(relatorio['economia_total'])}</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col3:
+                            st.markdown(f"""
+                            <div class="metric-card-promo">
+                                <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Economia Média</div>
+                                <div style="font-size: 1.8em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_moeda(relatorio['economia_media_por_produto'])}</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col4:
+                            st.markdown(f"""
+                            <div class="metric-card-promo">
+                                <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Preço Médio</div>
+                                <div style="font-size: 1.8em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_moeda(relatorio['preco_medio_original'])}</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col5:
+                            st.markdown(f"""
+                            <div class="metric-card-promo">
+                                <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Desconto Médio</div>
+                                <div style="font-size: 1.8em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_percentual_1casa(relatorio['desconto_medio_percent'])}</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        st.markdown("---")
+                        
+                        # Exibir tabela
+                        st.markdown('<div class="section-title-promo">5. Produtos Selecionados</div>', unsafe_allow_html=True)
+                        st.dataframe(df_marketplace, use_container_width=True, hide_index=True)
+                        
+                        st.markdown("---")
+                        
+                        # Download
+                        st.markdown('<div class="section-title-promo">6. Download da Planilha</div>', unsafe_allow_html=True)
+                        
+                        buffer = exporter.exportar_para_excel(
+                            df_marketplace,
+                            f"Promoção {marketplace_selecionado} - {categoria_selecionada}"
+                        )
+                        
+                        nome_arquivo = f"{marketplace_selecionado.lower()}_promocoes_{categoria_filtro}_{int(desconto_percent*100)}pct.xlsx"
+                        
+                        st.download_button(
+                            label=f"📥 Baixar Planilha {marketplace_selecionado} ({len(df_marketplace)} produtos)",
+                            data=buffer,
+                            file_name=nome_arquivo,
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            use_container_width=True
+                        )
+                        
+                        st.success(f"✅ Planilha pronta para upload no {marketplace_selecionado}!")
+                        
+            except Exception as e:
+                st.error(f"❌ Erro ao processar: {str(e)}")
