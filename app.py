@@ -95,7 +95,7 @@ def formatar_excel_profissional(df, nome_sheet="Relatorio"):
 # Configurar página
 st.set_page_config(
     page_title="Precificação Estratégica",
-    page_icon="📉",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -282,7 +282,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============ SIDEBAR ============
-st.sidebar.markdown("# ⚙️ CONFIGURAÇÕES")
+st.sidebar.markdown("#  CONFIGURAÇÕES")
 st.sidebar.markdown("---")
 
 # 1. MARKETPLACES
@@ -525,16 +525,16 @@ with st.sidebar.expander("Carregar Relatório de Vendas", expanded=False):
                 if valido:
                     df_agregado = processor.agregar_por_sku(df_normalizado)
                     st.session_state.relatorio_vendas = df_agregado
-                    st.success(f"✅ {len(df_agregado)} SKUs carregados com sucesso!")
+                    st.success(f" {len(df_agregado)} SKUs carregados com sucesso!")
                 else:
-                    st.error(f"❌ {mensagem}")
+                    st.error(f" {mensagem}")
         
         except Exception as e:
-            st.error(f"❌ Erro: {str(e)}")
+            st.error(f" Erro: {str(e)}")
 
 # ============ ABAS PRINCIPAIS ============
 st.markdown("---")
-tab1, tab2, tab3, tab4 = st.tabs(["🏠 Home", "🧮 Calculadora de Precificação", "📊 Simulador de Preço Alvo", "📈 Dashboard"])
+tab1, tab2, tab3, tab4 = st.tabs([" Home", "Calculadora de Precificação", "Simulador de Preço Alvo", " Dashboard"])
 
 # ============ ABA 1: HOME ============
 with tab1:
@@ -604,7 +604,7 @@ with tab1:
         line-height: 1.6;
     }
     .benefit-list li:before {
-        content: "✓";
+        content: "";
         position: absolute;
         left: 0;
         color: #667eea;
@@ -617,7 +617,7 @@ with tab1:
     # Hero Section
     st.markdown("""
     <div class="hero-section">
-        <div class="hero-title">📊 Precificação Estratégica</div>
+        <div class="hero-title"> Precificação Estratégica</div>
         <div class="hero-subtitle">Análise Inteligente para Precificação Estratégica</div>
     </div>
     """, unsafe_allow_html=True)
@@ -628,7 +628,7 @@ with tab1:
     with col1:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2.5em; margin-bottom: 10px;">📊</div>
+            <div style="font-size: 2.5em; margin-bottom: 10px;"></div>
             <div class="feature-title">Análise Completa</div>
             <p>Cálculos precisos de custos, margens e rentabilidade em tempo real</p>
         </div>
@@ -637,7 +637,7 @@ with tab1:
     with col2:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2.5em; margin-bottom: 10px;">🎯</div>
+            <div style="font-size: 2.5em; margin-bottom: 10px;"></div>
             <div class="feature-title">Oportunidades</div>
             <p>Identifique produtos com potencial de crescimento e ação</p>
         </div>
@@ -646,7 +646,7 @@ with tab1:
     with col3:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2.5em; margin-bottom: 10px;">📈</div>
+            <div style="font-size: 2.5em; margin-bottom: 10px;"></div>
             <div class="feature-title">Relatórios</div>
             <p>Exportação profissional em Excel com análises visuais</p>
         </div>
@@ -655,7 +655,7 @@ with tab1:
     st.markdown("---")
     
     # Seção: Como Funciona
-    st.markdown("## 🚀 Como Funciona")
+    st.markdown("## Como Funciona")
     
     col1, col2 = st.columns([1, 2])
     
@@ -719,14 +719,14 @@ with tab1:
     st.markdown("---")
     
     # Seção: Status de Saúde
-    st.markdown("## 🎯 Status de Saúde dos Produtos")
+    st.markdown("## Status de Saúde dos Produtos")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2em; margin-bottom: 10px;">🟢</div>
+            <div style="font-size: 2em; margin-bottom: 10px;"></div>
             <div class="feature-title">Saudável</div>
             <p><strong>Margem ≥ Alvo</strong></p>
             <p style="font-size: 0.9em; color: white;">Boa rentabilidade. Mantenha ou aumente volume.</p>
@@ -736,7 +736,7 @@ with tab1:
     with col2:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2em; margin-bottom: 10px;">🟡</div>
+            <div style="font-size: 2em; margin-bottom: 10px;"></div>
             <div class="feature-title">Alerta</div>
             <p><strong>Alvo > Margem ≥ Mínima</strong></p>
             <p style="font-size: 0.9em; color: white;">Rentabilidade aceitável. Monitore custos.</p>
@@ -746,7 +746,7 @@ with tab1:
     with col3:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2em; margin-bottom: 10px;">🔴</div>
+            <div style="font-size: 2em; margin-bottom: 10px;"></div>
             <div class="feature-title">Prejuízo</div>
             <p><strong>Margem < Mínima</strong></p>
             <p style="font-size: 0.9em; color: white;">Rentabilidade insuficiente. Revise preço.</p>
@@ -756,14 +756,14 @@ with tab1:
     st.markdown("---")
     
     # Seção: Curva ABC
-    st.markdown("## 📊 Classificação ABC")
+    st.markdown("## Classificação ABC")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2em; margin-bottom: 10px;">🔵</div>
+            <div style="font-size: 2em; margin-bottom: 10px;"></div>
             <div class="feature-title">Curva A</div>
             <p><strong>80% do faturamento</strong></p>
             <p style="font-size: 0.9em; color: white;">Produtos principais. Máxima atenção.</p>
@@ -773,7 +773,7 @@ with tab1:
     with col2:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2em; margin-bottom: 10px;">🟡</div>
+            <div style="font-size: 2em; margin-bottom: 10px;"></div>
             <div class="feature-title">Curva B</div>
             <p><strong>15% do faturamento</strong></p>
             <p style="font-size: 0.9em; color: white;">Produtos secundários. Oportunidades.</p>
@@ -783,7 +783,7 @@ with tab1:
     with col3:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2em; margin-bottom: 10px;">🔴</div>
+            <div style="font-size: 2em; margin-bottom: 10px;"></div>
             <div class="feature-title">Curva C</div>
             <p><strong>5% do faturamento</strong></p>
             <p style="font-size: 0.9em; color: white;">Produtos de baixa relevância.</p>
@@ -793,21 +793,21 @@ with tab1:
     st.markdown("---")
     
     # Dicas de Uso
-    st.markdown("## 💡 Dicas para Melhor Aproveitar")
+    st.markdown("## Dicas para Melhor Aproveitar")
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
         <div class="feature-card">
-            <div class="feature-title">✓ Comece pela Configuração</div>
+            <div class="feature-title"> Comece pela Configuração</div>
             <p>Dedique tempo para configurar corretamente os parâmetros de marketplaces e margens.</p>
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown("""
         <div class="feature-card">
-            <div class="feature-title">✓ Use o Modelo</div>
+            <div class="feature-title"> Use o Modelo</div>
             <p>Baixe e use o modelo de planilha fornecido para garantir dados corretos.</p>
         </div>
         """, unsafe_allow_html=True)
@@ -815,14 +815,14 @@ with tab1:
     with col2:
         st.markdown("""
         <div class="feature-card">
-            <div class="feature-title">✓ Analise o Dashboard</div>
+            <div class="feature-title"> Analise o Dashboard</div>
             <p>Use o dashboard para identificar padrões e oportunidades de crescimento.</p>
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown("""
         <div class="feature-card">
-            <div class="feature-title">✓ Exporte Regularmente</div>
+            <div class="feature-title"> Exporte Regularmente</div>
             <p>Mantenha histórico de análises para acompanhar tendências ao longo do tempo.</p>
         </div>
         """, unsafe_allow_html=True)
@@ -893,15 +893,15 @@ with tab2:
     # Header
     st.markdown("""
     <div class="calc-header">
-        <div class="calc-title">🧮 Calculadora de Precificação</div>
+        <div class="calc-title">Calculadora de Precificação</div>
         <div class="calc-subtitle">Calcule preços, margens e rentabilidade de seus produtos</div>
     </div>
     """, unsafe_allow_html=True)
     
     if st.session_state.relatorio_vendas is None or st.session_state.relatorio_vendas.empty:
-        st.info("📥 Carregue um relatório na sidebar para começar")
+        st.info(" Carregue um relatório na sidebar para começar")
     else:
-        st.markdown('<div class="section-title-calc">⚙️ Configuração</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title-calc">Configuração</div>', unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
         
@@ -919,7 +919,7 @@ with tab2:
                 key="calc_regime"
             )
         
-        if st.button("🔄 Calcular Precificação", use_container_width=True, key="btn_calc"):
+        if st.button("Calcular Precificação", use_container_width=True, key="btn_calc"):
             try:
                 calculator = PricingCalculatorV2(
                     marketplaces=st.session_state.marketplaces,
@@ -938,16 +938,16 @@ with tab2:
                 )
                 
                 st.session_state.resultado_calculadora = df_resultado
-                st.success("✅ Cálculo realizado com sucesso!")
+                st.success("Cálculo realizado com sucesso!")
             
             except Exception as e:
-                st.error(f"❌ Erro ao calcular: {str(e)}")
+                st.error(f"Erro ao calcular: {str(e)}")
         
         if "resultado_calculadora" in st.session_state:
             df_resultado = st.session_state.resultado_calculadora
             
             # Métricas
-            st.markdown('<div class="section-title-calc">📊 Resumo dos Resultados</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title-calc">Resumo dos Resultados</div>', unsafe_allow_html=True)
             
             col1, col2, col3, col4 = st.columns(4)
             with col1:
@@ -972,7 +972,7 @@ with tab2:
                 </div>
                 """, unsafe_allow_html=True)
             with col4:
-                saudaveis = len(df_resultado[df_resultado['Status'] == '🟢 Saudável'])
+                saudaveis = len(df_resultado[df_resultado['Status'] == ' Saudável'])
                 st.markdown(f"""
                 <div class="metric-card-calc" style="border-top-color: #22C55E;">
                     <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">Saudáveis</div>
@@ -983,7 +983,7 @@ with tab2:
             st.markdown("---")
             
             # Filtros
-            st.markdown('<div class="section-title-calc">🔍 Filtros e Busca</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title-calc">Filtros e Busca</div>', unsafe_allow_html=True)
             
             col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
             
@@ -1026,13 +1026,13 @@ with tab2:
             st.markdown("---")
             
             # Tabela
-            st.markdown(f'<div class="section-title-calc">📋 Detalhes da Precificação ({len(df_filtrado)} produtos)</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="section-title-calc">Detalhes da Precificação ({len(df_filtrado)} produtos)</div>', unsafe_allow_html=True)
             st.dataframe(df_filtrado, use_container_width=True, hide_index=True)
             
             st.markdown("---")
             
             # Downloads
-            st.markdown('<div class="section-title-calc">📥 Downloads</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title-calc">Downloads</div>', unsafe_allow_html=True)
             
             col1, col2, col3, col4 = st.columns(4)
             
@@ -1040,7 +1040,7 @@ with tab2:
                 if len(df_filtrado) > 0:
                     excel_filtrado = formatar_excel_profissional(df_filtrado, "Filtrado")
                     st.download_button(
-                        label="📊 Resultado Filtrado",
+                        label="Resultado Filtrado",
                         data=excel_filtrado,
                         file_name="calculadora_filtrado.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1048,11 +1048,11 @@ with tab2:
                     )
             
             with col2:
-                df_saudaveis = df_resultado[df_resultado['Status'] == '🟢 Saudável']
+                df_saudaveis = df_resultado[df_resultado['Status'] == ' Saudável']
                 if len(df_saudaveis) > 0:
                     excel_saudaveis = formatar_excel_profissional(df_saudaveis, "Saudáveis")
                     st.download_button(
-                        label="🟢 Saudáveis",
+                        label=" Saudáveis",
                         data=excel_saudaveis,
                         file_name="calculadora_saudaveis.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1064,7 +1064,7 @@ with tab2:
                 if len(df_alerta) > 0:
                     excel_alerta = formatar_excel_profissional(df_alerta, "Alerta")
                     st.download_button(
-                        label="🟡 Em Alerta",
+                        label=" Em Alerta",
                         data=excel_alerta,
                         file_name="calculadora_alerta.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1076,7 +1076,7 @@ with tab2:
                 if len(df_prejuizo) > 0:
                     excel_prejuizo = formatar_excel_profissional(df_prejuizo, "Prejuízo")
                     st.download_button(
-                        label="🔴 Em Prejuízo",
+                        label=" Em Prejuízo",
                         data=excel_prejuizo,
                         file_name="calculadora_prejuizo.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1130,15 +1130,15 @@ with tab3:
     # Header
     st.markdown("""
     <div class="sim-header">
-        <div class="sim-title">📊 Simulador de Preço Alvo</div>
+        <div class="sim-title">Simulador de Preço Alvo</div>
         <div class="sim-subtitle">Simule diferentes preços e veja o impacto nas margens</div>
     </div>
     """, unsafe_allow_html=True)
     
     if st.session_state.relatorio_vendas is None or st.session_state.relatorio_vendas.empty:
-        st.info("📥 Carregue um relatório na sidebar para começar")
+        st.info(" Carregue um relatório na sidebar para começar")
     else:
-        st.markdown('<div class="section-title-sim">⚙️ Configuração</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title-sim">Configuração</div>', unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
         
@@ -1156,7 +1156,7 @@ with tab3:
                 key="sim_regime"
             )
         
-        if st.button("📊 Simular Preços", use_container_width=True, key="btn_sim"):
+        if st.button("Simular Preços", use_container_width=True, key="btn_sim"):
             try:
                 simulator = PriceSimulator(
                     marketplaces=st.session_state.marketplaces,
@@ -1175,16 +1175,16 @@ with tab3:
                 )
                 
                 st.session_state.resultado_simulador = df_simulacao
-                st.success("✅ Simulação realizada com sucesso!")
+                st.success("Simulação realizada com sucesso!")
             
             except Exception as e:
-                st.error(f"❌ Erro ao simular: {str(e)}")
+                st.error(f"Erro ao simular: {str(e)}")
         
         if "resultado_simulador" in st.session_state:
             df_simulacao = st.session_state.resultado_simulador
             
             # Métricas
-            st.markdown('<div class="section-title-sim">📈 Resumo da Simulação</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title-sim">Resumo da Simulação</div>', unsafe_allow_html=True)
             
             col1, col2, col3, col4, col5 = st.columns(5)
             with col1:
@@ -1227,7 +1227,7 @@ with tab3:
             st.markdown("---")
             
             # Filtros
-            st.markdown('<div class="section-title-sim">🔍 Filtros e Busca</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title-sim">Filtros e Busca</div>', unsafe_allow_html=True)
             
             col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
             
@@ -1263,13 +1263,13 @@ with tab3:
             st.markdown("---")
             
             # Tabela
-            st.markdown(f'<div class="section-title-sim">📋 Simulação de Preços ({len(df_filtrado)} produtos)</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="section-title-sim"> Simulação de Preços ({len(df_filtrado)} produtos)</div>', unsafe_allow_html=True)
             st.dataframe(df_filtrado, use_container_width=True, hide_index=True)
             
             st.markdown("---")
             
             # Downloads
-            st.markdown('<div class="section-title-sim">📥 Downloads</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title-sim">Downloads</div>', unsafe_allow_html=True)
             
             col1, col2, col3 = st.columns(3)
             
@@ -1277,7 +1277,7 @@ with tab3:
                 if len(df_filtrado) > 0:
                     excel_filtrado = formatar_excel_profissional(df_filtrado, "Simulação")
                     st.download_button(
-                        label="📊 Resultado Filtrado",
+                        label="Resultado Filtrado",
                         data=excel_filtrado,
                         file_name="simulador_filtrado.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1287,7 +1287,7 @@ with tab3:
             with col2:
                 excel_completo = formatar_excel_profissional(df_simulacao, "Simulação Completa")
                 st.download_button(
-                    label="📊 Simulação Completa",
+                    label="Simulação Completa",
                     data=excel_completo,
                     file_name="simulador_completo.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1365,7 +1365,7 @@ with tab4:
     # Header do Dashboard
     st.markdown("""
     <div class="dashboard-header">
-        <div class="dashboard-title">📊 Dashboard de Análise</div>
+        <div class="dashboard-title">Dashboard de Análise</div>
         <div class="dashboard-subtitle">Visualize a saúde dos seus produtos e identifique oportunidades</div>
     </div>
     """, unsafe_allow_html=True)
@@ -1374,7 +1374,7 @@ with tab4:
     df_dashboard = st.session_state.resultado_calculadora if 'resultado_calculadora' in st.session_state else None
     
     if df_dashboard is None or len(df_dashboard) == 0:
-        st.info("📥 Carregue um relatório e calcule a precificação para visualizar o dashboard")
+        st.info("Carregue um relatório e calcule a precificação para visualizar o dashboard")
     else:
         try:
             import plotly.graph_objects as go
@@ -1386,7 +1386,7 @@ with tab4:
             curva_counts = df_dashboard['Curva ABC'].value_counts() if 'Curva ABC' in df_dashboard.columns else pd.Series()
             
             # Resumo em cards
-            st.markdown('<div class="section-title">📈 Resumo Geral</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">Resumo Geral</div>', unsafe_allow_html=True)
             
             col1, col2, col3, col4 = st.columns(4)
             
@@ -1399,19 +1399,19 @@ with tab4:
                 """, unsafe_allow_html=True)
             
             with col2:
-                saudaveis_total = len(df_dashboard[df_dashboard['Status'] == '🟢 Saudável']) if 'Status' in df_dashboard.columns else 0
+                saudaveis_total = len(df_dashboard[df_dashboard['Status'] == ' Saudável']) if 'Status' in df_dashboard.columns else 0
                 st.markdown(f"""
                 <div class="metric-card" style="border-top-color: #22C55E;">
-                    <div class="metric-label">🟢 Saudável</div>
+                    <div class="metric-label"> Saudável</div>
                     <div class="metric-value" style="color: #22C55E;">{saudaveis_total}</div>
                 </div>
                 """, unsafe_allow_html=True)
             
             with col3:
-                alerta_total = len(df_dashboard[df_dashboard['Status'] == '🟡 Alerta']) if 'Status' in df_dashboard.columns else 0
+                alerta_total = len(df_dashboard[df_dashboard['Status'] == ' Alerta']) if 'Status' in df_dashboard.columns else 0
                 st.markdown(f"""
                 <div class="metric-card" style="border-top-color: #EAB308;">
-                    <div class="metric-label">🟡 Alerta</div>
+                    <div class="metric-label"> Alerta</div>
                     <div class="metric-value" style="color: #EAB308;">{alerta_total}</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -1420,7 +1420,7 @@ with tab4:
                 prejuizo_total = len(df_dashboard[df_dashboard['Status'].astype(str).str.contains('Prejuízo', na=False)]) if 'Status' in df_dashboard.columns else 0
                 st.markdown(f"""
                 <div class="metric-card" style="border-top-color: #EF4444;">
-                    <div class="metric-label">🔴 Prejuízo</div>
+                    <div class="metric-label"> Prejuízo</div>
                     <div class="metric-value" style="color: #EF4444;">{prejuizo_total}</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -1428,7 +1428,7 @@ with tab4:
             st.markdown("---")
             
             # Gráficos em duas colunas
-            st.markdown('<div class="section-title">📊 Distribuição de Produtos</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">Distribuição de Produtos</div>', unsafe_allow_html=True)
             
             col1, col2 = st.columns(2)
             
@@ -1437,9 +1437,9 @@ with tab4:
                 st.markdown("### Produtos por Status")
                 if len(status_counts) > 0:
                     cores_status = {
-                        '🟢 Saudável': '#22C55E',
-                        '🟡 Alerta': '#EAB308',
-                        '🔴 Prejuízo': '#EF4444'
+                        ' Saudável': '#22C55E',
+                        ' Alerta': '#EAB308',
+                        ' Prejuízo': '#EF4444'
                     }
                     cores = [cores_status.get(str(status), '#999999') for status in status_counts.index]
                     
@@ -1515,7 +1515,7 @@ with tab4:
             st.markdown("---")
             
             # Análise Detalhada por Curva
-            st.markdown('<div class="section-title">🎯 Análise Detalhada por Curva ABC</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">Análise Detalhada por Curva ABC</div>', unsafe_allow_html=True)
             
             if 'Curva ABC' in df_dashboard.columns and 'Status' in df_dashboard.columns:
                 curvas_unicas = df_dashboard['Curva ABC'].unique()
@@ -1536,8 +1536,8 @@ with tab4:
                     
                     df_curva = df_dashboard[df_dashboard['Curva ABC'].astype(str).str.contains(curva_letra, na=False)]
                     
-                    saudaveis_curva = len(df_curva[df_curva['Status'] == '🟢 Saudável'])
-                    alerta_curva = len(df_curva[df_curva['Status'] == '🟡 Alerta'])
+                    saudaveis_curva = len(df_curva[df_curva['Status'] == ' Saudável'])
+                    alerta_curva = len(df_curva[df_curva['Status'] == ' Alerta'])
                     prejuizo_curva = len(df_curva[df_curva['Status'].astype(str).str.contains('Prejuízo', na=False)])
                     
                     col1, col2, col3, col4 = st.columns(4)
@@ -1553,7 +1553,7 @@ with tab4:
                     with col2:
                         st.markdown(f"""
                         <div class="metric-card" style="border-top-color: #22C55E;">
-                            <div class="metric-label">🟢 Saudável</div>
+                            <div class="metric-label"> Saudável</div>
                             <div class="metric-value" style="color: #22C55E;">{saudaveis_curva}</div>
                         </div>
                         """, unsafe_allow_html=True)
@@ -1561,7 +1561,7 @@ with tab4:
                     with col3:
                         st.markdown(f"""
                         <div class="metric-card" style="border-top-color: #EAB308;">
-                            <div class="metric-label">🟡 Alerta</div>
+                            <div class="metric-label"> Alerta</div>
                             <div class="metric-value" style="color: #EAB308;">{alerta_curva}</div>
                         </div>
                         """, unsafe_allow_html=True)
@@ -1569,7 +1569,7 @@ with tab4:
                     with col4:
                         st.markdown(f"""
                         <div class="metric-card" style="border-top-color: #EF4444;">
-                            <div class="metric-label">🔴 Prejuízo</div>
+                            <div class="metric-label"> Prejuízo</div>
                             <div class="metric-value" style="color: #EF4444;">{prejuizo_curva}</div>
                         </div>
                         """, unsafe_allow_html=True)
@@ -1581,13 +1581,13 @@ with tab4:
             st.markdown("---")
             
             # Oportunidades de Ação
-            st.markdown('<div class="section-title">💡 Oportunidades de Ação</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">Oportunidades de Ação</div>', unsafe_allow_html=True)
             
             # Informativo sobre critérios
             st.markdown("""
             <div style="background: rgba(102, 126, 234, 0.1); border-left: 4px solid #667eea; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                 <div style="color: white; font-size: 0.95em; line-height: 1.6;">
-                    <strong>ℹ️ Sobre estas Oportunidades:</strong><br>
+                    <strong>Sobre estas Oportunidades:</strong><br>
                     Produtos exibidos abaixo são da <strong>Curva B e C</strong> com <strong>margem bruta 5% ou mais acima</strong> da margem alvo configurada. 
                     Estes produtos têm potencial para ações diferenciadas como promoções, aumentos de volume ou investimentos em marketing.
                 </div>
@@ -1596,13 +1596,13 @@ with tab4:
             
             oportunidades = df_dashboard[
                 (df_dashboard['Curva ABC'].astype(str).str.contains('B', na=False) | df_dashboard['Curva ABC'].astype(str).str.contains('C', na=False)) &
-                (df_dashboard['Status'] == '🟢 Saudável')
+                (df_dashboard['Status'] == ' Saudável')
             ]
             
             if len(oportunidades) > 0:
                 st.markdown(f"""
                 <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid #22C55E;">
-                    <div style="font-size: 1.2em; font-weight: 700; color: #155724;">✓ {len(oportunidades)} Oportunidades Encontradas</div>
+                    <div style="font-size: 1.2em; font-weight: 700; color: #155724;"> {len(oportunidades)} Oportunidades Encontradas</div>
                     <div style="color: #155724; margin-top: 5px;">Produtos da Curva B e C com margens saudáveis - Potencial para ações diferenciadas</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -1638,7 +1638,7 @@ with tab4:
                     
                     buffer.seek(0)
                     st.download_button(
-                        label="📥 Baixar Oportunidades em Excel",
+                        label="Baixar Oportunidades em Excel",
                         data=buffer,
                         file_name=f"oportunidades_curva_bc.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1647,7 +1647,7 @@ with tab4:
             else:
                 st.markdown("""
                 <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #EAB308;">
-                    <div style="font-size: 1.1em; font-weight: 700; color: #856404;">⚠️ Nenhuma Oportunidade Encontrada</div>
+                    <div style="font-size: 1.1em; font-weight: 700; color: #856404;"> Nenhuma Oportunidade Encontrada</div>
                     <div style="color: #856404; margin-top: 5px;">Todos os produtos Curva B e C estão em Alerta ou Prejuízo. Revise suas estratégias de preço.</div>
                 </div>
                 """, unsafe_allow_html=True)
