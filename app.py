@@ -538,133 +538,294 @@ tab1, tab2, tab3, tab4 = st.tabs(["🏠 Home", "🧮 Calculadora de Precificaç�
 
 # ============ ABA 1: HOME ============
 with tab1:
-    st.markdown('<div class="main-header">💰 Precifica-o</div>', unsafe_allow_html=True)
-    st.markdown("**Gestão Completa de Preços, Margens e Análise de Oportunidades**")
+    # CSS personalizado para melhor visual
+    st.markdown("""
+    <style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px 20px;
+        border-radius: 15px;
+        color: white;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .hero-title {
+        font-size: 2.5em;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    .hero-subtitle {
+        font-size: 1.1em;
+        opacity: 0.9;
+    }
+    .feature-card {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        border-left: 5px solid #667eea;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    .feature-card:hover {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    .feature-title {
+        font-size: 1.3em;
+        font-weight: 600;
+        color: #667eea;
+        margin-bottom: 10px;
+    }
+    .step-number {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 40px;
+        font-weight: 700;
+        margin-right: 15px;
+        font-size: 1.1em;
+    }
+    .benefit-list {
+        list-style: none;
+        padding: 0;
+    }
+    .benefit-list li {
+        padding: 12px 0;
+        padding-left: 35px;
+        position: relative;
+        line-height: 1.6;
+    }
+    .benefit-list li:before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #667eea;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Hero Section
+    st.markdown("""
+    <div class="hero-section">
+        <div class="hero-title">💰 Precifica-o</div>
+        <div class="hero-subtitle">Gestão Inteligente de Preços, Margens e Oportunidades</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Resumo rápido em 3 colunas
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div class="feature-card">
+            <div style="font-size: 2.5em; margin-bottom: 10px;">📊</div>
+            <div class="feature-title">Análise Completa</div>
+            <p>Cálculos precisos de custos, margens e rentabilidade em tempo real</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="feature-card">
+            <div style="font-size: 2.5em; margin-bottom: 10px;">🎯</div>
+            <div class="feature-title">Oportunidades</div>
+            <p>Identifique produtos com potencial de crescimento e ação</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div class="feature-card">
+            <div style="font-size: 2.5em; margin-bottom: 10px;">📈</div>
+            <div class="feature-title">Relatórios</div>
+            <p>Exportação profissional em Excel com análises visuais</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
     st.markdown("---")
     
-    st.markdown("""
-    ## Como Usar o Precifica-o
+    # Seção: Como Funciona
+    st.markdown("## 🚀 Como Funciona")
     
-    O **Precifica-o** é uma ferramenta completa para gestão inteligente de preços, margens e análise de oportunidades em múltiplos marketplaces.
+    col1, col2 = st.columns([1, 2])
     
-    ### 📋 Fluxo de Uso
+    with col1:
+        st.markdown("""
+        <div class="feature-card">
+            <span class="step-number">1</span>
+            <div class="feature-title">Configurar</div>
+            <p>Defina marketplaces, regimes e margens na sidebar</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="feature-card">
+            <span class="step-number">2</span>
+            <div class="feature-title">Carregar</div>
+            <p>Importe seu relatório de produtos</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="feature-card">
+            <span class="step-number">3</span>
+            <div class="feature-title">Calcular</div>
+            <p>Análise automática de precificação</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="feature-card">
+            <span class="step-number">4</span>
+            <div class="feature-title">Simular</div>
+            <p>Teste preços e margens</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="feature-card">
+            <span class="step-number">5</span>
+            <div class="feature-title">Analisar</div>
+            <p>Veja oportunidades no dashboard</p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    #### Passo 1: Configurar Parâmetros (Sidebar)
-    Na barra lateral esquerda, configure:
+    with col2:
+        st.markdown("""
+        ### Funcionalidades Principais
+        
+        <ul class="benefit-list">
+            <li><strong>Múltiplos Marketplaces:</strong> Mercado Livre, Shopee, Amazon e mais</li>
+            <li><strong>Cálculos Precisos:</strong> Comissões, impostos, frete, publicidade</li>
+            <li><strong>Análise ABC:</strong> Classificação automática por faturamento</li>
+            <li><strong>Status de Saúde:</strong> Identifique produtos saudáveis, em alerta ou prejuízo</li>
+            <li><strong>Oportunidades:</strong> Produtos B e C com potencial de crescimento</li>
+            <li><strong>Simulador:</strong> Teste diferentes margens e preços</li>
+            <li><strong>Relatórios:</strong> Exporte dados em Excel profissional</li>
+            <li><strong>Dashboard:</strong> Visualizações interativas e análises detalhadas</li>
+        </ul>
+        """, unsafe_allow_html=True)
     
-    **Marketplaces**
-    - Defina a comissão (%) e taxa fixa (R$) para cada marketplace
-    - Padrões: Mercado Livre, Shopee, Amazon
+    st.markdown("---")
     
-    **Regimes Tributários**
-    - Configure IBS, CBS e Impostos/Encargos para cada regime
-    - Aplicável conforme sua categoria de produto
+    # Seção: Status de Saúde
+    st.markdown("## 🎯 Status de Saúde dos Produtos")
     
-    **Margens e Publicidade**
-    - Margem Bruta Alvo: Meta de margem para produtos saudáveis
-    - Margem Líquida Mínima: Limite mínimo aceitável
-    - Percentual de Publicidade: Estimativa de gasto com anúncios
+    col1, col2, col3 = st.columns(3)
     
-    **Custos Operacionais**
-    - Custo Fixo Operacional: Percentual de custos fixos
-    - Taxa de Devoluções e Trocas: Estimativa de perdas
+    with col1:
+        st.markdown("""
+        <div class="feature-card">
+            <div style="font-size: 2em; margin-bottom: 10px;">🟢</div>
+            <div class="feature-title">Saudável</div>
+            <p><strong>Margem ≥ Alvo</strong></p>
+            <p style="font-size: 0.9em; color: #666;">Boa rentabilidade. Mantenha ou aumente volume.</p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    #### Passo 2: Carregar Relatório (Sidebar)
-    - Baixe o modelo de planilha fornecido
-    - Preencha com seus dados:
-      - **SKU/MLB**: Identificador do produto
-      - **Título**: Nome do produto
-      - **Custo Produto (R$)**: Custo de aquisição
-      - **Frete (R$)**: Custo de frete
-      - **Preço Atual (R$)**: Preço de venda atual
-      - **Tipo de Anúncio**: Clássico ou Premium (Mercado Livre)
-      - **Quantidade Vendida**: Quantidade vendida (para Curva ABC)
-    - Faça upload do arquivo CSV ou Excel
+    with col2:
+        st.markdown("""
+        <div class="feature-card">
+            <div style="font-size: 2em; margin-bottom: 10px;">🟡</div>
+            <div class="feature-title">Alerta</div>
+            <p><strong>Alvo > Margem ≥ Mínima</strong></p>
+            <p style="font-size: 0.9em; color: #666;">Rentabilidade aceitável. Monitore custos.</p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    #### Passo 3: Calculadora de Precificação
-    - Selecione o Marketplace e Regime Tributário
-    - O sistema calcula automaticamente:
-      - Comissões e taxas do marketplace
-      - Impostos e encargos
-      - Custos de publicidade
-      - Lucro e margens
-      - Status de saúde do produto
-      - Classificação ABC (baseada em faturamento)
-    - Filtre por SKU, Status, Tipo de Anúncio ou Curva ABC
-    - Exporte os resultados em Excel
+    with col3:
+        st.markdown("""
+        <div class="feature-card">
+            <div style="font-size: 2em; margin-bottom: 10px;">🔴</div>
+            <div class="feature-title">Prejuízo</div>
+            <p><strong>Margem < Mínima</strong></p>
+            <p style="font-size: 0.9em; color: #666;">Rentabilidade insuficiente. Revise preço.</p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    #### Passo 4: Simulador de Preço Alvo
-    - Defina a margem desejada
-    - O sistema calcula o preço de venda necessário
-    - Compare com preço atual e veja o impacto no lucro
-    - Simule preços promocionais com desconto
-    - Analise o retorno esperado
+    st.markdown("---")
     
-    #### Passo 5: Dashboard de Análise
-    - Visualize a distribuição de produtos por Status
-    - Veja a distribuição por Curva ABC
-    - Análise detalhada: para cada Curva, quantos produtos em cada Status
-    - Identifique Oportunidades de Ação:
-      - Produtos da Curva B e C com margens saudáveis
-      - Potencial para ações promocionais
-      - Baixe a lista de oportunidades em Excel
+    # Seção: Curva ABC
+    st.markdown("## 📊 Classificação ABC")
     
-    ---
+    col1, col2, col3 = st.columns(3)
     
-    ## O Que o App Entrega
+    with col1:
+        st.markdown("""
+        <div class="feature-card">
+            <div style="font-size: 2em; margin-bottom: 10px;">🔵</div>
+            <div class="feature-title">Curva A</div>
+            <p><strong>80% do faturamento</strong></p>
+            <p style="font-size: 0.9em; color: #666;">Produtos principais. Máxima atenção.</p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    ### Cálculos Precisos
-    - Análise completa de custos (comissões, impostos, frete, publicidade)
-    - Cálculo automático de margens bruta e líquida
-    - Determinação de status de saúde de cada produto
-    - Suporte a múltiplos marketplaces (Mercado Livre, Shopee, Amazon)
+    with col2:
+        st.markdown("""
+        <div class="feature-card">
+            <div style="font-size: 2em; margin-bottom: 10px;">🟡</div>
+            <div class="feature-title">Curva B</div>
+            <p><strong>15% do faturamento</strong></p>
+            <p style="font-size: 0.9em; color: #666;">Produtos secundários. Oportunidades.</p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    ### Análise ABC
-    - Classificação automática baseada em faturamento
-    - Curva A: 80% do faturamento (produtos principais)
-    - Curva B: 15% do faturamento (produtos secundários)
-    - Curva C: 5% do faturamento (produtos de baixa relevância)
+    with col3:
+        st.markdown("""
+        <div class="feature-card">
+            <div style="font-size: 2em; margin-bottom: 10px;">🔴</div>
+            <div class="feature-title">Curva C</div>
+            <p><strong>5% do faturamento</strong></p>
+            <p style="font-size: 0.9em; color: #666;">Produtos de baixa relevância.</p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    ### Inteligência de Oportunidades
-    - Identifica produtos com potencial de crescimento
-    - Produtos Curva B e C com margens saudáveis
-    - Sugestões para ações promocionais
-    - Exportação de oportunidades para ação
+    st.markdown("---")
     
-    ### Relatórios Profissionais
-    - Exportação em Excel com formatação profissional
-    - Gráficos interativos (Plotly)
-    - Análise visual de distribuições
-    - Dados estruturados para tomada de decisão
+    # Dicas de Uso
+    st.markdown("## 💡 Dicas para Melhor Aproveitar")
     
-    ---
+    col1, col2 = st.columns(2)
     
-    ## Status de Saúde dos Produtos
+    with col1:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-title">✓ Comece pela Configuração</div>
+            <p>Dedique tempo para configurar corretamente os parâmetros de marketplaces e margens.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-title">✓ Use o Modelo</div>
+            <p>Baixe e use o modelo de planilha fornecido para garantir dados corretos.</p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    - **🟢 Saudável**: Margem bruta >= Margem Alvo
-      - Produto com boa rentabilidade
-      - Recomendação: Manter ou aumentar volume
-    
-    - **🟡 Alerta**: Margem bruta entre Alvo e Mínima
-      - Produto com rentabilidade aceitável
-      - Recomendação: Monitorar custos e competição
-    
-    - **🔴 Prejuízo**: Margem bruta < Margem Mínima
-      - Produto com rentabilidade insuficiente
-      - Recomendação: Revisar preço, custos ou descontinuar
-    
-    ---
-    
-    ## Dicas de Uso
-    
-    1. **Comece pela Configuração**: Dedique tempo para configurar corretamente os parâmetros
-    2. **Use o Modelo**: Baixe e use o modelo de planilha fornecido
-    3. **Valide os Dados**: Certifique-se de que os dados de entrada estão corretos
-    4. **Analise o Dashboard**: Use o dashboard para identificar padrões e oportunidades
-    5. **Exporte Regularmente**: Mantenha histórico de análises para acompanhar tendências
-    """)
+    with col2:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-title">✓ Analise o Dashboard</div>
+            <p>Use o dashboard para identificar padrões e oportunidades de crescimento.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-title">✓ Exporte Regularmente</div>
+            <p>Mantenha histórico de análises para acompanhar tendências ao longo do tempo.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # ============ ABA 2: CALCULADORA ============
+
+# ============ ABA 2: CALCULADORA ============
 with tab2:
     st.markdown('<div class="section-header">Calculadora de Precificação</div>', unsafe_allow_html=True)
     
@@ -994,17 +1155,80 @@ with tab3:
 
 # ============ ABA 4: DASHBOARD ============
 with tab4:
-    st.markdown("### Dashboard de Análise")
+    # CSS para Dashboard
+    st.markdown("""
+    <style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 30px 20px;
+        border-radius: 12px;
+        color: white;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .dashboard-title {
+        font-size: 2em;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    .dashboard-subtitle {
+        font-size: 0.95em;
+        opacity: 0.9;
+    }
+    .metric-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        border-top: 4px solid #667eea;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        text-align: center;
+    }
+    .metric-value {
+        font-size: 2em;
+        font-weight: 700;
+        color: #667eea;
+        margin: 10px 0;
+    }
+    .metric-label {
+        font-size: 0.9em;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .chart-container {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+    }
+    .section-title {
+        font-size: 1.3em;
+        font-weight: 700;
+        color: #333;
+        margin: 30px 0 20px 0;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #667eea;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Header do Dashboard
+    st.markdown("""
+    <div class="dashboard-header">
+        <div class="dashboard-title">📊 Dashboard de Análise</div>
+        <div class="dashboard-subtitle">Visualize a saúde dos seus produtos e identifique oportunidades</div>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Obter dados da calculadora do session_state
     df_dashboard = st.session_state.resultado_calculadora if 'resultado_calculadora' in st.session_state else None
     
     if df_dashboard is None or len(df_dashboard) == 0:
-        st.info("Carregue um relatório e calcule a precificação para visualizar o dashboard")
+        st.info("📥 Carregue um relatório e calcule a precificação para visualizar o dashboard")
     else:
         try:
             import plotly.graph_objects as go
-            
             
             # Contar produtos por status
             status_counts = df_dashboard['Status'].value_counts() if 'Status' in df_dashboard.columns else pd.Series()
@@ -1012,11 +1236,56 @@ with tab4:
             # Contar produtos por curva ABC
             curva_counts = df_dashboard['Curva ABC'].value_counts() if 'Curva ABC' in df_dashboard.columns else pd.Series()
             
+            # Resumo em cards
+            st.markdown('<div class="section-title">📈 Resumo Geral</div>', unsafe_allow_html=True)
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-label">Total de Produtos</div>
+                    <div class="metric-value">{len(df_dashboard)}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                saudaveis_total = len(df_dashboard[df_dashboard['Status'] == '🟢 Saudável']) if 'Status' in df_dashboard.columns else 0
+                st.markdown(f"""
+                <div class="metric-card" style="border-top-color: #22C55E;">
+                    <div class="metric-label">🟢 Saudável</div>
+                    <div class="metric-value" style="color: #22C55E;">{saudaveis_total}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col3:
+                alerta_total = len(df_dashboard[df_dashboard['Status'] == '🟡 Alerta']) if 'Status' in df_dashboard.columns else 0
+                st.markdown(f"""
+                <div class="metric-card" style="border-top-color: #EAB308;">
+                    <div class="metric-label">🟡 Alerta</div>
+                    <div class="metric-value" style="color: #EAB308;">{alerta_total}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col4:
+                prejuizo_total = len(df_dashboard[df_dashboard['Status'].astype(str).str.contains('Prejuízo', na=False)]) if 'Status' in df_dashboard.columns else 0
+                st.markdown(f"""
+                <div class="metric-card" style="border-top-color: #EF4444;">
+                    <div class="metric-label">🔴 Prejuízo</div>
+                    <div class="metric-value" style="color: #EF4444;">{prejuizo_total}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown("---")
+            
             # Gráficos em duas colunas
+            st.markdown('<div class="section-title">📊 Distribuição de Produtos</div>', unsafe_allow_html=True)
+            
             col1, col2 = st.columns(2)
             
             with col1:
-                st.markdown("**Produtos por Status**")
+                st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+                st.markdown("### Produtos por Status")
                 if len(status_counts) > 0:
                     cores_status = {
                         '🟢 Saudável': '#22C55E',
@@ -1028,31 +1297,32 @@ with tab4:
                     fig_status = go.Figure(data=[go.Pie(
                         labels=[str(label) for label in status_counts.index],
                         values=status_counts.values,
-                        marker=dict(colors=cores, line=dict(color='#000000', width=2)),
+                        marker=dict(colors=cores, line=dict(color='white', width=2)),
                         textposition='auto',
                         textinfo='label+percent',
                         hoverinfo='label+value+percent'
                     )])
                     fig_status.update_layout(
-                        height=400,
+                        height=350,
                         margin=dict(l=0, r=0, t=0, b=0),
                         showlegend=True,
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
-                        font=dict(color='#FFFFFF', size=12)
+                        font=dict(color='#333', size=11)
                     )
                     st.plotly_chart(fig_status, use_container_width=True)
                 else:
                     st.info("Sem dados de status")
+                st.markdown('</div>', unsafe_allow_html=True)
             
             with col2:
-                st.markdown("**Produtos por Curva ABC**")
+                st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+                st.markdown("### Produtos por Curva ABC")
                 if len(curva_counts) > 0:
-                    # Mapear cores - aceitar tanto "A" quanto "Curva A"
                     cores_curva = {
-                        'A': '#0066FF',  # Azul real
-                        'B': '#FFFF99',  # Amarelo claro
-                        'C': '#FF9999',  # Vermelho claro
+                        'A': '#0066FF',
+                        'B': '#FFFF99',
+                        'C': '#FF9999',
                         'Curva A': '#0066FF',
                         'Curva B': '#FFFF99',
                         'Curva C': '#FF9999'
@@ -1062,30 +1332,30 @@ with tab4:
                     fig_curva = go.Figure(data=[go.Pie(
                         labels=[str(label) for label in curva_counts.index],
                         values=curva_counts.values,
-                        marker=dict(colors=cores, line=dict(color='#000000', width=2)),
+                        marker=dict(colors=cores, line=dict(color='white', width=2)),
                         textposition='auto',
                         textinfo='label+percent',
                         hoverinfo='label+value+percent'
                     )])
                     fig_curva.update_layout(
-                        height=400,
+                        height=350,
                         margin=dict(l=0, r=0, t=0, b=0),
                         showlegend=True,
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
-                        font=dict(color='#FFFFFF', size=12)
+                        font=dict(color='#333', size=11)
                     )
                     st.plotly_chart(fig_curva, use_container_width=True)
                 else:
                     st.info("Sem dados de Curva ABC")
+                st.markdown('</div>', unsafe_allow_html=True)
             
             st.markdown("---")
             
-            # Métricas detalhadas: Curva ABC cruzada com Status
-            st.markdown("**Análise Detalhada por Curva ABC**")
+            # Análise Detalhada por Curva
+            st.markdown('<div class="section-title">🎯 Análise Detalhada por Curva ABC</div>', unsafe_allow_html=True)
             
             if 'Curva ABC' in df_dashboard.columns and 'Status' in df_dashboard.columns:
-                # Normalizar nomes de curva (aceitar "A" ou "Curva A")
                 curvas_unicas = df_dashboard['Curva ABC'].unique()
                 curvas_normalizadas = []
                 for c in curvas_unicas:
@@ -1098,27 +1368,49 @@ with tab4:
                         curvas_normalizadas.append(str(c))
                 
                 curvas = sorted(set(curvas_normalizadas))
+                
                 for curva in curvas:
-                    # Extrair apenas a letra (A, B ou C)
                     curva_letra = curva.replace('Curva ', '').strip()
-                    st.markdown(f"**Curva {curva_letra}**")
-                    col1, col2, col3 = st.columns(3)
                     
-                    # Filtrar por qualquer variação do nome da curva
                     df_curva = df_dashboard[df_dashboard['Curva ABC'].astype(str).str.contains(curva_letra, na=False)]
                     
+                    saudaveis_curva = len(df_curva[df_curva['Status'] == '🟢 Saudável'])
+                    alerta_curva = len(df_curva[df_curva['Status'] == '🟡 Alerta'])
+                    prejuizo_curva = len(df_curva[df_curva['Status'].astype(str).str.contains('Prejuízo', na=False)])
+                    
+                    col1, col2, col3, col4 = st.columns(4)
+                    
                     with col1:
-                        saudaveis_curva = len(df_curva[df_curva['Status'] == '🟢 Saudável'])
-                        st.metric(f"Saudável", saudaveis_curva, delta=None)
+                        st.markdown(f"""
+                        <div class="metric-card">
+                            <div class="metric-label">Curva {curva_letra}</div>
+                            <div class="metric-value">{len(df_curva)}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
                     
                     with col2:
-                        alerta_curva = len(df_curva[df_curva['Status'] == '🟡 Alerta'])
-                        st.metric(f"Alerta", alerta_curva, delta=None)
+                        st.markdown(f"""
+                        <div class="metric-card" style="border-top-color: #22C55E;">
+                            <div class="metric-label">🟢 Saudável</div>
+                            <div class="metric-value" style="color: #22C55E;">{saudaveis_curva}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
                     
                     with col3:
-                        # Aceitar tanto "Prejuízo" quanto "Prejuízo/Abaixo"
-                        prejuizo_curva = len(df_curva[df_curva['Status'].astype(str).str.contains('Prejuízo', na=False)])
-                        st.metric(f"Prejuízo", prejuizo_curva, delta=None)
+                        st.markdown(f"""
+                        <div class="metric-card" style="border-top-color: #EAB308;">
+                            <div class="metric-label">🟡 Alerta</div>
+                            <div class="metric-value" style="color: #EAB308;">{alerta_curva}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    
+                    with col4:
+                        st.markdown(f"""
+                        <div class="metric-card" style="border-top-color: #EF4444;">
+                            <div class="metric-label">🔴 Prejuízo</div>
+                            <div class="metric-value" style="color: #EF4444;">{prejuizo_curva}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
                     
                     st.markdown("")
             else:
@@ -1126,21 +1418,21 @@ with tab4:
             
             st.markdown("---")
             
-            # Seção de Oportunidades
-            st.markdown("**Oportunidades de Acao**")
+            # Oportunidades de Ação
+            st.markdown('<div class="section-title">💡 Oportunidades de Ação</div>', unsafe_allow_html=True)
             
-            # Filtrar produtos Curva B e C que estão Saudáveis
-            # Aceitar tanto "B" quanto "Curva B", e "C" quanto "Curva C"
             oportunidades = df_dashboard[
                 (df_dashboard['Curva ABC'].astype(str).str.contains('B', na=False) | df_dashboard['Curva ABC'].astype(str).str.contains('C', na=False)) &
                 (df_dashboard['Status'] == '🟢 Saudável')
             ]
             
             if len(oportunidades) > 0:
-                st.success(f"Encontradas {len(oportunidades)} oportunidades de acao")
-                
-                # Exibir informações das oportunidades
-                st.markdown("**Produtos com Potencial para Acao Diferenciada**")
+                st.markdown(f"""
+                <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid #22C55E;">
+                    <div style="font-size: 1.2em; font-weight: 700; color: #155724;">✓ {len(oportunidades)} Oportunidades Encontradas</div>
+                    <div style="color: #155724; margin-top: 5px;">Produtos da Curva B e C com margens saudáveis - Potencial para ações diferenciadas</div>
+                </div>
+                """, unsafe_allow_html=True)
                 
                 # Colunas para exibir
                 colunas_oportunidade = []
@@ -1173,16 +1465,19 @@ with tab4:
                     
                     buffer.seek(0)
                     st.download_button(
-                        label="Baixar Oportunidades em Excel",
+                        label="📥 Baixar Oportunidades em Excel",
                         data=buffer,
                         file_name=f"oportunidades_curva_bc.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         key="btn_download_oportunidades"
                     )
             else:
-                st.info("Nenhuma oportunidade encontrada. Todos os produtos Curva B e C estao em Alerta ou Prejuizo.")
+                st.markdown("""
+                <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); padding: 20px; border-radius: 12px; border-left: 5px solid #EAB308;">
+                    <div style="font-size: 1.1em; font-weight: 700; color: #856404;">⚠️ Nenhuma Oportunidade Encontrada</div>
+                    <div style="color: #856404; margin-top: 5px;">Todos os produtos Curva B e C estão em Alerta ou Prejuízo. Revise suas estratégias de preço.</div>
+                </div>
+                """, unsafe_allow_html=True)
         
         except Exception as e:
             st.error(f"Erro ao gerar dashboard: {str(e)}")
-            st.error(f"Erro ao gerar dashboard: {str(e)}")
-
