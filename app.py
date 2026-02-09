@@ -962,9 +962,9 @@ with tab4:
                 st.markdown("**Produtos por Curva ABC**")
                 if len(curva_counts) > 0:
                     cores_curva = {
-                        'A': '#556B2F',
-                        'B': '#6B8E23',
-                        'C': '#8FBC8F'
+                        'A': '#0066FF',  # Azul real
+                        'B': '#FFFF99',  # Amarelo claro
+                        'C': '#FF9999'   # Vermelho claro
                     }
                     cores = [cores_curva.get(str(curva), '#999999') for curva in curva_counts.index]
                     
@@ -993,26 +993,29 @@ with tab4:
             # Métricas detalhadas: Curva ABC cruzada com Status
             st.markdown("**Análise Detalhada por Curva ABC**")
             
-            curvas = ['A', 'B', 'C']
-            for curva in curvas:
-                st.markdown(f"**Curva {curva}**")
-                col1, col2, col3 = st.columns(3)
-                
-                df_curva = df_dashboard[df_dashboard['Curva ABC'] == curva] if 'Curva ABC' in df_dashboard.columns else pd.DataFrame()
-                
-                with col1:
-                    saudaveis_curva = len(df_curva[df_curva['Status'] == '🟢 Saudável']) if 'Status' in df_curva.columns else 0
-                    st.metric(f"Saudável", saudaveis_curva, delta=None)
-                
-                with col2:
-                    alerta_curva = len(df_curva[df_curva['Status'] == '🟡 Alerta']) if 'Status' in df_curva.columns else 0
-                    st.metric(f"Alerta", alerta_curva, delta=None)
-                
-                with col3:
-                    prejuizo_curva = len(df_curva[df_curva['Status'] == '🔴 Prejuízo']) if 'Status' in df_curva.columns else 0
-                    st.metric(f"Prejuízo", prejuizo_curva, delta=None)
-                
-                st.markdown("")
+            if 'Curva ABC' in df_dashboard.columns and 'Status' in df_dashboard.columns:
+                curvas = ['A', 'B', 'C']
+                for curva in curvas:
+                    st.markdown(f"**Curva {curva}**")
+                    col1, col2, col3 = st.columns(3)
+                    
+                    df_curva = df_dashboard[df_dashboard['Curva ABC'] == curva]
+                    
+                    with col1:
+                        saudaveis_curva = len(df_curva[df_curva['Status'] == '🟢 Saudável'])
+                        st.metric(f"Saudável", saudaveis_curva, delta=None)
+                    
+                    with col2:
+                        alerta_curva = len(df_curva[df_curva['Status'] == '🟡 Alerta'])
+                        st.metric(f"Alerta", alerta_curva, delta=None)
+                    
+                    with col3:
+                        prejuizo_curva = len(df_curva[df_curva['Status'] == '🔴 Prejuízo'])
+                        st.metric(f"Prejuízo", prejuizo_curva, delta=None)
+                    
+                    st.markdown("")
+            else:
+                st.info("Colunas 'Curva ABC' ou 'Status' não encontradas nos dados")
             
             st.markdown("---")
             
