@@ -14,51 +14,70 @@ class MercadoLivreProcessor:
     def normalizar_relatorio_vendas(df):
         """
         Normaliza relatório de vendas do Mercado Livre
-        Aceita formato simples com colunas: SKU/MLB, Titulo, Custo Produto, Frete, Preço Atual, Tipo de Anúncio (opcional)
+        Aceita formato simples com colunas: SKU/MLB, Titulo, Custo Produto, Frete, Preço Atual, Tipo de Anúncio (opcional), Quantidade Vendida (opcional)
         
         Args:
             df: DataFrame com dados brutos do Mercado Livre
             
         Returns:
-            DataFrame normalizado com colunas: SKU, Descrição, Custo Produto, Frete, Preço Atual, Tipo de Anúncio
+            DataFrame normalizado com colunas: SKU, Descrição, Custo Produto, Frete, Preço Atual, Tipo de Anúncio, Quantidade Vendida
         """
         df = df.copy()
         
-        # Mapeamento de colunas possíveis
+        # Debug: Mostrar colunas originais
+        print(f"Colunas originais: {df.columns.tolist()}")
+        
+        # Mapeamento de colunas possíveis - EXATO E FLEXÍVEL
         mapeamento_colunas = {
+            # SKU
             "sku/mlb": "SKU",
             "sku": "SKU",
             "mlb": "SKU",
+            "col a": "SKU",
+            # Título/Descrição
             "titulo": "Descrição",
             "título": "Descrição",
             "title": "Descrição",
             "product": "Descrição",
+            "col b": "Descrição",
+            # Custo Produto
             "custo produto (r$)": "Custo Produto",
             "custo produto": "Custo Produto",
             "custo": "Custo Produto",
             "cost": "Custo Produto",
+            "col c": "Custo Produto",
+            # Frete
             "frete (r$)": "Frete",
             "frete": "Frete",
             "shipping": "Frete",
+            "col d": "Frete",
+            # Preço Atual
             "preço atual (r$)": "Preço Atual",
             "preço atual": "Preço Atual",
             "preço": "Preço Atual",
             "price": "Preço Atual",
             "current price": "Preço Atual",
+            "col e": "Preço Atual",
+            # Tipo de Anúncio
             "tipo de anúncio": "Tipo de Anúncio",
             "tipo de anuncio": "Tipo de Anúncio",
             "ad type": "Tipo de Anúncio",
             "anuncio": "Tipo de Anúncio",
+            "col f": "Tipo de Anúncio",
+            # Quantidade Vendida
             "quantidade vendida": "Quantidade Vendida",
             "quantidade": "Quantidade Vendida",
             "quantity": "Quantidade Vendida",
             "vendas": "Quantidade Vendida",
             "sales": "Quantidade Vendida",
+            "col g": "Quantidade Vendida",
         }
         
         # Normalizar nomes de colunas
         df.columns = df.columns.str.lower().str.strip()
         df = df.rename(columns=mapeamento_colunas)
+        
+        print(f"Colunas após mapeamento: {df.columns.tolist()}")
         
         # Adicionar coluna Tipo de Anúncio se não existir
         if "Tipo de Anúncio" not in df.columns:
@@ -115,6 +134,8 @@ class MercadoLivreProcessor:
         if "Quantidade Vendida" in df.columns:
             df["Quantidade Vendida"] = pd.to_numeric(df["Quantidade Vendida"], errors="coerce").fillna(0).astype(int)
         
+        print(f"Quantidade Vendida após conversão: {df['Quantidade Vendida'].tolist()[:5]}")
+        
         # Selecionar apenas as colunas necessárias
         colunas_selecionadas = ["SKU", "Descrição", "Custo Produto", "Frete", "Preço Atual", "Tipo de Anúncio"]
         if "Quantidade Vendida" in df.columns:
@@ -142,6 +163,10 @@ class MercadoLivreProcessor:
             "Tipo de Anúncio": "first",
         }
         
+        # Adicionar Quantidade Vendida se existir
+        if "Quantidade Vendida" in df.columns:
+            agg_dict["Quantidade Vendida"] = "sum"  # Somar quantidade vendida
+        
         df_agg = df.groupby("SKU").agg(agg_dict).reset_index()
         
         return df_agg
@@ -149,60 +174,31 @@ class MercadoLivreProcessor:
     @staticmethod
     def validar_relatorio(df):
         """
-        Valida se o relatório tem dados suficientes
+        Valida se o relatório tem as colunas necessárias
         
         Args:
             df: DataFrame com dados de vendas
             
         Returns:
-            tuple (bool, str) com resultado e mensagem
+            Tupla (válido, mensagem)
         """
-        if df.empty:
+        colunas_obrigatorias = ["SKU", "Descrição", "Custo Produto", "Frete", "Preço Atual"]
+        
+        for col in colunas_obrigatorias:
+            if col not in df.columns:
+                return False, f"Coluna '{col}' não encontrada"
+        
+        if len(df) == 0:
             return False, "Relatório vazio"
-        
-        if "SKU" not in df.columns:
-            return False, "Relatório deve conter coluna 'SKU'"
-        
-        if "Preço Atual" not in df.columns:
-            return False, "Relatório deve conter coluna 'Preço Atual'"
         
         return True, "Relatório válido"
 
     @staticmethod
-    def carregar_de_excel(file_path, sheet_name=0):
-        """
-        Carrega dados de arquivo Excel
-        
-        Args:
-            file_path: Caminho do arquivo
-            sheet_name: Nome ou índice da aba
-            
-        Returns:
-            DataFrame com dados
-        """
-        try:
-            df = pd.read_excel(file_path, sheet_name=sheet_name)
-            if len(df) > 0:
-                return df
-        except Exception as e:
-            raise ValueError(f"Erro ao carregar arquivo Excel: {str(e)}")
+    def carregar_de_excel(arquivo):
+        """Carrega dados de arquivo Excel"""
+        return pd.read_excel(arquivo)
 
     @staticmethod
-    def carregar_de_csv(file_path, encoding="utf-8"):
-        """
-        Carrega dados de arquivo CSV
-        
-        Args:
-            file_path: Caminho do arquivo
-            encoding: Codificação do arquivo
-            
-        Returns:
-            DataFrame com dados
-        """
-        try:
-            return pd.read_csv(file_path, encoding=encoding)
-        except:
-            try:
-                return pd.read_csv(file_path, encoding="latin-1")
-            except:
-                return pd.read_csv(file_path, encoding="iso-8859-1")
+    def carregar_de_csv(arquivo):
+        """Carrega dados de arquivo CSV"""
+        return pd.read_csv(arquivo)
