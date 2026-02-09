@@ -19,7 +19,7 @@ class PromotionExporter:
     COLUMN_SYNONYMS = {
         "id": ["sku", "mlb", "id do produto", "id_produto", "product_id", "item_id", "codigo", "product id", "item id"],
         "descricao": ["descricao", "titulo", "nome do produto", "nome_produto", "product_name", "name", "product name"],
-        "preco": ["preco", "price", "valor", "valor_venda", "preco_venda", "valor venda", "preco venda"]
+        "preco": ["preco", "price", "valor", "valor_venda", "preco_venda", "valor venda", "preco venda", "preco sugerido", "preço sugerido", "preco limite", "preço limite", "preco promo limite", "preço promo limite"]
     }
     
     # Templates de colunas por marketplace
