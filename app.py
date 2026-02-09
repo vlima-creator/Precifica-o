@@ -1600,8 +1600,11 @@ with tab4:
             
             oportunidades = df_dashboard[
                 (df_dashboard['Curva ABC'].astype(str).str.contains('B', na=False) | df_dashboard['Curva ABC'].astype(str).str.contains('C', na=False)) &
-                (df_dashboard['Status'] == '🟢 Saudável')
+                (df_dashboard['Status'] == '🟢 Saudavel')
             ]
+            
+            # Armazenar oportunidades em session_state para uso na aba de Estrategias Promocionais
+            st.session_state.lista_oportunidades = oportunidades.copy()
             
             if len(oportunidades) > 0:
                 st.markdown(f"""
@@ -1800,23 +1803,26 @@ with tab5:
         if st.button("Processar e Visualizar", use_container_width=True, key="btn_promo_processar"):
             try:
                 with st.spinner("⏳ Processando dados..."):
-                    # Usar dados do Dashboard (resultado_calculadora) que ja tem Status e Curva ABC
-                    df_base = st.session_state.get("resultado_calculadora", None)
-                    
-                    if df_base is None:
-                        st.error("Erro: Nenhum dado de Dashboard disponivel. Carregue um relatorio e calcule a precificacao primeiro.")
-                        st.stop()
-                    
-                    # Inicializar exportador com o marketplace selecionado
-                    exporter = PromotionExporter(marketplace=marketplace_selecionado)
-                    
-                    # Filtrar dados (sincronizado com Dashboard)
-                    df_filtrado = exporter.filtrar_por_categoria(
-                        df_base,
-                        categoria=categoria_filtro,
-                        margem_minima=margem_minima,
-                        margem_alvo=st.session_state.get("slider_margem_bruta", 30.0)
-                    )
+                    # Se for oportunidade, usar a lista ja calculada no Dashboard
+                    if categoria_filtro == "oportunidade":
+                        df_filtrado = st.session_state.get("lista_oportunidades", None)
+                        if df_filtrado is None or len(df_filtrado) == 0:
+                            st.error("Erro: Nenhuma oportunidade encontrada. Verifique o Dashboard.")
+                            st.stop()
+                    else:
+                        # Para Curva ABC, usar resultado_calculadora
+                        df_base = st.session_state.get("resultado_calculadora", None)
+                        if df_base is None:
+                            st.error("Erro: Nenhum dado de Dashboard disponivel.")
+                            st.stop()
+                        
+                        exporter = PromotionExporter(marketplace=marketplace_selecionado)
+                        df_filtrado = exporter.filtrar_por_categoria(
+                            df_base,
+                            categoria=categoria_filtro,
+                            margem_minima=margem_minima,
+                            margem_alvo=st.session_state.get("slider_margem_bruta", 30.0)
+                        )
                     
                     if len(df_filtrado) == 0:
                         st.warning(f"⚠️ Nenhum produto encontrado na categoria '{categoria_selecionada}'")
