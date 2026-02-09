@@ -1583,6 +1583,17 @@ with tab4:
             # Oportunidades de Ação
             st.markdown('<div class="section-title">💡 Oportunidades de Ação</div>', unsafe_allow_html=True)
             
+            # Informativo sobre critérios
+            st.markdown("""
+            <div style="background: rgba(102, 126, 234, 0.1); border-left: 4px solid #667eea; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="color: white; font-size: 0.95em; line-height: 1.6;">
+                    <strong>ℹ️ Sobre estas Oportunidades:</strong><br>
+                    Produtos exibidos abaixo são da <strong>Curva B e C</strong> com <strong>margem bruta 5% ou mais acima</strong> da margem alvo configurada. 
+                    Estes produtos têm potencial para ações diferenciadas como promoções, aumentos de volume ou investimentos em marketing.
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
             oportunidades = df_dashboard[
                 (df_dashboard['Curva ABC'].astype(str).str.contains('B', na=False) | df_dashboard['Curva ABC'].astype(str).str.contains('C', na=False)) &
                 (df_dashboard['Status'] == '🟢 Saudável')
