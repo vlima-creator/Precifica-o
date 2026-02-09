@@ -94,7 +94,7 @@ def formatar_excel_profissional(df, nome_sheet="Relatorio"):
 
 # Configurar página
 st.set_page_config(
-    page_title="Precifica-o | Minimalista",
+    page_title="Precificação Estratégica",
     page_icon="📉",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -617,8 +617,8 @@ with tab1:
     # Hero Section
     st.markdown("""
     <div class="hero-section">
-        <div class="hero-title">💰 Precifica-o</div>
-        <div class="hero-subtitle">Gestão Inteligente de Preços, Margens e Oportunidades</div>
+        <div class="hero-title">📊 Precificação Estratégica</div>
+        <div class="hero-subtitle">Análise Inteligente para Precificação Estratégica</div>
     </div>
     """, unsafe_allow_html=True)
     
