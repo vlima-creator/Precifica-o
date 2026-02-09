@@ -972,10 +972,14 @@ with tab4:
             with col2:
                 st.markdown("**Produtos por Curva ABC**")
                 if len(curva_counts) > 0:
+                    # Mapear cores - aceitar tanto "A" quanto "Curva A"
                     cores_curva = {
                         'A': '#0066FF',  # Azul real
                         'B': '#FFFF99',  # Amarelo claro
-                        'C': '#FF9999'   # Vermelho claro
+                        'C': '#FF9999',  # Vermelho claro
+                        'Curva A': '#0066FF',
+                        'Curva B': '#FFFF99',
+                        'Curva C': '#FF9999'
                     }
                     cores = [cores_curva.get(str(curva), '#999999') for curva in curva_counts.index]
                     
@@ -1005,12 +1009,27 @@ with tab4:
             st.markdown("**Análise Detalhada por Curva ABC**")
             
             if 'Curva ABC' in df_dashboard.columns and 'Status' in df_dashboard.columns:
-                curvas = sorted(df_dashboard['Curva ABC'].unique())
+                # Normalizar nomes de curva (aceitar "A" ou "Curva A")
+                curvas_unicas = df_dashboard['Curva ABC'].unique()
+                curvas_normalizadas = []
+                for c in curvas_unicas:
+                    if isinstance(c, str):
+                        if c.startswith('Curva'):
+                            curvas_normalizadas.append(c)
+                        else:
+                            curvas_normalizadas.append(f'Curva {c}')
+                    else:
+                        curvas_normalizadas.append(str(c))
+                
+                curvas = sorted(set(curvas_normalizadas))
                 for curva in curvas:
-                    st.markdown(f"**Curva {curva}**")
+                    # Extrair apenas a letra (A, B ou C)
+                    curva_letra = curva.replace('Curva ', '').strip()
+                    st.markdown(f"**Curva {curva_letra}**")
                     col1, col2, col3 = st.columns(3)
                     
-                    df_curva = df_dashboard[df_dashboard['Curva ABC'] == curva]
+                    # Filtrar por qualquer variação do nome da curva
+                    df_curva = df_dashboard[df_dashboard['Curva ABC'].astype(str).str.contains(curva_letra, na=False)]
                     
                     with col1:
                         saudaveis_curva = len(df_curva[df_curva['Status'] == '🟢 Saudável'])
@@ -1021,7 +1040,8 @@ with tab4:
                         st.metric(f"Alerta", alerta_curva, delta=None)
                     
                     with col3:
-                        prejuizo_curva = len(df_curva[df_curva['Status'] == '🔴 Prejuízo'])
+                        # Aceitar tanto "Prejuízo" quanto "Prejuízo/Abaixo"
+                        prejuizo_curva = len(df_curva[df_curva['Status'].astype(str).str.contains('Prejuízo', na=False)])
                         st.metric(f"Prejuízo", prejuizo_curva, delta=None)
                     
                     st.markdown("")
@@ -1034,8 +1054,9 @@ with tab4:
             st.markdown("**Oportunidades de Acao**")
             
             # Filtrar produtos Curva B e C que estão Saudáveis
+            # Aceitar tanto "B" quanto "Curva B", e "C" quanto "Curva C"
             oportunidades = df_dashboard[
-                ((df_dashboard['Curva ABC'] == 'B') | (df_dashboard['Curva ABC'] == 'C')) &
+                (df_dashboard['Curva ABC'].astype(str).str.contains('B', na=False) | df_dashboard['Curva ABC'].astype(str).str.contains('C', na=False)) &
                 (df_dashboard['Status'] == '🟢 Saudável')
             ]
             

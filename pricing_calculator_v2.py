@@ -112,11 +112,11 @@ class PricingCalculatorV2:
         # Classificar em A, B ou C
         def classificar_abc(percentual):
             if percentual <= 80:
-                return "Curva A"
+                return "A"
             elif percentual <= 95:
-                return "Curva B"
+                return "B"
             else:
-                return "Curva C"
+                return "C"
         
         df_ordenado['Curva ABC'] = df_ordenado['Percentual_Acumulado'].apply(classificar_abc)
         
