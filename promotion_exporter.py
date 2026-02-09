@@ -1,6 +1,7 @@
 """
 Módulo genérico para exportação de promoções por marketplace
 Suporta múltiplos canais (Shopee, Mercado Livre, etc) com templates específicos
+Garante fidelidade absoluta ao template de saída do marketplace
 """
 
 import pandas as pd
@@ -15,17 +16,17 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 class PromotionExporter:
     """Exporta promoções no formato compatível com diferentes marketplaces."""
     
-    # Mapeamento de sinônimos de colunas (para diferentes marketplaces)
+    # Mapeamento de sinônimos de colunas de ENTRADA (para identificar dados)
     COLUMN_SYNONYMS = {
         "id": ["sku", "mlb", "id do produto", "id_produto", "product_id", "item_id", "codigo", "product id", "item id"],
         "descricao": ["descricao", "titulo", "nome do produto", "nome_produto", "product_name", "name", "product name"],
         "preco": ["preco", "price", "valor", "valor_venda", "preco_venda", "valor venda", "preco venda", "preco sugerido", "preço sugerido", "preco limite", "preço limite", "preco promo limite", "preço promo limite"]
     }
     
-    # Templates de colunas por marketplace
+    # Templates de SAÍDA por marketplace (estrutura exata que será exportada)
     MARKETPLACE_TEMPLATES = {
         "Shopee": {
-            "colunas": [
+            "colunas_saida": [
                 "ID do produto",
                 "Nome do Produto. (Opcional)",
                 "Nº de Ref. Parent SKU. (Opcional)",
@@ -35,18 +36,7 @@ class PromotionExporter:
                 "Preço original (opcional)",
                 "Preço de desconto",
                 "Limite de compra (Opcional)",
-            ],
-            "mapeamento": {
-                "ID do produto": "SKU",
-                "Nome do Produto. (Opcional)": "Descrição",
-                "Nº de Ref. Parent SKU. (Opcional)": None,
-                "ID de variação": "SKU",
-                "Variação de nome. (Opcional)": None,
-                "Nº de Ref. SKU. (Opcional)": "SKU",
-                "Preço original (opcional)": "Preço",
-                "Preço de desconto": "Preço_Desconto",
-                "Limite de compra (Opcional)": None,
-            }
+            ]
         }
     }
     
@@ -114,7 +104,7 @@ class PromotionExporter:
             df: DataFrame com colunas variadas
             
         Returns:
-            DataFrame com colunas padronizadas (SKU, Descrição, Preço)
+            DataFrame com colunas padronizadas (id_original, descricao_original, preco_original)
         """
         df_norm = df.copy()
         
@@ -135,12 +125,10 @@ class PromotionExporter:
             
             raise ValueError(f"Não foi possível identificar as colunas: {', '.join(colunas_faltantes)}. Colunas disponíveis: {list(df_norm.columns)}")
         
-        # Renomear colunas para o padrão interno
-        df_norm = df_norm.rename(columns={
-            col_id: "SKU",
-            col_descricao: "Descrição",
-            col_preco: "Preço"
-        })
+        # Armazenar os nomes originais das colunas encontradas
+        df_norm["_id_original"] = df_norm[col_id].astype(str)
+        df_norm["_descricao_original"] = df_norm[col_descricao].astype(str)
+        df_norm["_preco_original"] = pd.to_numeric(df_norm[col_preco], errors='coerce')
         
         return df_norm
     
@@ -206,31 +194,44 @@ class PromotionExporter:
     
     def mapear_dados_para_marketplace(self, df, desconto_percent=0.0):
         """
-        Mapeia dados do dashboard para o formato do marketplace
+        Mapeia dados do dashboard para o formato EXATO do marketplace
         
         Args:
             df: DataFrame com dados de produtos
             desconto_percent: Percentual de desconto a aplicar (ex: 0.05 para 5%)
             
         Returns:
-            DataFrame formatado para o marketplace
+            DataFrame formatado exatamente como o template do marketplace
         """
         # Normalizar DataFrame para identificar colunas automaticamente
-        df_export = self._normalizar_dataframe(df)
+        df_norm = self._normalizar_dataframe(df)
         
         # Calcular preço com desconto
-        df_export["Preço_Desconto"] = (df_export["Preço"] * (1 - desconto_percent)).round(2)
+        df_norm["_preco_desconto"] = (df_norm["_preco_original"] * (1 - desconto_percent)).round(2)
         
-        # Criar DataFrame no formato do marketplace
+        # Criar DataFrame com EXATAMENTE as colunas do template de saída
         df_marketplace = pd.DataFrame()
         
-        for col_marketplace, col_origem in self.template["mapeamento"].items():
-            if col_origem is None:
-                # Coluna vazia
-                df_marketplace[col_marketplace] = ""
-            else:
-                # Mapear coluna
-                df_marketplace[col_marketplace] = df_export[col_origem].astype(str)
+        # Mapear cada coluna do template para os dados normalizados
+        for col in self.template["colunas_saida"]:
+            if col == "ID do produto":
+                df_marketplace[col] = df_norm["_id_original"]
+            elif col == "Nome do Produto. (Opcional)":
+                df_marketplace[col] = df_norm["_descricao_original"]
+            elif col == "Nº de Ref. Parent SKU. (Opcional)":
+                df_marketplace[col] = ""  # Vazio
+            elif col == "ID de variação":
+                df_marketplace[col] = df_norm["_id_original"]  # Mesmo ID do produto
+            elif col == "Variação de nome. (Opcional)":
+                df_marketplace[col] = ""  # Vazio
+            elif col == "Nº de Ref. SKU. (Opcional)":
+                df_marketplace[col] = df_norm["_id_original"]  # SKU/MLB original
+            elif col == "Preço original (opcional)":
+                df_marketplace[col] = df_norm["_preco_original"].round(2)
+            elif col == "Preço de desconto":
+                df_marketplace[col] = df_norm["_preco_desconto"]
+            elif col == "Limite de compra (Opcional)":
+                df_marketplace[col] = ""  # Vazio
         
         return df_marketplace
     
@@ -278,9 +279,10 @@ class PromotionExporter:
                 )
                 cell.border = thin_border
         
-        # Ajustar largura das colunas automaticamente
-        for idx, col in enumerate(self.template["colunas"], 1):
-            ws.column_dimensions[chr(64 + idx)].width = 20
+        # Ajustar largura das colunas
+        larguras = [18, 30, 20, 18, 25, 18, 18, 18, 20]
+        for idx, largura in enumerate(larguras, 1):
+            ws.column_dimensions[chr(64 + idx)].width = largura
         
         # Congelar primeira linha
         ws.freeze_panes = "A2"
@@ -303,8 +305,11 @@ class PromotionExporter:
         Returns:
             dict com métricas de impacto
         """
-        economia_por_produto = df_original["Preço"] - df_marketplace["Preço de desconto"].astype(float)
-        desconto_medio_percent = (economia_por_produto / df_original["Preço"] * 100).mean()
+        preco_original = pd.to_numeric(df_marketplace["Preço original (opcional)"], errors='coerce')
+        preco_desconto = pd.to_numeric(df_marketplace["Preço de desconto"], errors='coerce')
+        
+        economia_por_produto = preco_original - preco_desconto
+        desconto_medio_percent = (economia_por_produto / preco_original * 100).mean()
         
         return {
             "economia_total": economia_por_produto.sum(),
@@ -326,11 +331,14 @@ class PromotionExporter:
         """
         impacto = self.calcular_impacto(df_marketplace, df_original)
         
+        preco_original = pd.to_numeric(df_marketplace["Preço original (opcional)"], errors='coerce')
+        preco_desconto = pd.to_numeric(df_marketplace["Preço de desconto"], errors='coerce')
+        
         return {
             "total_produtos": len(df_marketplace),
             "economia_total": impacto["economia_total"],
             "economia_media_por_produto": impacto["economia_media"],
             "desconto_medio_percent": impacto["desconto_medio_percent"],
-            "preco_medio_original": df_original["Preço"].mean(),
-            "preco_medio_desconto": df_marketplace["Preço de desconto"].astype(float).mean(),
+            "preco_medio_original": preco_original.mean(),
+            "preco_medio_desconto": preco_desconto.mean(),
         }
