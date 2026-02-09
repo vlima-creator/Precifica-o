@@ -5,6 +5,7 @@ Suporta múltiplos canais (Shopee, Mercado Livre, etc) com templates específico
 
 import pandas as pd
 import numpy as np
+import unicodedata
 from io import BytesIO
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -13,6 +14,13 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 
 class PromotionExporter:
     """Exporta promoções no formato compatível com diferentes marketplaces."""
+    
+    # Mapeamento de sinônimos de colunas (para diferentes marketplaces)
+    COLUMN_SYNONYMS = {
+        "id": ["sku", "mlb", "id do produto", "id_produto", "product_id", "item_id", "codigo", "product id", "item id"],
+        "descricao": ["descricao", "titulo", "nome do produto", "nome_produto", "product_name", "name", "product name"],
+        "preco": ["preco", "price", "valor", "valor_venda", "preco_venda", "valor venda", "preco venda"]
+    }
     
     # Templates de colunas por marketplace
     MARKETPLACE_TEMPLATES = {
@@ -31,13 +39,13 @@ class PromotionExporter:
             "mapeamento": {
                 "ID do produto": "SKU",
                 "Nome do Produto. (Opcional)": "Descrição",
-                "Nº de Ref. Parent SKU. (Opcional)": None,  # Deixar vazio
+                "Nº de Ref. Parent SKU. (Opcional)": None,
                 "ID de variação": "SKU",
-                "Variação de nome. (Opcional)": None,  # Deixar vazio
+                "Variação de nome. (Opcional)": None,
                 "Nº de Ref. SKU. (Opcional)": "SKU",
                 "Preço original (opcional)": "Preço",
-                "Preço de desconto": "Preço_Desconto",  # Será calculado
-                "Limite de compra (Opcional)": None,  # Deixar vazio
+                "Preço de desconto": "Preço_Desconto",
+                "Limite de compra (Opcional)": None,
             }
         }
     }
@@ -54,6 +62,87 @@ class PromotionExporter:
         
         self.marketplace = marketplace
         self.template = self.MARKETPLACE_TEMPLATES[marketplace]
+    
+    def _normalizar_nome_coluna(self, nome):
+        """
+        Normaliza o nome de uma coluna para comparação
+        Remove espaços, acentos e converte para minúsculas
+        
+        Args:
+            nome: Nome da coluna
+            
+        Returns:
+            Nome normalizado
+        """
+        # Remover acentos
+        nome_sem_acentos = ''.join(
+            c for c in unicodedata.normalize('NFD', str(nome))
+            if unicodedata.category(c) != 'Mn'
+        )
+        # Converter para minúsculas e remover espaços
+        return nome_sem_acentos.lower().strip()
+    
+    def _encontrar_coluna(self, df, tipo_coluna):
+        """
+        Encontra uma coluna no DataFrame usando sinônimos
+        
+        Args:
+            df: DataFrame
+            tipo_coluna: "id", "descricao" ou "preco"
+            
+        Returns:
+            Nome da coluna encontrada ou None
+        """
+        sinonimos = self.COLUMN_SYNONYMS.get(tipo_coluna, [])
+        
+        # Normalizar sinônimos
+        sinonimos_normalizados = [self._normalizar_nome_coluna(s) for s in sinonimos]
+        
+        # Procurar nas colunas do DataFrame
+        for col in df.columns:
+            col_normalizado = self._normalizar_nome_coluna(col)
+            if col_normalizado in sinonimos_normalizados:
+                return col
+        
+        return None
+    
+    def _normalizar_dataframe(self, df):
+        """
+        Normaliza o DataFrame identificando e renomeando colunas automaticamente
+        
+        Args:
+            df: DataFrame com colunas variadas
+            
+        Returns:
+            DataFrame com colunas padronizadas (SKU, Descrição, Preço)
+        """
+        df_norm = df.copy()
+        
+        # Encontrar e renomear colunas
+        col_id = self._encontrar_coluna(df_norm, "id")
+        col_descricao = self._encontrar_coluna(df_norm, "descricao")
+        col_preco = self._encontrar_coluna(df_norm, "preco")
+        
+        # Validar se encontrou as colunas essenciais
+        if not col_id or not col_descricao or not col_preco:
+            colunas_faltantes = []
+            if not col_id:
+                colunas_faltantes.append("ID (SKU/MLB/ID do Produto)")
+            if not col_descricao:
+                colunas_faltantes.append("Descrição (Título/Nome)")
+            if not col_preco:
+                colunas_faltantes.append("Preço")
+            
+            raise ValueError(f"Não foi possível identificar as colunas: {', '.join(colunas_faltantes)}. Colunas disponíveis: {list(df_norm.columns)}")
+        
+        # Renomear colunas para o padrão interno
+        df_norm = df_norm.rename(columns={
+            col_id: "SKU",
+            col_descricao: "Descrição",
+            col_preco: "Preço"
+        })
+        
+        return df_norm
     
     def filtrar_por_categoria(self, df, categoria="oportunidade", margem_minima=15.0):
         """
@@ -126,11 +215,8 @@ class PromotionExporter:
         Returns:
             DataFrame formatado para o marketplace
         """
-        df_export = df.copy()
-        
-        # Garantir que temos as colunas necessárias
-        if "SKU" not in df_export.columns or "Descrição" not in df_export.columns or "Preço" not in df_export.columns:
-            raise ValueError("DataFrame deve conter colunas: SKU, Descrição, Preço")
+        # Normalizar DataFrame para identificar colunas automaticamente
+        df_export = self._normalizar_dataframe(df)
         
         # Calcular preço com desconto
         df_export["Preço_Desconto"] = (df_export["Preço"] * (1 - desconto_percent)).round(2)
