@@ -1915,3 +1915,4 @@ with tab5:
                         
             except Exception as e:
                 st.error(f"❌ Erro ao processar: {str(e)}")
+# Forçar recarregamento do Streamlit - Mon Feb  9 14:05:19 EST 2026
