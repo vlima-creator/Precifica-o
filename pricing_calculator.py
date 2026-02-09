@@ -10,6 +10,8 @@ from config import (
     STATUS_SAUDAVEL,
     STATUS_ALERTA,
     STATUS_PREJUIZO,
+    MERCADO_LIVRE_TAXA_FIXA,
+    MERCADO_LIVRE_LIMITE_TAXA_FIXA,
 )
 
 
@@ -19,8 +21,37 @@ class PricingCalculator:
     def __init__(self, marketplaces=None, regimes=None):
         self.marketplaces = marketplaces or DEFAULT_MARKETPLACES
         self.regimes = regimes or DEFAULT_REGIMES
+    
+    def calcular_taxa_fixa_mercado_livre(self, preco_venda, categoria="Produtos Comuns"):
+        """
+        Calcula a taxa fixa do Mercado Livre baseada na faixa de preço
+        
+        Args:
+            preco_venda: Preço de venda em R$
+            categoria: Categoria do produto ("Produtos Comuns" ou "Livros")
+            
+        Returns:
+            dict com taxa_fixa (valor em R$) e cobrada (bool)
+        """
+        # Se preço > limite, não cobra taxa fixa
+        if preco_venda > MERCADO_LIVRE_LIMITE_TAXA_FIXA:
+            return {"taxa_fixa": 0.0, "cobrada": False, "faixa": "Acima de R$ 79,00"}
+        
+        # Buscar faixa correta
+        faixas = MERCADO_LIVRE_TAXA_FIXA.get(categoria, MERCADO_LIVRE_TAXA_FIXA["Produtos Comuns"])
+        
+        for faixa in faixas:
+            if faixa["min"] <= preco_venda <= faixa["max"]:
+                return {
+                    "taxa_fixa": faixa["taxa_fixa"],
+                    "cobrada": True,
+                    "faixa": f"R$ {faixa['min']:.0f} - R$ {faixa['max']:.0f}"
+                }
+        
+        # Fallback (não deve chegar aqui)
+        return {"taxa_fixa": 0.0, "cobrada": False, "faixa": "Não identificada"}
 
-    def calcular_custos_variáveis(self, preco_venda, marketplace, regime, ads_percent=0):
+    def calcular_custos_variáveis(self, preco_venda, marketplace, regime, ads_percent=0, categoria="Produtos Comuns"):
         """
         Calcula todos os custos variáveis (comissão, taxa fixa, impostos, ads)
         
@@ -29,6 +60,7 @@ class PricingCalculator:
             marketplace: Nome do marketplace
             regime: Regime tributário
             ads_percent: Percentual de Ads
+            categoria: Categoria do produto (para Mercado Livre)
             
         Returns:
             dict com detalhamento de custos
@@ -40,14 +72,21 @@ class PricingCalculator:
         comissao = preco_venda * mp_config["comissao"]
 
         # Taxa fixa do marketplace
-        taxa_fixa = mp_config["custo_fixo"]
+        taxa_fixa = 0.0
+        taxa_fixa_info = {"cobrada": False, "faixa": "Não aplicável"}
+        
+        if marketplace == "Mercado Livre":
+            taxa_fixa_info = self.calcular_taxa_fixa_mercado_livre(preco_venda, categoria)
+            taxa_fixa = taxa_fixa_info["taxa_fixa"]
+        else:
+            taxa_fixa = mp_config["custo_fixo"]
 
         # Impostos (IBS + CBS + Impostos e Encargos)
         impostos = preco_venda * (
             regime_config["ibs"] + regime_config["cbs"] + regime_config["impostos_encargos"]
         )
 
-        # Ads
+        # Ads (Publicidade)
         ads = preco_venda * ads_percent if ads_percent > 0 else 0
 
         # Taxa de devolução
@@ -56,6 +95,7 @@ class PricingCalculator:
         return {
             "comissao": comissao,
             "taxa_fixa": taxa_fixa,
+            "taxa_fixa_info": taxa_fixa_info,
             "impostos": impostos,
             "ads": ads,
             "taxa_devolucao": taxa_devolucao,

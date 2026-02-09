@@ -17,6 +17,24 @@ MERCADO_LIVRE_AD_TYPES = {
     "Premium": {"comissao": 0.19, "custo_fixo": 6.0},
 }
 
+# Tabelas de Taxa Fixa do Mercado Livre por Faixa de Preço (2025)
+# Aplicada quando preço <= 79 reais
+MERCADO_LIVRE_TAXA_FIXA = {
+    "Produtos Comuns": [
+        {"min": 0.0, "max": 29.0, "taxa_fixa": 6.25},
+        {"min": 29.0, "max": 50.0, "taxa_fixa": 6.50},
+        {"min": 50.0, "max": 79.0, "taxa_fixa": 6.75},
+    ],
+    "Livros": [
+        {"min": 0.0, "max": 29.0, "taxa_fixa": 3.00},
+        {"min": 29.0, "max": 50.0, "taxa_fixa": 3.50},
+        {"min": 50.0, "max": 79.0, "taxa_fixa": 4.00},
+    ],
+}
+
+# Limite para aplicação da taxa fixa
+MERCADO_LIVRE_LIMITE_TAXA_FIXA = 79.0
+
 # Configurações de Regimes Tributários
 DEFAULT_REGIMES = {
     "Simples Nacional": {"ibs": 0.001, "cbs": 0.009, "impostos_encargos": 0.04},
@@ -26,7 +44,7 @@ DEFAULT_REGIMES = {
 }
 
 # Custos Operacionais (agora em seção separada)
-DEFAULT_CUSTO_FIXO_OPERACIONAL = 0.0  # R$
+DEFAULT_CUSTO_FIXO_OPERACIONAL = 0.0  # %
 DEFAULT_TAXA_DEVOLUCAO = 0.0  # %
 
 # Limites de Curva ABC (baseado em % de faturamento acumulado)

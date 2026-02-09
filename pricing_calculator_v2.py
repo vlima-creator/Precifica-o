@@ -5,7 +5,7 @@ Implementa a lógica automática baseada em dados do relatório
 
 import pandas as pd
 import numpy as np
-from config import MERCADO_LIVRE_AD_TYPES
+from config import MERCADO_LIVRE_AD_TYPES, MERCADO_LIVRE_TAXA_FIXA, MERCADO_LIVRE_LIMITE_TAXA_FIXA
 
 
 class PricingCalculatorV2:
@@ -33,6 +33,35 @@ class PricingCalculatorV2:
         self.custo_fixo_operacional = custo_fixo_operacional
         self.taxa_devolucao = taxa_devolucao
 
+    def calcular_taxa_fixa_mercado_livre(self, preco_venda, categoria="Produtos Comuns"):
+        """
+        Calcula a taxa fixa do Mercado Livre baseada na faixa de preço
+        
+        Args:
+            preco_venda: Preço de venda em R$
+            categoria: Categoria do produto ("Produtos Comuns" ou "Livros")
+            
+        Returns:
+            dict com taxa_fixa (valor em R$) e cobrada (bool)
+        """
+        # Se preço > limite, não cobra taxa fixa
+        if preco_venda > MERCADO_LIVRE_LIMITE_TAXA_FIXA:
+            return {"taxa_fixa": 0.0, "cobrada": False, "faixa": "Acima de R$ 79,00"}
+        
+        # Buscar faixa correta
+        faixas = MERCADO_LIVRE_TAXA_FIXA.get(categoria, MERCADO_LIVRE_TAXA_FIXA["Produtos Comuns"])
+        
+        for faixa in faixas:
+            if faixa["min"] <= preco_venda <= faixa["max"]:
+                return {
+                    "taxa_fixa": faixa["taxa_fixa"],
+                    "cobrada": True,
+                    "faixa": f"R$ {faixa['min']:.0f} - R$ {faixa['max']:.0f}"
+                }
+        
+        # Fallback (não deve chegar aqui)
+        return {"taxa_fixa": 0.0, "cobrada": False, "faixa": "Não identificada"}
+    
     def obter_config_marketplace(self, marketplace, tipo_anuncio=""):
         """
         Obtém configuração do marketplace, considerando tipo de anúncio para Mercado Livre
@@ -84,7 +113,16 @@ class PricingCalculatorV2:
         publicidade = preco_atual * (self.percent_publicidade / 100)
         devoluoes = preco_atual * (self.taxa_devolucao / 100)
         
-        lucro = preco_atual - custo_produto - frete - comissao - taxa_fixa - impostos - publicidade - devoluoes - self.custo_fixo_operacional
+        # Calcular taxa fixa do Mercado Livre se aplicável
+        taxa_fixa_info = {"cobrada": False, "faixa": "Não aplicável"}
+        if marketplace == "Mercado Livre":
+            taxa_fixa_info = self.calcular_taxa_fixa_mercado_livre(preco_atual, "Produtos Comuns")
+            taxa_fixa = taxa_fixa_info["taxa_fixa"]
+        
+        lucro = preco_atual - custo_produto - frete - comissao - taxa_fixa - impostos - publicidade - devoluoes - (self.custo_fixo_operacional / 100 * preco_atual)
+        
+        # Calcular custos operacionais em valor (era percentual)
+        custo_fixo_op_valor = (self.custo_fixo_operacional / 100 * preco_atual)
         
         margem_bruta = (lucro / preco_atual * 100) if preco_atual > 0 else 0
         
@@ -99,16 +137,20 @@ class PricingCalculatorV2:
         return {
             "SKU": sku,
             "Descrição": descricao,
+            "Taxa Fixa Cobrada": "Sim" if taxa_fixa_info["cobrada"] else "Não",
+            "Faixa Taxa Fixa": taxa_fixa_info["faixa"],
             "Preço Atual (R$)": preco_atual,
             "Custo Produto": custo_produto,
             "Frete": frete,
-            "Comissão": comissao,
-            "Taxa Fixa": taxa_fixa,
+            "Comissão R$": comissao,
+            "Taxa Fixa R$": taxa_fixa,
+            "Taxa Fixa Faixa": taxa_fixa_info["faixa"],
             "Custo Fixo Op.": self.custo_fixo_operacional,
             "Impostos": impostos,
             "Publicidade": publicidade,
             "Lucro R$": lucro,
             "Margem Bruta %": margem_bruta,
+            "Margem Líquida %": margem_bruta,
             "Status": status,
         }
 
