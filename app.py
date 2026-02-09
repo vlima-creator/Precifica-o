@@ -559,13 +559,16 @@ with tab1:
         opacity: 0.9;
     }
     .feature-card {
-        background: white;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
         padding: 25px;
         border-radius: 12px;
         border-left: 5px solid #667eea;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         margin-bottom: 20px;
         transition: all 0.3s ease;
+        color: #333;
     }
     .feature-card:hover {
         box-shadow: 0 4px 15px rgba(0,0,0,0.12);
@@ -1176,11 +1179,13 @@ with tab4:
         opacity: 0.9;
     }
     .metric-card {
-        background: white;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
         padding: 20px;
         border-radius: 12px;
         border-top: 4px solid #667eea;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         text-align: center;
     }
     .metric-value {
@@ -1196,10 +1201,12 @@ with tab4:
         letter-spacing: 0.5px;
     }
     .chart-container {
-        background: white;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
         padding: 20px;
         border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         margin-bottom: 20px;
     }
     .section-title {
@@ -1349,6 +1356,68 @@ with tab4:
                 else:
                     st.info("Sem dados de Curva ABC")
                 st.markdown('</div>', unsafe_allow_html=True)
+            
+            # Novo gráfico em linhas para análise de Curva ABC
+            st.markdown('<div class="section-title">📈 Análise de Tendência por Curva ABC</div>', unsafe_allow_html=True)
+            
+            st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+            
+            if 'Curva ABC' in df_dashboard.columns and 'Status' in df_dashboard.columns:
+                # Preparar dados para gráfico de linhas
+                curvas_list = ['A', 'B', 'C']
+                status_list = ['🟢 Saudável', '🟡 Alerta', '🔴 Prejuízo']
+                
+                data_for_chart = []
+                for status in status_list:
+                    counts = []
+                    for curva in curvas_list:
+                        count = len(df_dashboard[
+                            (df_dashboard['Curva ABC'].astype(str).str.contains(curva, na=False)) &
+                            (df_dashboard['Status'].astype(str).str.contains(status.replace('🟢 ', '').replace('🟡 ', '').replace('🔴 ', ''), na=False))
+                        ])
+                        counts.append(count)
+                    
+                    cor_status = {
+                        '🟢 Saudável': '#22C55E',
+                        '🟡 Alerta': '#EAB308',
+                        '🔴 Prejuízo': '#EF4444'
+                    }
+                    
+                    data_for_chart.append(go.Scatter(
+                        x=['Curva A', 'Curva B', 'Curva C'],
+                        y=counts,
+                        mode='lines+markers',
+                        name=status,
+                        line=dict(color=cor_status.get(status, '#999999'), width=3),
+                        marker=dict(size=10, symbol='circle'),
+                        hovertemplate='<b>%{x}</b><br>%{y} produtos<extra></extra>'
+                    ))
+                
+                fig_lines = go.Figure(data=data_for_chart)
+                fig_lines.update_layout(
+                    title='Distribuição de Status por Curva ABC',
+                    xaxis_title='Curva ABC',
+                    yaxis_title='Quantidade de Produtos',
+                    height=400,
+                    hovermode='x unified',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='#333', size=11),
+                    margin=dict(l=50, r=50, t=50, b=50),
+                    legend=dict(
+                        x=0.02,
+                        y=0.98,
+                        bgcolor='rgba(255,255,255,0.8)',
+                        bordercolor='#ddd',
+                        borderwidth=1
+                    )
+                )
+                
+                st.plotly_chart(fig_lines, use_container_width=True)
+            else:
+                st.info("Dados insuficientes para gráfico de linhas")
+            
+            st.markdown('</div>', unsafe_allow_html=True)
             
             st.markdown("---")
             
