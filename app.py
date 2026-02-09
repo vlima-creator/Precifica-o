@@ -538,44 +538,133 @@ tab1, tab2, tab3, tab4 = st.tabs(["🏠 Home", "🧮 Calculadora de Precificaç�
 
 # ============ ABA 1: HOME ============
 with tab1:
-    st.markdown('<div class="main-header">💰 Dominador De Preços</div>', unsafe_allow_html=True)
-    st.markdown("**Gestão Completa de Preços, Margens e Promoções**")
+    st.markdown('<div class="main-header">💰 Precifica-o</div>', unsafe_allow_html=True)
+    st.markdown("**Gestão Completa de Preços, Margens e Análise de Oportunidades**")
     st.markdown("---")
     
     st.markdown("""
-    ### 📃 Como Funciona
+    ## Como Usar o Precifica-o
     
-    O **Dominador De Preços** ajuda você a precificar seus produtos de forma inteligente e automática.
+    O **Precifica-o** é uma ferramenta completa para gestão inteligente de preços, margens e análise de oportunidades em múltiplos marketplaces.
     
-    **Passo 1: Configurar** ⚙️
-    - Defina as taxas de comissão dos marketplaces
-    - Configure os regimes tributários
-    - Estabeleça suas margens alvo
-    - Defina custos operacionais e devoluções
+    ### 📋 Fluxo de Uso
     
-    **Passo 2: Carregar Relatório** 📥
-    - Importe seu relatório de vendas com: SKU, Título, Custo, Frete, Preço Atual
-    - Opcionalmente, adicione o Tipo de Anúncio (Clássico/Premium para Mercado Livre)
+    #### Passo 1: Configurar Parâmetros (Sidebar)
+    Na barra lateral esquerda, configure:
     
-    **Passo 3: Calcular Precificação** 🧮
+    **Marketplaces**
+    - Defina a comissão (%) e taxa fixa (R$) para cada marketplace
+    - Padrões: Mercado Livre, Shopee, Amazon
+    
+    **Regimes Tributários**
+    - Configure IBS, CBS e Impostos/Encargos para cada regime
+    - Aplicável conforme sua categoria de produto
+    
+    **Margens e Publicidade**
+    - Margem Bruta Alvo: Meta de margem para produtos saudáveis
+    - Margem Líquida Mínima: Limite mínimo aceitável
+    - Percentual de Publicidade: Estimativa de gasto com anúncios
+    
+    **Custos Operacionais**
+    - Custo Fixo Operacional: Percentual de custos fixos
+    - Taxa de Devoluções e Trocas: Estimativa de perdas
+    
+    #### Passo 2: Carregar Relatório (Sidebar)
+    - Baixe o modelo de planilha fornecido
+    - Preencha com seus dados:
+      - **SKU/MLB**: Identificador do produto
+      - **Título**: Nome do produto
+      - **Custo Produto (R$)**: Custo de aquisição
+      - **Frete (R$)**: Custo de frete
+      - **Preço Atual (R$)**: Preço de venda atual
+      - **Tipo de Anúncio**: Clássico ou Premium (Mercado Livre)
+      - **Quantidade Vendida**: Quantidade vendida (para Curva ABC)
+    - Faça upload do arquivo CSV ou Excel
+    
+    #### Passo 3: Calculadora de Precificação
     - Selecione o Marketplace e Regime Tributário
-    - O sistema calcula automaticamente todos os custos
-    - Veja o status de saúde de cada produto
+    - O sistema calcula automaticamente:
+      - Comissões e taxas do marketplace
+      - Impostos e encargos
+      - Custos de publicidade
+      - Lucro e margens
+      - Status de saúde do produto
+      - Classificação ABC (baseada em faturamento)
+    - Filtre por SKU, Status, Tipo de Anúncio ou Curva ABC
+    - Exporte os resultados em Excel
     
-    **Passo 4: Simular Preços** 📊
-    - Veja os preços sugeridos para atingir suas margens
-    - Compare preço normal vs. preço promocional
-    - Analise o lucro esperado
+    #### Passo 4: Simulador de Preço Alvo
+    - Defina a margem desejada
+    - O sistema calcula o preço de venda necessário
+    - Compare com preço atual e veja o impacto no lucro
+    - Simule preços promocionais com desconto
+    - Analise o retorno esperado
+    
+    #### Passo 5: Dashboard de Análise
+    - Visualize a distribuição de produtos por Status
+    - Veja a distribuição por Curva ABC
+    - Análise detalhada: para cada Curva, quantos produtos em cada Status
+    - Identifique Oportunidades de Ação:
+      - Produtos da Curva B e C com margens saudáveis
+      - Potencial para ações promocionais
+      - Baixe a lista de oportunidades em Excel
     
     ---
     
-    ### 🎯 Status de Saúde
-    - 🟢 **Saudável**: Margem acima do alvo
-    - 🟡 **Alerta**: Margem entre alvo e mínima
-    - 🔴 **Prejuízo**: Margem abaixo do mínimo
+    ## O Que o App Entrega
+    
+    ### Cálculos Precisos
+    - Análise completa de custos (comissões, impostos, frete, publicidade)
+    - Cálculo automático de margens bruta e líquida
+    - Determinação de status de saúde de cada produto
+    - Suporte a múltiplos marketplaces (Mercado Livre, Shopee, Amazon)
+    
+    ### Análise ABC
+    - Classificação automática baseada em faturamento
+    - Curva A: 80% do faturamento (produtos principais)
+    - Curva B: 15% do faturamento (produtos secundários)
+    - Curva C: 5% do faturamento (produtos de baixa relevância)
+    
+    ### Inteligência de Oportunidades
+    - Identifica produtos com potencial de crescimento
+    - Produtos Curva B e C com margens saudáveis
+    - Sugestões para ações promocionais
+    - Exportação de oportunidades para ação
+    
+    ### Relatórios Profissionais
+    - Exportação em Excel com formatação profissional
+    - Gráficos interativos (Plotly)
+    - Análise visual de distribuições
+    - Dados estruturados para tomada de decisão
+    
+    ---
+    
+    ## Status de Saúde dos Produtos
+    
+    - **🟢 Saudável**: Margem bruta >= Margem Alvo
+      - Produto com boa rentabilidade
+      - Recomendação: Manter ou aumentar volume
+    
+    - **🟡 Alerta**: Margem bruta entre Alvo e Mínima
+      - Produto com rentabilidade aceitável
+      - Recomendação: Monitorar custos e competição
+    
+    - **🔴 Prejuízo**: Margem bruta < Margem Mínima
+      - Produto com rentabilidade insuficiente
+      - Recomendação: Revisar preço, custos ou descontinuar
+    
+    ---
+    
+    ## Dicas de Uso
+    
+    1. **Comece pela Configuração**: Dedique tempo para configurar corretamente os parâmetros
+    2. **Use o Modelo**: Baixe e use o modelo de planilha fornecido
+    3. **Valide os Dados**: Certifique-se de que os dados de entrada estão corretos
+    4. **Analise o Dashboard**: Use o dashboard para identificar padrões e oportunidades
+    5. **Exporte Regularmente**: Mantenha histórico de análises para acompanhar tendências
     """)
 
-# ============ ABA 2: CALCULADORA ============
+    # ============ ABA 2: CALCULADORA ============
 with tab2:
     st.markdown('<div class="section-header">Calculadora de Precificação</div>', unsafe_allow_html=True)
     
