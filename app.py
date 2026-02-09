@@ -1800,8 +1800,12 @@ with tab5:
         if st.button("Processar e Visualizar", use_container_width=True, key="btn_promo_processar"):
             try:
                 with st.spinner("⏳ Processando dados..."):
-                    # Usar dados do simulador se disponível
-                    df_base = st.session_state.resultado_simulador if "resultado_simulador" in st.session_state else st.session_state.relatorio_vendas
+                    # Usar dados do Dashboard (resultado_calculadora) que ja tem Status e Curva ABC
+                    df_base = st.session_state.get("resultado_calculadora", None)
+                    
+                    if df_base is None:
+                        st.error("Erro: Nenhum dado de Dashboard disponivel. Carregue um relatorio e calcule a precificacao primeiro.")
+                        st.stop()
                     
                     # Inicializar exportador com o marketplace selecionado
                     exporter = PromotionExporter(marketplace=marketplace_selecionado)

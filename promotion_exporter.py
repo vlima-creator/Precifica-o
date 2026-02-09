@@ -152,32 +152,19 @@ class PromotionExporter:
         colunas_disponiveis = df_filtrado.columns.tolist()
         
         if categoria.lower() == "oportunidade":
-            # Produtos de oportunidade (Curva B/C com margem 5% acima da alvo e saudáveis)
-            # EXATAMENTE como no Dashboard
+            # Produtos de oportunidade (Curva B/C com margem 5% acima da alvo e saudaveis)
+            # EXATAMENTE como no Dashboard (linhas 1601-1603 do app.py)
             
-            # Verificar se as colunas necessárias existem
-            tem_curva = "Curva ABC" in colunas_disponiveis
-            tem_status = "Status" in colunas_disponiveis
-            tem_margem = "Margem Bruta %" in colunas_disponiveis
-            
-            if not (tem_curva and tem_status and tem_margem):
-                # Se não tiver as colunas esperadas, retornar vazio
+            # Verificar se as colunas necessarias existem
+            if "Curva ABC" not in colunas_disponiveis or "Status" not in colunas_disponiveis:
                 return pd.DataFrame(columns=df_filtrado.columns)
             
-            # Filtro 1: Curva B ou C
-            curva_bc = (df_filtrado["Curva ABC"].astype(str).str.contains("B", na=False, case=False)) | \
-                       (df_filtrado["Curva ABC"].astype(str).str.contains("C", na=False, case=False))
-            
-            # Filtro 2: Status Saudável (com tratamento de emoji)
-            status_col = df_filtrado["Status"].astype(str)
-            status_saudavel = status_col.str.contains("Saudável", na=False, case=False) | \
-                              status_col.str.contains("Saudavel", na=False, case=False)
-            
-            # Filtro 3: Margem >= (Margem Alvo + 5%)
-            margem_qualificada = df_filtrado["Margem Bruta %"] >= (margem_alvo + 5.0)
-            
-            # Aplicar todos os filtros
-            df_filtrado = df_filtrado[curva_bc & status_saudavel & margem_qualificada]
+            # Aplicar EXATAMENTE a mesma logica do Dashboard
+            df_filtrado = df_filtrado[
+                (df_filtrado["Curva ABC"].astype(str).str.contains("B", na=False) | 
+                 df_filtrado["Curva ABC"].astype(str).str.contains("C", na=False)) &
+                (df_filtrado["Status"] == "🟢 Saudavel")
+            ]
         
         elif categoria.lower() == "curva_a":
             # Apenas Curva A
