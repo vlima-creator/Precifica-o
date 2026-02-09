@@ -589,7 +589,7 @@ with tab2:
             st.divider()
             
             # Filtros
-            col1, col2, col3 = st.columns([2, 2, 1])
+            col1, col2, col3, col4 = st.columns([2, 2, 2, 1])
             
             with col1:
                 pesquisa_sku = st.text_input("Pesquisar por SKU/MLB", placeholder="Digite SKU ou MLB")
@@ -599,6 +599,14 @@ with tab2:
                 filtro_status = st.selectbox("Filtrar por Status", status_opcoes)
             
             with col3:
+                # Adicionar filtro por Tipo de Anuncio se for Mercado Livre
+                if marketplace == "Mercado Livre" and "Tipo de Anuncio" in df_resultado.columns:
+                    tipo_anuncio_opcoes = ["Todos"] + list(df_resultado['Tipo de Anuncio'].unique())
+                    filtro_tipo_anuncio = st.selectbox("Filtrar por Tipo", tipo_anuncio_opcoes)
+                else:
+                    filtro_tipo_anuncio = "Todos"
+            
+            with col4:
                 st.write("")
                 st.write("")
             
@@ -610,6 +618,10 @@ with tab2:
             
             if filtro_status != "Todos":
                 df_filtrado = df_filtrado[df_filtrado['Status'] == filtro_status]
+            
+            # Filtro por Tipo de Anuncio (Mercado Livre)
+            if marketplace == "Mercado Livre" and filtro_tipo_anuncio != "Todos" and "Tipo de Anuncio" in df_filtrado.columns:
+                df_filtrado = df_filtrado[df_filtrado['Tipo de Anuncio'] == filtro_tipo_anuncio]
             
             # Tabela
             st.markdown(f"**Detalhes da Precificação** ({len(df_filtrado)} produtos)")
