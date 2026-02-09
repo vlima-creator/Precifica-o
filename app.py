@@ -990,44 +990,41 @@ with tab4:
             
             st.markdown("---")
             
-            # Métricas de totais
-            st.markdown("**Totais por Status**")
-            col1, col2, col3 = st.columns(3)
+            # Métricas detalhadas: Curva ABC cruzada com Status
+            st.markdown("**Análise Detalhada por Curva ABC**")
             
-            with col1:
-                saudaveis = len(df_dashboard[df_dashboard['Status'] == '🟢 Saudável']) if 'Status' in df_dashboard.columns else 0
-                st.metric("Produtos Saudaveis", saudaveis, delta=None)
-            
-            with col2:
-                alerta = len(df_dashboard[df_dashboard['Status'] == '🟡 Alerta']) if 'Status' in df_dashboard.columns else 0
-                st.metric("Produtos em Alerta", alerta, delta=None)
-            
-            with col3:
-                prejuizo = len(df_dashboard[df_dashboard['Status'] == '🔴 Prejuízo']) if 'Status' in df_dashboard.columns else 0
-                st.metric("Produtos em Prejuizo", prejuizo, delta=None)
-            
-            st.markdown("---")
-            
-            # Métricas de Curva ABC
-            st.markdown("**Totais por Curva ABC**")
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
-                curva_a = len(df_dashboard[df_dashboard['Curva ABC'] == 'A']) if 'Curva ABC' in df_dashboard.columns else 0
-                st.metric("Curva A (80%)", curva_a, delta=None)
-            
-            with col2:
-                curva_b = len(df_dashboard[df_dashboard['Curva ABC'] == 'B']) if 'Curva ABC' in df_dashboard.columns else 0
-                st.metric("Curva B (15%)", curva_b, delta=None)
-            
-            with col3:
-                curva_c = len(df_dashboard[df_dashboard['Curva ABC'] == 'C']) if 'Curva ABC' in df_dashboard.columns else 0
-                st.metric("Curva C (5%)", curva_c, delta=None)
+            curvas = ['A', 'B', 'C']
+            for curva in curvas:
+                st.markdown(f"**Curva {curva}**")
+                col1, col2, col3 = st.columns(3)
+                
+                df_curva = df_dashboard[df_dashboard['Curva ABC'] == curva] if 'Curva ABC' in df_dashboard.columns else pd.DataFrame()
+                
+                with col1:
+                    saudaveis_curva = len(df_curva[df_curva['Status'] == '🟢 Saudável']) if 'Status' in df_curva.columns else 0
+                    st.metric(f"Saudável", saudaveis_curva, delta=None)
+                
+                with col2:
+                    alerta_curva = len(df_curva[df_curva['Status'] == '🟡 Alerta']) if 'Status' in df_curva.columns else 0
+                    st.metric(f"Alerta", alerta_curva, delta=None)
+                
+                with col3:
+                    prejuizo_curva = len(df_curva[df_curva['Status'] == '🔴 Prejuízo']) if 'Status' in df_curva.columns else 0
+                    st.metric(f"Prejuízo", prejuizo_curva, delta=None)
+                
+                st.markdown("")
             
             st.markdown("---")
             
             # Seção de Oportunidades
             st.markdown("**Oportunidades de Acao**")
+            
+            # Debug: mostrar quantos produtos B e C saudáveis existem
+            if 'Curva ABC' in df_dashboard.columns and 'Status' in df_dashboard.columns:
+                curva_b_saudavel = len(df_dashboard[(df_dashboard['Curva ABC'] == 'B') & (df_dashboard['Status'] == '🟢 Saudável')])
+                curva_c_saudavel = len(df_dashboard[(df_dashboard['Curva ABC'] == 'C') & (df_dashboard['Status'] == '🟢 Saudável')])
+                
+                st.info(f"Curva B Saudável: {curva_b_saudavel} | Curva C Saudável: {curva_c_saudavel}")
             
             # Filtrar produtos Curva B e C que estão Saudáveis
             oportunidades = df_dashboard[
