@@ -916,19 +916,6 @@ with tab4:
         try:
             import plotly.graph_objects as go
             
-            # DEBUG: Mostrar informações sobre os dados
-            st.markdown("**DEBUG - Informações dos Dados**")
-            col_debug1, col_debug2 = st.columns(2)
-            with col_debug1:
-                st.info(f"Total de produtos: {len(df_dashboard)}")
-                st.info(f"Colunas disponíveis: {list(df_dashboard.columns)}")
-            with col_debug2:
-                if 'Status' in df_dashboard.columns:
-                    st.info(f"Status únicos: {df_dashboard['Status'].unique().tolist()}")
-                if 'Curva ABC' in df_dashboard.columns:
-                    st.info(f"Curvas ABC únicas: {df_dashboard['Curva ABC'].unique().tolist()}")
-            
-            st.markdown("---")
             
             # Contar produtos por status
             status_counts = df_dashboard['Status'].value_counts() if 'Status' in df_dashboard.columns else pd.Series()
