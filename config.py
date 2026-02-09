@@ -32,8 +32,52 @@ MERCADO_LIVRE_TAXA_FIXA = {
     ],
 }
 
-# Limite para aplicação da taxa fixa
+# Limite para aplicacao da taxa fixa
 MERCADO_LIVRE_LIMITE_TAXA_FIXA = 79.0
+
+# Tabelas de Comissao e Subsidio Pix da Shopee por Faixa de Preco (2025)
+SHOPEE_FAIXAS_PRECO = [
+    {
+        "min": 0.0,
+        "max": 79.99,
+        "comissao_percent": 0.20,
+        "comissao_fixa": 4.0,
+        "subsidio_pix_percent": 0.0,
+        "descricao": "Ate R$ 79,99"
+    },
+    {
+        "min": 80.0,
+        "max": 99.99,
+        "comissao_percent": 0.14,
+        "comissao_fixa": 16.0,
+        "subsidio_pix_percent": 0.05,
+        "descricao": "R$ 80,00 - R$ 99,99"
+    },
+    {
+        "min": 100.0,
+        "max": 199.99,
+        "comissao_percent": 0.14,
+        "comissao_fixa": 20.0,
+        "subsidio_pix_percent": 0.05,
+        "descricao": "R$ 100,00 - R$ 199,99"
+    },
+    {
+        "min": 200.0,
+        "max": 499.99,
+        "comissao_percent": 0.14,
+        "comissao_fixa": 26.0,
+        "subsidio_pix_percent": 0.05,
+        "descricao": "R$ 200,00 - R$ 499,99"
+    },
+    {
+        "min": 500.0,
+        "max": float('inf'),
+        "comissao_percent": 0.14,
+        "comissao_fixa": 26.0,
+        "subsidio_pix_percent": 0.08,
+        "descricao": "Acima de R$ 500,00"
+    },
+]
 
 # Configurações de Regimes Tributários
 DEFAULT_REGIMES = {

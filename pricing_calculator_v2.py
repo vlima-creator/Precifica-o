@@ -5,7 +5,7 @@ Implementa a lógica automática baseada em dados do relatório
 
 import pandas as pd
 import numpy as np
-from config import MERCADO_LIVRE_AD_TYPES, MERCADO_LIVRE_TAXA_FIXA, MERCADO_LIVRE_LIMITE_TAXA_FIXA
+from config import MERCADO_LIVRE_AD_TYPES, MERCADO_LIVRE_TAXA_FIXA, MERCADO_LIVRE_LIMITE_TAXA_FIXA, SHOPEE_FAIXAS_PRECO
 
 
 class PricingCalculatorV2:
@@ -33,6 +33,33 @@ class PricingCalculatorV2:
         self.custo_fixo_operacional = custo_fixo_operacional
         self.taxa_devolucao = taxa_devolucao
 
+    def calcular_comissao_shopee(self, preco_venda):
+        """
+        Calcula a comissao e subsidio Pix da Shopee baseado na faixa de preco
+        
+        Args:
+            preco_venda: Preco de venda em R$
+            
+        Returns:
+            dict com comissao_percent, comissao_fixa, subsidio_pix_percent e faixa
+        """
+        for faixa in SHOPEE_FAIXAS_PRECO:
+            if faixa["min"] <= preco_venda <= faixa["max"]:
+                return {
+                    "comissao_percent": faixa["comissao_percent"],
+                    "comissao_fixa": faixa["comissao_fixa"],
+                    "subsidio_pix_percent": faixa["subsidio_pix_percent"],
+                    "faixa": faixa["descricao"]
+                }
+        
+        # Fallback (nao deve chegar aqui)
+        return {
+            "comissao_percent": 0.20,
+            "comissao_fixa": 4.0,
+            "subsidio_pix_percent": 0.0,
+            "faixa": "Nao identificada"
+        }
+    
     def calcular_taxa_fixa_mercado_livre(self, preco_venda, categoria="Produtos Comuns"):
         """
         Calcula a taxa fixa do Mercado Livre baseada na faixa de preço
@@ -113,13 +140,27 @@ class PricingCalculatorV2:
         publicidade = preco_atual * (self.percent_publicidade / 100)
         devoluoes = preco_atual * (self.taxa_devolucao / 100)
         
-        # Calcular taxa fixa do Mercado Livre se aplicável
-        taxa_fixa_info = {"cobrada": False, "faixa": "Não aplicável"}
+        # Calcular taxa fixa do Mercado Livre se aplicavel
+        taxa_fixa_info = {"cobrada": False, "faixa": "Nao aplicavel"}
+        subsidio_pix = 0.0
+        subsidio_pix_info = {"subsidio_pix_percent": 0.0, "faixa": "Nao aplicavel"}
+        
         if marketplace == "Mercado Livre":
             taxa_fixa_info = self.calcular_taxa_fixa_mercado_livre(preco_atual, "Produtos Comuns")
             taxa_fixa = taxa_fixa_info["taxa_fixa"]
+        elif marketplace == "Shopee":
+            # Para Shopee, usar comissao variavel por faixa de preco
+            shopee_config = self.calcular_comissao_shopee(preco_atual)
+            comissao_percent = shopee_config["comissao_percent"]
+            taxa_fixa = shopee_config["comissao_fixa"]
+            subsidio_pix = preco_atual * shopee_config["subsidio_pix_percent"]
+            subsidio_pix_info = {
+                "subsidio_pix_percent": shopee_config["subsidio_pix_percent"] * 100,
+                "faixa": shopee_config["faixa"]
+            }
         
-        lucro = preco_atual - custo_produto - frete - comissao - taxa_fixa - impostos - publicidade - devoluoes - (self.custo_fixo_operacional / 100 * preco_atual)
+        comissao = preco_atual * comissao_percent
+        lucro = preco_atual - custo_produto - frete - comissao - taxa_fixa - impostos - publicidade - devoluoes - (self.custo_fixo_operacional / 100 * preco_atual) + subsidio_pix
         
         # Calcular custos operacionais em valor (era percentual)
         custo_fixo_op_valor = (self.custo_fixo_operacional / 100 * preco_atual)
@@ -144,9 +185,12 @@ class PricingCalculatorV2:
             "Descrição": descricao,
             "Tipo de Anúncio": tipo_anuncio_exibicao,
             "Taxa Comissão %": f"{comissao_percent * 100:.2f}%",
-            "Taxa Fixa Cobrada": "Sim" if taxa_fixa_info["cobrada"] else "Não",
+            "Taxa Fixa Cobrada": "Sim" if taxa_fixa_info["cobrada"] else "Nao",
             "Faixa Taxa Fixa": taxa_fixa_info["faixa"],
-            "Preço Atual (R$)": preco_atual,
+            "Subsidio Pix %": f"{subsidio_pix_info['subsidio_pix_percent']:.2f}%",
+            "Subsidio Pix R$": subsidio_pix,
+            "Faixa Shopee": subsidio_pix_info["faixa"],
+            "Preco Atual (R$)": preco_atual,
             "Custo Produto": custo_produto,
             "Frete": frete,
             "Comissão R$": comissao,
@@ -154,6 +198,7 @@ class PricingCalculatorV2:
             "Custo Fixo Op.": self.custo_fixo_operacional,
             "Impostos": impostos,
             "Publicidade": publicidade,
+            "Subsidio Pix (Credito)": subsidio_pix,
             "Lucro R$": lucro,
             "Margem Bruta %": margem_bruta,
             "Margem Líquida %": margem_bruta,
