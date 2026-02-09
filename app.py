@@ -618,8 +618,8 @@ with tab1:
     # Hero Section
     st.markdown("""
     <div class="hero-section">
-        <div class="hero-title">Carblue Pricing & Promo Manager</div>
-        <div class="hero-subtitle">Sua ferramenta inteligente para precificação estratégica e gestão de promoções em marketplaces.</div>
+        <div class="hero-title"> Precificação Estratégica</div>
+        <div class="hero-subtitle">Análise Inteligente para Precificação Estratégica</div>
     </div>
     """, unsafe_allow_html=True)
     
@@ -629,34 +629,31 @@ with tab1:
     with col1:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2.5em; margin-bottom: 10px;">📈</div>
-            <div class="feature-title">Precificação Inteligente</div>
-            <p>Cálculos precisos de custos, margens e rentabilidade em tempo real.</p>
+            <div class="feature-title">Análise Completa</div>
+            <p>Cálculos precisos de custos, margens e rentabilidade em tempo real</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2.5em; margin-bottom: 10px;">🎯</div>
-            <div class="feature-title">Oportunidades & ABC</div>
-            <p>Identifique produtos com potencial de crescimento e classifique por faturamento.</p>
+            <div class="feature-title">Oportunidades</div>
+            <p>Identifique produtos com potencial de crescimento e ação</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col3:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2.5em; margin-bottom: 10px;">🚀</div>
-            <div class="feature-title">Promoções Automatizadas</div>
-            <p>Gere templates de promoções para Shopee e Mercado Livre com descontos calculados.</p>
+            <div class="feature-title">Relatórios</div>
+            <p>Exportação profissional em Excel com análises visuais</p>
         </div>
         """, unsafe_allow_html=True)
     
     st.markdown("---")
     
     # Seção: Como Funciona
-    st.markdown("## 💡 Como Funciona")
+    st.markdown("## Como Funciona")
     
     col1, col2 = st.columns([1, 2])
     
@@ -665,32 +662,39 @@ with tab1:
         <div class="feature-card">
             <span class="step-number">1</span>
             <div class="feature-title">Configurar</div>
-            <p>Defina marketplaces, regimes fiscais e margens alvo na sidebar.</p>
+            <p>Defina marketplaces, regimes e margens na sidebar</p>
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown("""
         <div class="feature-card">
             <span class="step-number">2</span>
-            <div class="feature-title">Carregar Dados</div>
-            <p>Importe seu relatório de produtos (Excel) para análise.</p>
+            <div class="feature-title">Carregar</div>
+            <p>Importe seu relatório de produtos</p>
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown("""
         <div class="feature-card">
             <span class="step-number">3</span>
-            <div class="feature-title">Analisar & Otimizar</div>
-            <p>Visualize o Dashboard, simule preços e identifique oportunidades.</p>
+            <div class="feature-title">Calcular</div>
+            <p>Análise automática de precificação</p>
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown("""
         <div class="feature-card">
             <span class="step-number">4</span>
-            <div class="feature-title">Gerar Promoções</div>
-            <p>Na aba 'Estratégias Promocionais', configure descontos e exporte templates para marketplaces.</p>
+            <div class="feature-title">Simular</div>
+            <p>Teste preços e margens</p>
         </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="feature-card">
+            <span class="step-number">5</span>
+            <div class="feature-title">Analisar</div>
+            <p>Veja oportunidades no dashboard</p>
         """, unsafe_allow_html=True)
     
     with col2:
@@ -698,96 +702,89 @@ with tab1:
         ### Funcionalidades Principais
         
         <ul class="benefit-list">
-            <li><strong>Múltiplos Marketplaces:</strong> Suporte a Mercado Livre, Shopee e arquitetura escalável para mais.</li>
-            <li><strong>Cálculos Precisos:</strong> Comissões, impostos, frete, publicidade e margens detalhadas.</li>
-            <li><strong>Análise ABC:</strong> Classificação automática de produtos por faturamento para foco estratégico.</li>
-            <li><strong>Status de Saúde:</strong> Identifique produtos saudáveis, em alerta ou prejuízo rapidamente.</li>
-            <li><strong>Oportunidades:</strong> Descubra produtos Curva B/C com potencial de crescimento e margem saudável.</li>
-            <li><strong>Simulador de Preços:</strong> Teste diferentes margens e preços para maximizar lucros.</li>
-            <li><strong>Relatórios Profissionais:</strong> Exporte dados em Excel com análises visuais e prontas para uso.</li>
-            <li><strong>Estratégias Promocionais:</strong> Gere templates de promoções com descontos calculados para Shopee e Mercado Livre.</li>
-            <li><strong>Dashboard Interativo:</strong> Visualizações dinâmicas e análises detalhadas para tomada de decisão.</li>
+            <li><strong>Múltiplos Marketplaces:</strong> Mercado Livre, Shopee, Amazon e mais</li>
+            <li><strong>Cálculos Precisos:</strong> Comissões, impostos, frete, publicidade</li>
+            <li><strong>Análise ABC:</strong> Classificação automática por faturamento</li>
+            <li><strong>Status de Saúde:</strong> Identifique produtos saudáveis, em alerta ou prejuízo</li>
+            <li><strong>Oportunidades:</strong> Produtos B e C com potencial de crescimento</li>
+            <li><strong>Simulador:</strong> Teste diferentes margens e preços</li>
+            <li><strong>Relatórios:</strong> Exporte dados em Excel profissional</li>
+            <li><strong>Dashboard:</strong> Visualizações interativas e análises detalhadas</li>
         </ul>
         """, unsafe_allow_html=True)
     
     st.markdown("---")
     
     # Seção: Status de Saúde
-    st.markdown("## 🟢 Status de Saúde dos Produtos")
+    st.markdown("## Status de Saúde dos Produtos")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2em; margin-bottom: 10px;">✅</div>
             <div class="feature-title">Saudável</div>
             <p><strong>Margem ≥ Alvo</strong></p>
-            <p style="font-size: 0.9em; color: white;">Produtos com boa rentabilidade. Mantenha ou aumente o volume de vendas.</p>
+            <p style="font-size: 0.9em; color: white;">Boa rentabilidade. Mantenha ou aumente volume.</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2em; margin-bottom: 10px;">⚠️</div>
             <div class="feature-title">Alerta</div>
             <p><strong>Alvo > Margem ≥ Mínima</strong></p>
-            <p style="font-size: 0.9em; color: white;">Rentabilidade aceitável, mas exige monitoramento de custos ou ajuste de preço.</p>
+            <p style="font-size: 0.9em; color: white;">Rentabilidade aceitável. Monitore custos.</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col3:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2em; margin-bottom: 10px;">❌</div>
             <div class="feature-title">Prejuízo</div>
             <p><strong>Margem < Mínima</strong></p>
-            <p style="font-size: 0.9em; color: white;">Rentabilidade insuficiente. Revise urgentemente o preço ou a estratégia de custo.</p>
+            <p style="font-size: 0.9em; color: white;">Rentabilidade insuficiente. Revise preço.</p>
         </div>
         """, unsafe_allow_html=True)
     
     st.markdown("---")
     
     # Seção: Classificação ABC
-    st.markdown("## 📊 Classificação ABC")
+    st.markdown("## Classificação ABC")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2em; margin-bottom: 10px;">🥇</div>
             <div class="feature-title">Curva A</div>
             <p><strong>80% do faturamento</strong></p>
-            <p style="font-size: 0.9em; color: white;">Produtos principais que geram a maior parte da receita. Foco total na manutenção e otimização.</p>
+            <p style="font-size: 0.9em; color: white;">Produtos principais. Máxima atenção.</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2em; margin-bottom: 10px;">🥈</div>
             <div class="feature-title">Curva B</div>
             <p><strong>15% do faturamento</strong></p>
-            <p style="font-size: 0.9em; color: white;">Produtos secundários com bom potencial. Identifique oportunidades para movê-los para a Curva A.</p>
+            <p style="font-size: 0.9em; color: white;">Produtos secundários. Oportunidades.</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col3:
         st.markdown("""
         <div class="feature-card">
-            <div style="font-size: 2em; margin-bottom: 10px;">🥉</div>
             <div class="feature-title">Curva C</div>
             <p><strong>5% do faturamento</strong></p>
-            <p style="font-size: 0.9em; color: white;">Produtos de baixa relevância no faturamento. Avalie a descontinuação ou estratégias de promoção para desova.</p>
+            <p style="font-size: 0.9em; color: white;">Produtos de baixa relevância.</p>
         </div>
         """, unsafe_allow_html=True)
     
     st.markdown("---")
     
     # Dicas de Uso
-    st.markdown("## 🚀 Dicas para Melhor Aproveitar")
+    st.markdown("## Dicas para Melhor Aproveitar")
     
     col1, col2 = st.columns(2)
     
@@ -795,37 +792,36 @@ with tab1:
         st.markdown("""
         <div class="feature-card">
             <div class="feature-title"> Comece pela Configuração</div>
-            <p>Dedique tempo para configurar corretamente os parâmetros de marketplaces, regimes fiscais e margens alvo na sidebar.</p>
+            <p>Dedique tempo para configurar corretamente os parâmetros de marketplaces e margens.</p>
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown("""
         <div class="feature-card">
-            <div class="feature-title"> Use o Modelo de Planilha</div>
-            <p>Baixe e utilize o modelo de planilha fornecido para garantir que seus dados de entrada estejam no formato correto.</p>
+            <div class="feature-title"> Use o Modelo</div>
+            <p>Baixe e use o modelo de planilha fornecido para garantir dados corretos.</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
         <div class="feature-card">
-            <div class="feature-title"> Analise o Dashboard e Oportunidades</div>
-            <p>Use o Dashboard para identificar padrões, simular preços e descobrir produtos com alto potencial de lucro.</p>
+            <div class="feature-title"> Analise o Dashboard</div>
+            <p>Use o dashboard para identificar padrões e oportunidades de crescimento.</p>
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown("""
         <div class="feature-card">
-            <div class="feature-title"> Explore Estratégias Promocionais</div>
-            <p>Aproveite a nova aba para criar e exportar campanhas de desconto direcionadas para Shopee e Mercado Livre, otimizando suas vendas.</p>
-        </div>
+            <div class="feature-title"> Exporte Regularmente</div>
+            <p>Mantenha histórico de análises para acompanhar tendências ao longo do tempo.</p>
         """, unsafe_allow_html=True)
     
     st.markdown("---")
     
     st.markdown("""
     <div style="text-align: center; padding: 20px; color: #888;">
-        <p>Desenvolvido com 💙 por Carblue</p>
+        <p>Desenvolvido por Vinícius Lima</p>
     </div>
     """, unsafe_allow_html=True)
 
