@@ -1437,6 +1437,9 @@ with tab4:
                 st.markdown("### Produtos por Status")
                 if len(status_counts) > 0:
                     cores_status = {
+                        '🟢 Saudável': '#22C55E',
+                        '🟡 Alerta': '#EAB308',
+                        '🔴 Prejuízo': '#EF4444',
                         ' Saudável': '#22C55E',
                         ' Alerta': '#EAB308',
                         ' Prejuízo': '#EF4444'
