@@ -1010,7 +1010,9 @@ with tab2:
             df_filtrado = df_resultado.copy()
             
             if pesquisa_sku:
-                df_filtrado = df_filtrado[df_filtrado['SKU ou MLB'].str.contains(pesquisa_sku, case=False, na=False)]
+                col_sku = 'SKU ou MLB' if 'SKU ou MLB' in df_filtrado.columns else 'SKU'
+                if col_sku in df_filtrado.columns:
+                    df_filtrado = df_filtrado[df_filtrado[col_sku].astype(str).str.contains(pesquisa_sku, case=False, na=False)]
             
             if filtro_status != "Todos":
                 df_filtrado = df_filtrado[df_filtrado['Status'] == filtro_status]
@@ -1250,7 +1252,9 @@ with tab3:
             df_filtrado = df_simulacao.copy()
             
             if pesquisa_sku:
-                df_filtrado = df_filtrado[df_filtrado['SKU ou MLB'].str.contains(pesquisa_sku, case=False, na=False)]
+                col_sku = 'SKU ou MLB' if 'SKU ou MLB' in df_filtrado.columns else 'SKU'
+                if col_sku in df_filtrado.columns:
+                    df_filtrado = df_filtrado[df_filtrado[col_sku].astype(str).str.contains(pesquisa_sku, case=False, na=False)]
             
             if 'Status' in df_filtrado.columns and filtro_status != "Todos":
                 df_filtrado = df_filtrado[df_filtrado['Status'] == filtro_status]
