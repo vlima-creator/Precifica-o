@@ -280,7 +280,44 @@ class PromotionExporter:
         # Calcular preço com desconto
         df_norm["_preco_desconto"] = (df_norm["_preco_original"] * (1 - desconto_percent)).round(2)
         
-        # Criar DataFrame com EXATAMENTE as colunas do template de saída
+        # Mapear para Mercado Livre
+        if self.marketplace == "Mercado Livre":
+            df_ml = pd.DataFrame()
+            
+            for col in self.template["colunas_saida"]:
+                if col == "TITLE":
+                    df_ml[col] = df_norm["_descricao_original"]
+                elif col == "ITEM_ID":
+                    df_ml[col] = df_norm["_id_original"]
+                elif col == "SKU":
+                    df_ml[col] = df_norm["_id_original"]
+                elif col == "ORIGINAL_PRICE":
+                    df_ml[col] = df_norm["_preco_original"].round(2)
+                elif col == "DISCOUNT_PERCENTAGE":
+                    # Calcular percentual de desconto (ex: 0.05 -> 5)
+                    df_ml[col] = int(round(desconto_percent * 100))
+                elif col == "FINAL_PRICE":
+                    df_ml[col] = df_norm["_preco_desconto"].round(2)
+                elif col == "SUGGESTION":
+                    df_ml[col] = ""
+                elif col == "RECEIVES":
+                    df_ml[col] = ""
+                elif col == "LOYALTY_DISCOUNT_PERCENTAGE":
+                    df_ml[col] = ""
+                elif col == "LOYALTY_PRICE":
+                    df_ml[col] = ""
+                elif col == "LOYALTY_RECEIVES":
+                    df_ml[col] = ""
+                elif col == "STATUS":
+                    df_ml[col] = "Ativo"
+                elif col == "ACTION":
+                    df_ml[col] = "Participar"
+                elif col == "ERRORS":
+                    df_ml[col] = ""
+            
+            return df_ml
+        
+        # Mapear para Shopee (padrão)
         df_marketplace = pd.DataFrame()
         
         # Mapear cada coluna do template para os dados normalizados
@@ -303,43 +340,6 @@ class PromotionExporter:
                 df_marketplace[col] = df_norm["_preco_desconto"]
             elif col == "Limite de compra (Opcional)":
                 df_marketplace[col] = ""  # Vazio
-        
-        # Mapear para Mercado Livre
-        if self.marketplace == "Mercado Livre":
-            df_ml = pd.DataFrame()
-            
-            for col in self.template["colunas_saida"]:
-                if col == "TITLE":
-                    df_ml[col] = df_norm["_descricao_original"]
-                elif col == "ITEM_ID":
-                    df_ml[col] = df_norm["_id_original"]
-                elif col == "SKU":
-                    df_ml[col] = df_norm["_id_original"]
-                elif col == "ORIGINAL_PRICE":
-                    df_ml[col] = df_norm["_preco_original"].round(2)
-                elif col == "DISCOUNT_PERCENTAGE":
-                    # Calcular percentual de desconto
-                    df_ml[col] = int(desconto_percent * 100)
-                elif col == "FINAL_PRICE":
-                    df_ml[col] = df_norm["_preco_desconto"]
-                elif col == "SUGGESTION":
-                    df_ml[col] = ""
-                elif col == "RECEIVES":
-                    df_ml[col] = ""
-                elif col == "LOYALTY_DISCOUNT_PERCENTAGE":
-                    df_ml[col] = ""
-                elif col == "LOYALTY_PRICE":
-                    df_ml[col] = ""
-                elif col == "LOYALTY_RECEIVES":
-                    df_ml[col] = ""
-                elif col == "STATUS":
-                    df_ml[col] = "Ativo"
-                elif col == "ACTION":
-                    df_ml[col] = "Participar"
-                elif col == "ERRORS":
-                    df_ml[col] = ""
-            
-            return df_ml
         
         return df_marketplace
     
