@@ -932,23 +932,27 @@ with tab4:
                 if len(status_counts) > 0:
                     # Mapear cores para status
                     cores_status = {
-                        'Saudavel': '#228B22',
-                        'Alerta': '#FFA500',
-                        'Prejuizo': '#FF6B6B'
+                        '🟢 Saudável': '#22C55E',
+                        '🟡 Alerta': '#EAB308',
+                        '🔴 Prejuízo': '#EF4444'
                     }
-                    cores = [cores_status.get(status, '#999999') for status in status_counts.index]
+                    cores = [cores_status.get(str(status), '#999999') for status in status_counts.index]
                     
                     fig_status = go.Figure(data=[go.Pie(
-                        labels=status_counts.index,
+                        labels=[str(label) for label in status_counts.index],
                         values=status_counts.values,
-                        marker=dict(colors=cores),
-                        textposition='inside',
-                        textinfo='label+percent'
+                        marker=dict(colors=cores, line=dict(color='#000000', width=2)),
+                        textposition='auto',
+                        textinfo='label+percent',
+                        hoverinfo='label+value+percent'
                     )])
                     fig_status.update_layout(
                         height=400,
                         margin=dict(l=0, r=0, t=0, b=0),
-                        showlegend=True
+                        showlegend=True,
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        font=dict(color='#FFFFFF', size=12)
                     )
                     st.plotly_chart(fig_status, use_container_width=True)
                 else:
@@ -962,19 +966,23 @@ with tab4:
                         'B': '#6B8E23',
                         'C': '#8FBC8F'
                     }
-                    cores = [cores_curva.get(curva, '#999999') for curva in curva_counts.index]
+                    cores = [cores_curva.get(str(curva), '#999999') for curva in curva_counts.index]
                     
                     fig_curva = go.Figure(data=[go.Pie(
-                        labels=curva_counts.index,
+                        labels=[str(label) for label in curva_counts.index],
                         values=curva_counts.values,
-                        marker=dict(colors=cores),
-                        textposition='inside',
-                        textinfo='label+percent'
+                        marker=dict(colors=cores, line=dict(color='#000000', width=2)),
+                        textposition='auto',
+                        textinfo='label+percent',
+                        hoverinfo='label+value+percent'
                     )])
                     fig_curva.update_layout(
                         height=400,
                         margin=dict(l=0, r=0, t=0, b=0),
-                        showlegend=True
+                        showlegend=True,
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        font=dict(color='#FFFFFF', size=12)
                     )
                     st.plotly_chart(fig_curva, use_container_width=True)
                 else:
@@ -987,15 +995,15 @@ with tab4:
             col1, col2, col3 = st.columns(3)
             
             with col1:
-                saudaveis = len(df_dashboard[df_dashboard['Status'] == 'Saudavel']) if 'Status' in df_dashboard.columns else 0
+                saudaveis = len(df_dashboard[df_dashboard['Status'] == '🟢 Saudável']) if 'Status' in df_dashboard.columns else 0
                 st.metric("Produtos Saudaveis", saudaveis, delta=None)
             
             with col2:
-                alerta = len(df_dashboard[df_dashboard['Status'] == 'Alerta']) if 'Status' in df_dashboard.columns else 0
+                alerta = len(df_dashboard[df_dashboard['Status'] == '🟡 Alerta']) if 'Status' in df_dashboard.columns else 0
                 st.metric("Produtos em Alerta", alerta, delta=None)
             
             with col3:
-                prejuizo = len(df_dashboard[df_dashboard['Status'] == 'Prejuizo']) if 'Status' in df_dashboard.columns else 0
+                prejuizo = len(df_dashboard[df_dashboard['Status'] == '🔴 Prejuízo']) if 'Status' in df_dashboard.columns else 0
                 st.metric("Produtos em Prejuizo", prejuizo, delta=None)
             
             st.markdown("---")
@@ -1024,7 +1032,7 @@ with tab4:
             # Filtrar produtos Curva B e C que estão Saudáveis
             oportunidades = df_dashboard[
                 ((df_dashboard['Curva ABC'] == 'B') | (df_dashboard['Curva ABC'] == 'C')) &
-                (df_dashboard['Status'] == 'Saudavel')
+                (df_dashboard['Status'] == '🟢 Saudável')
             ]
             
             if len(oportunidades) > 0:
