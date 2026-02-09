@@ -38,6 +38,57 @@ class PromotionExporter:
                 "Preço de desconto",
                 "Limite de compra (Opcional)",
             ]
+        },
+        "Mercado Livre": {
+            "colunas_saida": [
+                "TITLE",
+                "ITEM_ID",
+                "SKU",
+                "ORIGINAL_PRICE",
+                "DISCOUNT_PERCENTAGE",
+                "FINAL_PRICE",
+                "SUGGESTION",
+                "RECEIVES",
+                "LOYALTY_DISCOUNT_PERCENTAGE",
+                "LOYALTY_PRICE",
+                "LOYALTY_RECEIVES",
+                "STATUS",
+                "ACTION",
+                "ERRORS"
+            ],
+            "tem_cabecalhos_customizados": True,
+            "cabecalho_linha_1": [
+                "Título do anúncio ",
+                "Número do anúncio ",
+                "SKU ",
+                "Preço original ",
+                "Desconto ",
+                "Desconto ",
+                "Desconto ",
+                "Desconto ",
+                "Desconto exclusivo Meli+ \n Ofereça um desconto para assinantes do Meli+, eles compram 78% a mais do que outras pessoas. É opcional.",
+                "Desconto exclusivo Meli+ ",
+                "Desconto exclusivo Meli+ ",
+                "Status da promoção ",
+                "O que você quer fazer com este anúncio? ",
+                "Observações e erros \nNão altere este campo"
+            ],
+            "cabecalho_linha_2": [
+                None,
+                None,
+                None,
+                None,
+                "Porcentagem",
+                "Preço final",
+                "Avaliação do desconto",
+                "Você recebe",
+                "Porcentagem",
+                "Preço final",
+                "Você recebe",
+                None,
+                None,
+                None
+            ]
         }
     }
     
@@ -252,6 +303,43 @@ class PromotionExporter:
                 df_marketplace[col] = df_norm["_preco_desconto"]
             elif col == "Limite de compra (Opcional)":
                 df_marketplace[col] = ""  # Vazio
+        
+        # Mapear para Mercado Livre
+        if self.marketplace == "Mercado Livre":
+            df_ml = pd.DataFrame()
+            
+            for col in self.template["colunas_saida"]:
+                if col == "TITLE":
+                    df_ml[col] = df_norm["_descricao_original"]
+                elif col == "ITEM_ID":
+                    df_ml[col] = df_norm["_id_original"]
+                elif col == "SKU":
+                    df_ml[col] = df_norm["_id_original"]
+                elif col == "ORIGINAL_PRICE":
+                    df_ml[col] = df_norm["_preco_original"].round(2)
+                elif col == "DISCOUNT_PERCENTAGE":
+                    # Calcular percentual de desconto
+                    df_ml[col] = int(desconto_percent * 100)
+                elif col == "FINAL_PRICE":
+                    df_ml[col] = df_norm["_preco_desconto"]
+                elif col == "SUGGESTION":
+                    df_ml[col] = ""
+                elif col == "RECEIVES":
+                    df_ml[col] = ""
+                elif col == "LOYALTY_DISCOUNT_PERCENTAGE":
+                    df_ml[col] = ""
+                elif col == "LOYALTY_PRICE":
+                    df_ml[col] = ""
+                elif col == "LOYALTY_RECEIVES":
+                    df_ml[col] = ""
+                elif col == "STATUS":
+                    df_ml[col] = "Ativo"
+                elif col == "ACTION":
+                    df_ml[col] = "Participar"
+                elif col == "ERRORS":
+                    df_ml[col] = ""
+            
+            return df_ml
         
         return df_marketplace
     

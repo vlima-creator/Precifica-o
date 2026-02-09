@@ -1726,7 +1726,7 @@ with tab5:
         with col1:
             marketplace_selecionado = st.selectbox(
                 "Marketplace",
-                options=["Shopee"],  # Começar com Shopee, adicionar outros depois
+                options=["Shopee", "Mercado Livre"],
                 key="promo_marketplace"
             )
         
