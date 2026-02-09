@@ -349,7 +349,7 @@ class PricingCalculatorV2:
         if "Quantidade Vendida" in df.columns:
             # Calcular faturamento (preco_atual * quantidade_vendida)
             df_temp = df.copy()
-            df_temp['Faturamento'] = df_temp['Preco Atual'] * df_temp['Quantidade Vendida']
+            df_temp['Faturamento'] = df_temp['Preço Atual'] * df_temp['Quantidade Vendida']
             
             # Calcular Curva ABC
             curva_abc = self.calcular_curva_abc(df_temp)
