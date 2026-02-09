@@ -1304,18 +1304,25 @@ with tab4:
                     fig_status = go.Figure(data=[go.Pie(
                         labels=[str(label) for label in status_counts.index],
                         values=status_counts.values,
-                        marker=dict(colors=cores, line=dict(color='white', width=2)),
-                        textposition='auto',
+                        marker=dict(
+                            colors=cores,
+                            line=dict(color='rgba(255,255,255,0.3)', width=3),
+                            opacity=0.9
+                        ),
+                        textposition='inside',
                         textinfo='label+percent',
-                        hoverinfo='label+value+percent'
+                        textfont=dict(size=12, color='white', family='Arial Black'),
+                        hovertemplate='<b>%{label}</b><br>%{value} produtos<br>%{percent}<extra></extra>',
+                        pull=[0.05, 0.05, 0.05]
                     )])
                     fig_status.update_layout(
-                        height=350,
-                        margin=dict(l=0, r=0, t=0, b=0),
-                        showlegend=True,
+                        height=380,
+                        margin=dict(l=20, r=20, t=20, b=20),
+                        showlegend=False,
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
-                        font=dict(color='#333', size=11)
+                        font=dict(color='#333', size=11),
+                        hovermode='closest'
                     )
                     st.plotly_chart(fig_status, use_container_width=True)
                 else:
@@ -1339,85 +1346,31 @@ with tab4:
                     fig_curva = go.Figure(data=[go.Pie(
                         labels=[str(label) for label in curva_counts.index],
                         values=curva_counts.values,
-                        marker=dict(colors=cores, line=dict(color='white', width=2)),
-                        textposition='auto',
+                        marker=dict(
+                            colors=cores,
+                            line=dict(color='rgba(255,255,255,0.3)', width=3),
+                            opacity=0.9
+                        ),
+                        textposition='inside',
                         textinfo='label+percent',
-                        hoverinfo='label+value+percent'
+                        textfont=dict(size=12, color='white', family='Arial Black'),
+                        hovertemplate='<b>%{label}</b><br>%{value} produtos<br>%{percent}<extra></extra>',
+                        pull=[0.05, 0.05, 0.05]
                     )])
                     fig_curva.update_layout(
-                        height=350,
-                        margin=dict(l=0, r=0, t=0, b=0),
-                        showlegend=True,
+                        height=380,
+                        margin=dict(l=20, r=20, t=20, b=20),
+                        showlegend=False,
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
-                        font=dict(color='#333', size=11)
+                        font=dict(color='#333', size=11),
+                        hovermode='closest'
                     )
                     st.plotly_chart(fig_curva, use_container_width=True)
                 else:
                     st.info("Sem dados de Curva ABC")
                 st.markdown('</div>', unsafe_allow_html=True)
-            
-            # Novo gráfico em linhas para análise de Curva ABC
-            st.markdown('<div class="section-title">📈 Análise de Tendência por Curva ABC</div>', unsafe_allow_html=True)
-            
-            st.markdown('<div class="chart-container">', unsafe_allow_html=True)
-            
-            if 'Curva ABC' in df_dashboard.columns and 'Status' in df_dashboard.columns:
-                # Preparar dados para gráfico de linhas
-                curvas_list = ['A', 'B', 'C']
-                status_list = ['🟢 Saudável', '🟡 Alerta', '🔴 Prejuízo']
-                
-                data_for_chart = []
-                for status in status_list:
-                    counts = []
-                    for curva in curvas_list:
-                        count = len(df_dashboard[
-                            (df_dashboard['Curva ABC'].astype(str).str.contains(curva, na=False)) &
-                            (df_dashboard['Status'].astype(str).str.contains(status.replace('🟢 ', '').replace('🟡 ', '').replace('🔴 ', ''), na=False))
-                        ])
-                        counts.append(count)
-                    
-                    cor_status = {
-                        '🟢 Saudável': '#22C55E',
-                        '🟡 Alerta': '#EAB308',
-                        '🔴 Prejuízo': '#EF4444'
-                    }
-                    
-                    data_for_chart.append(go.Scatter(
-                        x=['Curva A', 'Curva B', 'Curva C'],
-                        y=counts,
-                        mode='lines+markers',
-                        name=status,
-                        line=dict(color=cor_status.get(status, '#999999'), width=3),
-                        marker=dict(size=10, symbol='circle'),
-                        hovertemplate='<b>%{x}</b><br>%{y} produtos<extra></extra>'
-                    ))
-                
-                fig_lines = go.Figure(data=data_for_chart)
-                fig_lines.update_layout(
-                    title='Distribuição de Status por Curva ABC',
-                    xaxis_title='Curva ABC',
-                    yaxis_title='Quantidade de Produtos',
-                    height=400,
-                    hovermode='x unified',
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color='#333', size=11),
-                    margin=dict(l=50, r=50, t=50, b=50),
-                    legend=dict(
-                        x=0.02,
-                        y=0.98,
-                        bgcolor='rgba(255,255,255,0.8)',
-                        bordercolor='#ddd',
-                        borderwidth=1
-                    )
-                )
-                
-                st.plotly_chart(fig_lines, use_container_width=True)
-            else:
-                st.info("Dados insuficientes para gráfico de linhas")
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+
             
             st.markdown("---")
             
