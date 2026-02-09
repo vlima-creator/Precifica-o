@@ -907,17 +907,20 @@ with tab3:
 with tab4:
     st.markdown("### Dashboard de Análise")
     
-    if df_calculadora is None or len(df_calculadora) == 0:
+    # Obter dados da calculadora do session_state
+    df_dashboard = st.session_state.resultado_calculadora if 'resultado_calculadora' in st.session_state else None
+    
+    if df_dashboard is None or len(df_dashboard) == 0:
         st.info("Carregue um relatório e calcule a precificação para visualizar o dashboard")
     else:
         try:
             import plotly.graph_objects as go
             
             # Contar produtos por status
-            status_counts = df_calculadora['Status'].value_counts() if 'Status' in df_calculadora.columns else pd.Series()
+            status_counts = df_dashboard['Status'].value_counts() if 'Status' in df_dashboard.columns else pd.Series()
             
             # Contar produtos por curva ABC
-            curva_counts = df_calculadora['Curva ABC'].value_counts() if 'Curva ABC' in df_calculadora.columns else pd.Series()
+            curva_counts = df_dashboard['Curva ABC'].value_counts() if 'Curva ABC' in df_dashboard.columns else pd.Series()
             
             st.markdown("---")
             
@@ -984,15 +987,15 @@ with tab4:
             col1, col2, col3 = st.columns(3)
             
             with col1:
-                saudaveis = len(df_calculadora[df_calculadora['Status'] == 'Saudavel']) if 'Status' in df_calculadora.columns else 0
+                saudaveis = len(df_dashboard[df_dashboard['Status'] == 'Saudavel']) if 'Status' in df_dashboard.columns else 0
                 st.metric("Produtos Saudaveis", saudaveis, delta=None)
             
             with col2:
-                alerta = len(df_calculadora[df_calculadora['Status'] == 'Alerta']) if 'Status' in df_calculadora.columns else 0
+                alerta = len(df_dashboard[df_dashboard['Status'] == 'Alerta']) if 'Status' in df_dashboard.columns else 0
                 st.metric("Produtos em Alerta", alerta, delta=None)
             
             with col3:
-                prejuizo = len(df_calculadora[df_calculadora['Status'] == 'Prejuizo']) if 'Status' in df_calculadora.columns else 0
+                prejuizo = len(df_dashboard[df_dashboard['Status'] == 'Prejuizo']) if 'Status' in df_dashboard.columns else 0
                 st.metric("Produtos em Prejuizo", prejuizo, delta=None)
             
             st.markdown("---")
@@ -1002,15 +1005,15 @@ with tab4:
             col1, col2, col3 = st.columns(3)
             
             with col1:
-                curva_a = len(df_calculadora[df_calculadora['Curva ABC'] == 'A']) if 'Curva ABC' in df_calculadora.columns else 0
+                curva_a = len(df_dashboard[df_dashboard['Curva ABC'] == 'A']) if 'Curva ABC' in df_dashboard.columns else 0
                 st.metric("Curva A (80%)", curva_a, delta=None)
             
             with col2:
-                curva_b = len(df_calculadora[df_calculadora['Curva ABC'] == 'B']) if 'Curva ABC' in df_calculadora.columns else 0
+                curva_b = len(df_dashboard[df_dashboard['Curva ABC'] == 'B']) if 'Curva ABC' in df_dashboard.columns else 0
                 st.metric("Curva B (15%)", curva_b, delta=None)
             
             with col3:
-                curva_c = len(df_calculadora[df_calculadora['Curva ABC'] == 'C']) if 'Curva ABC' in df_calculadora.columns else 0
+                curva_c = len(df_dashboard[df_dashboard['Curva ABC'] == 'C']) if 'Curva ABC' in df_dashboard.columns else 0
                 st.metric("Curva C (5%)", curva_c, delta=None)
             
             st.markdown("---")
@@ -1019,9 +1022,9 @@ with tab4:
             st.markdown("**Oportunidades de Acao**")
             
             # Filtrar produtos Curva B e C que estão Saudáveis
-            oportunidades = df_calculadora[
-                ((df_calculadora['Curva ABC'] == 'B') | (df_calculadora['Curva ABC'] == 'C')) &
-                (df_calculadora['Status'] == 'Saudavel')
+            oportunidades = df_dashboard[
+                ((df_dashboard['Curva ABC'] == 'B') | (df_dashboard['Curva ABC'] == 'C')) &
+                (df_dashboard['Status'] == 'Saudavel')
             ]
             
             if len(oportunidades) > 0:
