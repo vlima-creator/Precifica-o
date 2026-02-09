@@ -710,6 +710,7 @@ with tab1:
             <li><strong>Simulador:</strong> Teste diferentes margens e preços</li>
             <li><strong>Relatórios:</strong> Exporte dados em Excel profissional</li>
             <li><strong>Dashboard:</strong> Visualizações interativas e análises detalhadas</li>
+            <li><strong>Estratégias Promocionais:</strong> Gere templates de promoções para Shopee e Mercado Livre com descontos calculados</li>
         </ul>
         """, unsafe_allow_html=True)
     
@@ -1733,13 +1734,13 @@ with tab5:
     # Header
     st.markdown("""
     <div class="promo-header">
-        <div class="promo-title">🎯 Estratégias Promocionais</div>
+        <div class="promo-title"> Estratégias Promocionais</div>
         <div class="promo-subtitle">Configure descontos por categoria e exporte para o marketplace selecionado</div>
     </div>
     """, unsafe_allow_html=True)
     
     if st.session_state.relatorio_vendas is None or st.session_state.relatorio_vendas.empty:
-        st.info("📊 Carregue um relatório na sidebar para começar")
+        st.info("Carregue um relatório na sidebar para começar")
     else:
         # Seção 1: Seleção de Marketplace
         st.markdown("""
