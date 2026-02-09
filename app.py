@@ -1306,8 +1306,7 @@ with tab4:
                         values=status_counts.values,
                         marker=dict(
                             colors=cores,
-                            line=dict(color='rgba(255,255,255,0.3)', width=3),
-                            opacity=0.9
+                            line=dict(color='rgba(255,255,255,0.3)', width=3)
                         ),
                         textposition='inside',
                         textinfo='label+percent',
@@ -1348,8 +1347,7 @@ with tab4:
                         values=curva_counts.values,
                         marker=dict(
                             colors=cores,
-                            line=dict(color='rgba(255,255,255,0.3)', width=3),
-                            opacity=0.9
+                            line=dict(color='rgba(255,255,255,0.3)', width=3)
                         ),
                         textposition='inside',
                         textinfo='label+percent',
