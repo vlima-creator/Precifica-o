@@ -41,20 +41,20 @@ class PromotionExporter:
         },
         "Mercado Livre": {
             "colunas_saida": [
-                "TITLE",
-                "ITEM_ID",
+                "Título do anúncio",
+                "Número do anúncio",
                 "SKU",
-                "ORIGINAL_PRICE",
-                "DISCOUNT_PERCENTAGE",
-                "FINAL_PRICE",
-                "SUGGESTION",
-                "RECEIVES",
-                "LOYALTY_DISCOUNT_PERCENTAGE",
-                "LOYALTY_PRICE",
-                "LOYALTY_RECEIVES",
-                "STATUS",
-                "ACTION",
-                "ERRORS"
+                "Preço original",
+                "Desconto (Porcentagem)",
+                "Desconto (Preço final)",
+                "Desconto (Avaliação)",
+                "Desconto (Você recebe)",
+                "Desconto exclusivo Meli+ (Porcentagem)",
+                "Desconto exclusivo Meli+ (Preço final)",
+                "Desconto exclusivo Meli+ (Você recebe)",
+                "Status da promoção",
+                "O que você quer fazer com este anúncio?",
+                "Observações e erros"
             ],
             "tem_cabecalhos_customizados": True,
             "cabecalho_linha_1": [
@@ -285,34 +285,34 @@ class PromotionExporter:
             df_ml = pd.DataFrame()
             
             for col in self.template["colunas_saida"]:
-                if col == "TITLE":
+                if col == "Título do anúncio":
                     df_ml[col] = df_norm["_descricao_original"]
-                elif col == "ITEM_ID":
+                elif col == "Número do anúncio":
                     df_ml[col] = df_norm["_id_original"]
                 elif col == "SKU":
                     df_ml[col] = df_norm["_id_original"]
-                elif col == "ORIGINAL_PRICE":
+                elif col == "Preço original":
                     df_ml[col] = df_norm["_preco_original"].round(2)
-                elif col == "DISCOUNT_PERCENTAGE":
+                elif col == "Desconto (Porcentagem)":
                     # Calcular percentual de desconto (ex: 0.05 -> 5)
                     df_ml[col] = int(round(desconto_percent * 100))
-                elif col == "FINAL_PRICE":
+                elif col == "Desconto (Preço final)":
                     df_ml[col] = df_norm["_preco_desconto"].round(2)
-                elif col == "SUGGESTION":
+                elif col == "Desconto (Avaliação)":
                     df_ml[col] = ""
-                elif col == "RECEIVES":
+                elif col == "Desconto (Você recebe)":
                     df_ml[col] = ""
-                elif col == "LOYALTY_DISCOUNT_PERCENTAGE":
+                elif col == "Desconto exclusivo Meli+ (Porcentagem)":
                     df_ml[col] = ""
-                elif col == "LOYALTY_PRICE":
+                elif col == "Desconto exclusivo Meli+ (Preço final)":
                     df_ml[col] = ""
-                elif col == "LOYALTY_RECEIVES":
+                elif col == "Desconto exclusivo Meli+ (Você recebe)":
                     df_ml[col] = ""
-                elif col == "STATUS":
+                elif col == "Status da promoção":
                     df_ml[col] = "Ativo"
-                elif col == "ACTION":
+                elif col == "O que você quer fazer com este anúncio?":
                     df_ml[col] = "Participar"
-                elif col == "ERRORS":
+                elif col == "Observações e erros":
                     df_ml[col] = ""
             
             return df_ml
@@ -414,8 +414,8 @@ class PromotionExporter:
             dict com métricas de impacto
         """
         if self.marketplace == "Mercado Livre":
-            col_preco_original = "ORIGINAL_PRICE"
-            col_preco_desconto = "FINAL_PRICE"
+            col_preco_original = "Preço original"
+            col_preco_desconto = "Desconto (Preço final)"
         else:
             col_preco_original = "Preço original (opcional)"
             col_preco_desconto = "Preço de desconto"
@@ -447,8 +447,8 @@ class PromotionExporter:
         impacto = self.calcular_impacto(df_marketplace, df_original)
         
         if self.marketplace == "Mercado Livre":
-            col_preco_original = "ORIGINAL_PRICE"
-            col_preco_desconto = "FINAL_PRICE"
+            col_preco_original = "Preço original"
+            col_preco_desconto = "Desconto (Preço final)"
         else:
             col_preco_original = "Preço original (opcional)"
             col_preco_desconto = "Preço de desconto"
