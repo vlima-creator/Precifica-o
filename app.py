@@ -902,3 +902,174 @@ with tab3:
                         )
             
 
+
+# ============ ABA DASHBOARD ============
+with tab_dashboard:
+    st.markdown("### Dashboard de Análise")
+    
+    if df_calculadora is None or len(df_calculadora) == 0:
+        st.info("Carregue um relatório e calcule a precificação para visualizar o dashboard")
+    else:
+        try:
+            import plotly.graph_objects as go
+            
+            # Contar produtos por status
+            status_counts = df_calculadora['Status'].value_counts() if 'Status' in df_calculadora.columns else pd.Series()
+            
+            # Contar produtos por curva ABC
+            curva_counts = df_calculadora['Curva ABC'].value_counts() if 'Curva ABC' in df_calculadora.columns else pd.Series()
+            
+            st.markdown("---")
+            
+            # Gráficos em duas colunas
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("**Produtos por Status**")
+                if len(status_counts) > 0:
+                    # Mapear cores para status
+                    cores_status = {
+                        'Saudavel': '#228B22',
+                        'Alerta': '#FFA500',
+                        'Prejuizo': '#FF6B6B'
+                    }
+                    cores = [cores_status.get(status, '#999999') for status in status_counts.index]
+                    
+                    fig_status = go.Figure(data=[go.Pie(
+                        labels=status_counts.index,
+                        values=status_counts.values,
+                        marker=dict(colors=cores),
+                        textposition='inside',
+                        textinfo='label+percent'
+                    )])
+                    fig_status.update_layout(
+                        height=400,
+                        margin=dict(l=0, r=0, t=0, b=0),
+                        showlegend=True
+                    )
+                    st.plotly_chart(fig_status, use_container_width=True)
+                else:
+                    st.info("Sem dados de status")
+            
+            with col2:
+                st.markdown("**Produtos por Curva ABC**")
+                if len(curva_counts) > 0:
+                    cores_curva = {
+                        'A': '#556B2F',
+                        'B': '#6B8E23',
+                        'C': '#8FBC8F'
+                    }
+                    cores = [cores_curva.get(curva, '#999999') for curva in curva_counts.index]
+                    
+                    fig_curva = go.Figure(data=[go.Pie(
+                        labels=curva_counts.index,
+                        values=curva_counts.values,
+                        marker=dict(colors=cores),
+                        textposition='inside',
+                        textinfo='label+percent'
+                    )])
+                    fig_curva.update_layout(
+                        height=400,
+                        margin=dict(l=0, r=0, t=0, b=0),
+                        showlegend=True
+                    )
+                    st.plotly_chart(fig_curva, use_container_width=True)
+                else:
+                    st.info("Sem dados de Curva ABC")
+            
+            st.markdown("---")
+            
+            # Métricas de totais
+            st.markdown("**Totais por Status**")
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                saudaveis = len(df_calculadora[df_calculadora['Status'] == 'Saudavel']) if 'Status' in df_calculadora.columns else 0
+                st.metric("Produtos Saudaveis", saudaveis, delta=None)
+            
+            with col2:
+                alerta = len(df_calculadora[df_calculadora['Status'] == 'Alerta']) if 'Status' in df_calculadora.columns else 0
+                st.metric("Produtos em Alerta", alerta, delta=None)
+            
+            with col3:
+                prejuizo = len(df_calculadora[df_calculadora['Status'] == 'Prejuizo']) if 'Status' in df_calculadora.columns else 0
+                st.metric("Produtos em Prejuizo", prejuizo, delta=None)
+            
+            st.markdown("---")
+            
+            # Métricas de Curva ABC
+            st.markdown("**Totais por Curva ABC**")
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                curva_a = len(df_calculadora[df_calculadora['Curva ABC'] == 'A']) if 'Curva ABC' in df_calculadora.columns else 0
+                st.metric("Curva A (80%)", curva_a, delta=None)
+            
+            with col2:
+                curva_b = len(df_calculadora[df_calculadora['Curva ABC'] == 'B']) if 'Curva ABC' in df_calculadora.columns else 0
+                st.metric("Curva B (15%)", curva_b, delta=None)
+            
+            with col3:
+                curva_c = len(df_calculadora[df_calculadora['Curva ABC'] == 'C']) if 'Curva ABC' in df_calculadora.columns else 0
+                st.metric("Curva C (5%)", curva_c, delta=None)
+            
+            st.markdown("---")
+            
+            # Seção de Oportunidades
+            st.markdown("**Oportunidades de Acao**")
+            
+            # Filtrar produtos Curva B e C que estão Saudáveis
+            oportunidades = df_calculadora[
+                ((df_calculadora['Curva ABC'] == 'B') | (df_calculadora['Curva ABC'] == 'C')) &
+                (df_calculadora['Status'] == 'Saudavel')
+            ]
+            
+            if len(oportunidades) > 0:
+                st.success(f"Encontradas {len(oportunidades)} oportunidades de acao")
+                
+                # Exibir informações das oportunidades
+                st.markdown("**Produtos com Potencial para Acao Diferenciada**")
+                
+                # Colunas para exibir
+                colunas_oportunidade = []
+                if 'SKU ou MLB' in oportunidades.columns:
+                    colunas_oportunidade.append('SKU ou MLB')
+                if 'Titulo' in oportunidades.columns:
+                    colunas_oportunidade.append('Titulo')
+                if 'Curva ABC' in oportunidades.columns:
+                    colunas_oportunidade.append('Curva ABC')
+                if 'Preco Atual (R$)' in oportunidades.columns:
+                    colunas_oportunidade.append('Preco Atual (R$)')
+                if 'Lucro R$' in oportunidades.columns:
+                    colunas_oportunidade.append('Lucro R$')
+                if 'Margem Bruta %' in oportunidades.columns:
+                    colunas_oportunidade.append('Margem Bruta %')
+                if 'Status' in oportunidades.columns:
+                    colunas_oportunidade.append('Status')
+                
+                if colunas_oportunidade:
+                    st.dataframe(
+                        oportunidades[colunas_oportunidade].reset_index(drop=True),
+                        use_container_width=True,
+                        hide_index=True
+                    )
+                    
+                    # Botão para baixar oportunidades
+                    buffer = BytesIO()
+                    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+                        oportunidades[colunas_oportunidade].to_excel(writer, sheet_name='Oportunidades', index=False)
+                    
+                    buffer.seek(0)
+                    st.download_button(
+                        label="Baixar Oportunidades em Excel",
+                        data=buffer,
+                        file_name=f"oportunidades_{marketplace_selecionado}.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        key="btn_download_oportunidades"
+                    )
+            else:
+                st.info("Nenhuma oportunidade encontrada. Todos os produtos Curva B e C estao em Alerta ou Prejuizo.")
+        
+        except Exception as e:
+            st.error(f"Erro ao gerar dashboard: {str(e)}")
+
