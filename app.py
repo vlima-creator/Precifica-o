@@ -442,12 +442,63 @@ with st.sidebar.expander("Carregar Relatório de Vendas", expanded=False):
     st.markdown("""
     **Formato esperado:**
     - **A:** SKU/MLB
-    - **B:** Título
+    - **B:** Titulo
     - **C:** Custo Produto (R$)
     - **D:** Frete (R$)
-    - **E:** Preço Atual (R$)
-    - **F:** Tipo de Anúncio (opcional)
+    - **E:** Preco Atual (R$)
+    - **F:** Tipo de Anuncio (opcional)
+    - **G:** Quantidade Vendida (opcional - para Curva ABC)
     """)
+    
+    st.markdown("")
+    
+    # Criar e disponibilizar modelo de planilha
+    from io import BytesIO
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment
+    
+    df_modelo = pd.DataFrame({
+        'SKU/MLB': ['SKU001', 'SKU002', 'SKU003'],
+        'Titulo': ['Produto Exemplo 1', 'Produto Exemplo 2', 'Produto Exemplo 3'],
+        'Custo Produto (R$)': [25.50, 45.00, 15.75],
+        'Frete (R$)': [8.00, 12.00, 5.00],
+        'Preco Atual (R$)': [89.90, 149.90, 59.90],
+        'Tipo de Anuncio': ['Classico', 'Premium', 'Classico'],
+        'Quantidade Vendida': [150, 85, 320]
+    })
+    
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df_modelo.to_excel(writer, index=False, sheet_name='Produtos')
+        
+        # Formatar planilha
+        ws = writer.sheets['Produtos']
+        header_fill = PatternFill(start_color="556B2F", end_color="556B2F", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF")
+        
+        for cell in ws[1]:
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+        
+        # Ajustar largura das colunas
+        ws.column_dimensions['A'].width = 15
+        ws.column_dimensions['B'].width = 25
+        ws.column_dimensions['C'].width = 18
+        ws.column_dimensions['D'].width = 15
+        ws.column_dimensions['E'].width = 18
+        ws.column_dimensions['F'].width = 18
+        ws.column_dimensions['G'].width = 20
+    
+    output.seek(0)
+    
+    st.download_button(
+        label="Baixar Modelo de Planilha",
+        data=output.getvalue(),
+        file_name="modelo_precificacao.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=True
+    )
     
     st.markdown("")
     
