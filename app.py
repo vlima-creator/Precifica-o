@@ -1704,6 +1704,33 @@ with tab5:
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         text-align: center;
     }
+    .step-container {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(102, 126, 234, 0.3);
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 25px;
+        backdrop-filter: blur(10px);
+    }
+    .step-number {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 40px;
+        font-weight: 700;
+        font-size: 1.1em;
+        margin-right: 15px;
+    }
+    .step-title {
+        display: inline-block;
+        color: white;
+        font-size: 1.1em;
+        font-weight: 600;
+    }
     </style>
     """, unsafe_allow_html=True)
     
@@ -1719,7 +1746,12 @@ with tab5:
         st.info("📊 Carregue um relatório na sidebar para começar")
     else:
         # Seção 1: Seleção de Marketplace
-        st.markdown('<div class="section-title-promo">1. Selecione o Marketplace</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="step-container">
+            <span class="step-number">1</span>
+            <span class="step-title">Selecione o Marketplace</span>
+        </div>
+        """, unsafe_allow_html=True)
         
         col1, col2 = st.columns([2, 1])
         
@@ -1736,7 +1768,12 @@ with tab5:
             st.info(f"📦 Canal: **{marketplace_selecionado}**")
         
         # Seção 2: Seleção de Categoria
-        st.markdown('<div class="section-title-promo">2. Selecione a Categoria de Produtos</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="step-container">
+            <span class="step-number">2</span>
+            <span class="step-title">Selecione a Categoria de Produtos</span>
+        </div>
+        """, unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
         
@@ -1770,7 +1807,12 @@ with tab5:
         categoria_filtro = categoria_map[categoria_selecionada]
         
         # Seção 3: Configuração de Desconto e Margem
-        st.markdown('<div class="section-title-promo">3. Configure o Desconto e Critérios</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="step-container">
+            <span class="step-number">3</span>
+            <span class="step-title">Configure o Desconto e Critérios</span>
+        </div>
+        """, unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns(3)
         
