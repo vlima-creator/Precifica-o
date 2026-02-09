@@ -830,11 +830,78 @@ with tab1:
 
 # ============ ABA 2: CALCULADORA ============
 with tab2:
-    st.markdown('<div class="section-header">Calculadora de Precificação</div>', unsafe_allow_html=True)
+    # CSS para Calculadora
+    st.markdown("""
+    <style>
+    .calc-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 30px 20px;
+        border-radius: 12px;
+        color: white;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .calc-title {
+        font-size: 2em;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    .calc-subtitle {
+        font-size: 0.95em;
+        opacity: 0.9;
+    }
+    .input-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    .metric-card-calc {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+        border-radius: 12px;
+        border-top: 4px solid #667eea;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    .section-title-calc {
+        font-size: 1.3em;
+        font-weight: 700;
+        color: #333;
+        margin: 30px 0 20px 0;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #667eea;
+    }
+    .filter-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Header
+    st.markdown("""
+    <div class="calc-header">
+        <div class="calc-title">🧮 Calculadora de Precificação</div>
+        <div class="calc-subtitle">Calcule preços, margens e rentabilidade de seus produtos</div>
+    </div>
+    """, unsafe_allow_html=True)
     
     if st.session_state.relatorio_vendas is None or st.session_state.relatorio_vendas.empty:
-        st.warning("⚠️ Nenhum relatório carregado. Carregue um arquivo no Sidebar.")
+        st.info("📥 Carregue um relatório na sidebar para começar")
     else:
+        st.markdown('<div class="section-title-calc">⚙️ Configuração</div>', unsafe_allow_html=True)
+        
         col1, col2 = st.columns(2)
         
         with col1:
@@ -851,7 +918,7 @@ with tab2:
                 key="calc_regime"
             )
         
-        if st.button("🔄 Calcular Precificação", use_container_width=True):
+        if st.button("🔄 Calcular Precificação", use_container_width=True, key="btn_calc"):
             try:
                 calculator = PricingCalculatorV2(
                     marketplaces=st.session_state.marketplaces,
@@ -879,20 +946,44 @@ with tab2:
             df_resultado = st.session_state.resultado_calculadora
             
             # Métricas
+            st.markdown('<div class="section-title-calc">📊 Resumo dos Resultados</div>', unsafe_allow_html=True)
+            
             col1, col2, col3, col4 = st.columns(4)
             with col1:
-                st.metric("Total de SKUs", len(df_resultado))
+                st.markdown(f"""
+                <div class="metric-card-calc">
+                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Total de SKUs</div>
+                    <div style="font-size: 2em; font-weight: 700; color: #667eea; margin: 10px 0;">{len(df_resultado)}</div>
+                </div>
+                """, unsafe_allow_html=True)
             with col2:
-                st.metric("Margem Média", formatar_percentual_1casa(df_resultado['Margem Bruta %'].mean()))
+                st.markdown(f"""
+                <div class="metric-card-calc">
+                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Margem Média</div>
+                    <div style="font-size: 2em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_percentual_1casa(df_resultado['Margem Bruta %'].mean())}</div>
+                </div>
+                """, unsafe_allow_html=True)
             with col3:
-                st.metric("Lucro Total", formatar_moeda(df_resultado['Lucro R$'].sum()))
+                st.markdown(f"""
+                <div class="metric-card-calc">
+                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Lucro Total</div>
+                    <div style="font-size: 2em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_moeda(df_resultado['Lucro R$'].sum())}</div>
+                </div>
+                """, unsafe_allow_html=True)
             with col4:
                 saudaveis = len(df_resultado[df_resultado['Status'] == '🟢 Saudável'])
-                st.metric("Produtos Saudáveis", f"{saudaveis}/{len(df_resultado)}")
+                st.markdown(f"""
+                <div class="metric-card-calc" style="border-top-color: #22C55E;">
+                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Saudáveis</div>
+                    <div style="font-size: 2em; font-weight: 700; color: #22C55E; margin: 10px 0;">{saudaveis}/{len(df_resultado)}</div>
+                </div>
+                """, unsafe_allow_html=True)
             
-            st.divider()
+            st.markdown("---")
             
             # Filtros
+            st.markdown('<div class="section-title-calc">🔍 Filtros e Busca</div>', unsafe_allow_html=True)
+            
             col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
             
             with col1:
@@ -903,7 +994,6 @@ with tab2:
                 filtro_status = st.selectbox("Filtrar por Status", status_opcoes)
             
             with col3:
-                # Adicionar filtro por Tipo de Anuncio se for Mercado Livre
                 if marketplace == "Mercado Livre" and "Tipo de Anuncio" in df_resultado.columns:
                     tipo_anuncio_opcoes = ["Todos"] + list(df_resultado['Tipo de Anuncio'].unique())
                     filtro_tipo_anuncio = st.selectbox("Filtrar por Tipo", tipo_anuncio_opcoes)
@@ -911,7 +1001,6 @@ with tab2:
                     filtro_tipo_anuncio = "Todos"
             
             with col4:
-                # Adicionar filtro por Curva ABC se existir
                 if "Curva ABC" in df_resultado.columns:
                     curva_abc_opcoes = ["Todos"] + sorted(df_resultado['Curva ABC'].unique())
                     filtro_curva_abc = st.selectbox("Filtrar por Curva ABC", curva_abc_opcoes)
@@ -927,27 +1016,30 @@ with tab2:
             if filtro_status != "Todos":
                 df_filtrado = df_filtrado[df_filtrado['Status'] == filtro_status]
             
-            # Filtro por Tipo de Anuncio (Mercado Livre)
             if marketplace == "Mercado Livre" and filtro_tipo_anuncio != "Todos" and "Tipo de Anuncio" in df_filtrado.columns:
                 df_filtrado = df_filtrado[df_filtrado['Tipo de Anuncio'] == filtro_tipo_anuncio]
             
-            # Filtro por Curva ABC
             if filtro_curva_abc != "Todos" and "Curva ABC" in df_filtrado.columns:
                 df_filtrado = df_filtrado[df_filtrado['Curva ABC'] == filtro_curva_abc]
             
+            st.markdown("---")
+            
             # Tabela
-            st.markdown(f"**Detalhes da Precificação** ({len(df_filtrado)} produtos)")
+            st.markdown(f'<div class="section-title-calc">📋 Detalhes da Precificação ({len(df_filtrado)} produtos)</div>', unsafe_allow_html=True)
             st.dataframe(df_filtrado, use_container_width=True, hide_index=True)
             
-            # Downloads individuais
-            st.markdown("**Downloads**")
+            st.markdown("---")
+            
+            # Downloads
+            st.markdown('<div class="section-title-calc">📥 Downloads</div>', unsafe_allow_html=True)
+            
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
                 if len(df_filtrado) > 0:
                     excel_filtrado = formatar_excel_profissional(df_filtrado, "Filtrado")
                     st.download_button(
-                        label="Resultado Filtrado",
+                        label="📊 Resultado Filtrado",
                         data=excel_filtrado,
                         file_name="calculadora_filtrado.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -959,7 +1051,7 @@ with tab2:
                 if len(df_saudaveis) > 0:
                     excel_saudaveis = formatar_excel_profissional(df_saudaveis, "Saudáveis")
                     st.download_button(
-                        label="Produtos Saudáveis",
+                        label="🟢 Saudáveis",
                         data=excel_saudaveis,
                         file_name="calculadora_saudaveis.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -971,7 +1063,7 @@ with tab2:
                 if len(df_alerta) > 0:
                     excel_alerta = formatar_excel_profissional(df_alerta, "Alerta")
                     st.download_button(
-                        label="Produtos em Alerta",
+                        label="🟡 Em Alerta",
                         data=excel_alerta,
                         file_name="calculadora_alerta.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -983,22 +1075,69 @@ with tab2:
                 if len(df_prejuizo) > 0:
                     excel_prejuizo = formatar_excel_profissional(df_prejuizo, "Prejuízo")
                     st.download_button(
-                        label="Produtos em Prejuízo",
+                        label="🔴 Em Prejuízo",
                         data=excel_prejuizo,
                         file_name="calculadora_prejuizo.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         use_container_width=True
                     )
-            
-
 
 # ============ ABA 3: SIMULADOR ============
 with tab3:
-    st.markdown('<div class="section-header">Simulador de Preço Alvo</div>', unsafe_allow_html=True)
+    # CSS para Simulador
+    st.markdown("""
+    <style>
+    .sim-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 30px 20px;
+        border-radius: 12px;
+        color: white;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .sim-title {
+        font-size: 2em;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    .sim-subtitle {
+        font-size: 0.95em;
+        opacity: 0.9;
+    }
+    .metric-card-sim {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+        border-radius: 12px;
+        border-top: 4px solid #667eea;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    .section-title-sim {
+        font-size: 1.3em;
+        font-weight: 700;
+        color: #333;
+        margin: 30px 0 20px 0;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #667eea;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Header
+    st.markdown("""
+    <div class="sim-header">
+        <div class="sim-title">📊 Simulador de Preço Alvo</div>
+        <div class="sim-subtitle">Simule diferentes preços e veja o impacto nas margens</div>
+    </div>
+    """, unsafe_allow_html=True)
     
     if st.session_state.relatorio_vendas is None or st.session_state.relatorio_vendas.empty:
-        st.warning("⚠️ Nenhum relatório carregado. Carregue um arquivo no Sidebar.")
+        st.info("📥 Carregue um relatório na sidebar para começar")
     else:
+        st.markdown('<div class="section-title-sim">⚙️ Configuração</div>', unsafe_allow_html=True)
+        
         col1, col2 = st.columns(2)
         
         with col1:
@@ -1015,7 +1154,7 @@ with tab3:
                 key="sim_regime"
             )
         
-        if st.button("📊 Simular Preços", use_container_width=True):
+        if st.button("📊 Simular Preços", use_container_width=True, key="btn_sim"):
             try:
                 simulator = PriceSimulator(
                     marketplaces=st.session_state.marketplaces,
@@ -1043,22 +1182,51 @@ with tab3:
             df_simulacao = st.session_state.resultado_simulador
             
             # Métricas
+            st.markdown('<div class="section-title-sim">📈 Resumo da Simulação</div>', unsafe_allow_html=True)
+            
             col1, col2, col3, col4, col5 = st.columns(5)
             with col1:
-                st.metric("Preço Médio Sugerido", formatar_moeda(df_simulacao['Preço Sugerido'].mean()))
+                st.markdown(f"""
+                <div class="metric-card-sim">
+                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Preço Médio</div>
+                    <div style="font-size: 1.8em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_moeda(df_simulacao['Preço Sugerido'].mean())}</div>
+                </div>
+                """, unsafe_allow_html=True)
             with col2:
-                st.metric("Preço Promo Médio", formatar_moeda(df_simulacao['Preço Promo Limite'].mean()))
+                st.markdown(f"""
+                <div class="metric-card-sim">
+                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Preço Promo</div>
+                    <div style="font-size: 1.8em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_moeda(df_simulacao['Preço Promo Limite'].mean())}</div>
+                </div>
+                """, unsafe_allow_html=True)
             with col3:
-                st.metric("Lucro Bruto Total", formatar_moeda(df_simulacao['Lucro Bruto'].sum()))
+                st.markdown(f"""
+                <div class="metric-card-sim">
+                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Lucro Bruto</div>
+                    <div style="font-size: 1.8em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_moeda(df_simulacao['Lucro Bruto'].sum())}</div>
+                </div>
+                """, unsafe_allow_html=True)
             with col4:
-                st.metric("Lucro Líquido Total", formatar_moeda(df_simulacao['Lucro Líquido'].sum()))
+                st.markdown(f"""
+                <div class="metric-card-sim">
+                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Lucro Líquido</div>
+                    <div style="font-size: 1.8em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_moeda(df_simulacao['Lucro Líquido'].sum())}</div>
+                </div>
+                """, unsafe_allow_html=True)
             with col5:
                 margem_media = df_simulacao['Margem Líquida %'].mean() if 'Margem Líquida %' in df_simulacao.columns else df_simulacao['Margem Bruta %'].mean()
-                st.metric("Margem Restante", formatar_percentual_1casa(margem_media))
+                st.markdown(f"""
+                <div class="metric-card-sim">
+                    <div style="font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Margem Média</div>
+                    <div style="font-size: 1.8em; font-weight: 700; color: #667eea; margin: 10px 0;">{formatar_percentual_1casa(margem_media)}</div>
+                </div>
+                """, unsafe_allow_html=True)
             
-            st.divider()
+            st.markdown("---")
             
             # Filtros
+            st.markdown('<div class="section-title-sim">🔍 Filtros e Busca</div>', unsafe_allow_html=True)
+            
             col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
             
             with col1:
@@ -1069,7 +1237,6 @@ with tab3:
                 filtro_status = st.selectbox("Filtrar por Status", status_opcoes, key="sim_status")
             
             with col3:
-                # Adicionar filtro por Curva ABC se existir
                 if "Curva ABC" in df_simulacao.columns:
                     curva_abc_opcoes = ["Todos"] + sorted(df_simulacao['Curva ABC'].unique())
                     filtro_curva_abc = st.selectbox("Filtrar por Curva ABC", curva_abc_opcoes, key="sim_curva_abc")
@@ -1088,73 +1255,45 @@ with tab3:
             if 'Status' in df_filtrado.columns and filtro_status != "Todos":
                 df_filtrado = df_filtrado[df_filtrado['Status'] == filtro_status]
             
-            # Filtro por Curva ABC
             if filtro_curva_abc != "Todos" and "Curva ABC" in df_filtrado.columns:
                 df_filtrado = df_filtrado[df_filtrado['Curva ABC'] == filtro_curva_abc]
             
+            st.markdown("---")
+            
             # Tabela
-            st.markdown(f"**Simulação de Preços** ({len(df_filtrado)} produtos)")
+            st.markdown(f'<div class="section-title-sim">📋 Simulação de Preços ({len(df_filtrado)} produtos)</div>', unsafe_allow_html=True)
             st.dataframe(df_filtrado, use_container_width=True, hide_index=True)
             
-            # Downloads individuais
-            st.markdown("**Downloads**")
-            col1, col2, col3, col4 = st.columns(4)
+            st.markdown("---")
+            
+            # Downloads
+            st.markdown('<div class="section-title-sim">📥 Downloads</div>', unsafe_allow_html=True)
+            
+            col1, col2, col3 = st.columns(3)
             
             with col1:
                 if len(df_filtrado) > 0:
-                    excel_filtrado = formatar_excel_profissional(df_filtrado, "Filtrado")
+                    excel_filtrado = formatar_excel_profissional(df_filtrado, "Simulação")
                     st.download_button(
-                        label="Resultado Filtrado",
+                        label="📊 Resultado Filtrado",
                         data=excel_filtrado,
                         file_name="simulador_filtrado.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        use_container_width=True,
-                        key="btn_sim_filtrado"
+                        use_container_width=True
                     )
             
             with col2:
-                if 'Status' in df_simulacao.columns:
-                    df_saudaveis = df_simulacao[df_simulacao['Status'] == '🟢 Saudável']
-                    if len(df_saudaveis) > 0:
-                        excel_saudaveis = formatar_excel_profissional(df_saudaveis, "Saudáveis")
-                        st.download_button(
-                            label="Produtos Saudáveis",
-                            data=excel_saudaveis,
-                            file_name="simulador_saudaveis.xlsx",
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            use_container_width=True,
-                            key="btn_sim_saudaveis"
-                        )
+                excel_completo = formatar_excel_profissional(df_simulacao, "Simulação Completa")
+                st.download_button(
+                    label="📊 Simulação Completa",
+                    data=excel_completo,
+                    file_name="simulador_completo.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True
+                )
             
             with col3:
-                if 'Status' in df_simulacao.columns:
-                    df_alerta = df_simulacao[df_simulacao['Status'].str.contains('Alerta', na=False)]
-                    if len(df_alerta) > 0:
-                        excel_alerta = formatar_excel_profissional(df_alerta, "Alerta")
-                        st.download_button(
-                            label="Produtos em Alerta",
-                            data=excel_alerta,
-                            file_name="simulador_alerta.xlsx",
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            use_container_width=True,
-                            key="btn_sim_alerta"
-                        )
-            
-            with col4:
-                if 'Status' in df_simulacao.columns:
-                    df_prejuizo = df_simulacao[df_simulacao['Status'].str.contains('Prejuízo', na=False)]
-                    if len(df_prejuizo) > 0:
-                        excel_prejuizo = formatar_excel_profissional(df_prejuizo, "Prejuízo")
-                        st.download_button(
-                            label="Produtos em Prejuízo",
-                            data=excel_prejuizo,
-                            file_name="simulador_prejuizo.xlsx",
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            use_container_width=True,
-                            key="btn_sim_prejuizo"
-                        )
-            
-
+                st.write("")
 
 # ============ ABA 4: DASHBOARD ============
 with tab4:
