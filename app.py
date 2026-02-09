@@ -1600,7 +1600,7 @@ with tab4:
             
             oportunidades = df_dashboard[
                 (df_dashboard['Curva ABC'].astype(str).str.contains('B', na=False) | df_dashboard['Curva ABC'].astype(str).str.contains('C', na=False)) &
-                (df_dashboard['Status'] == '🟢 Saudavel')
+                (df_dashboard['Status'] == '🟢 Saudável')
             ]
             
             # Armazenar oportunidades em session_state para uso na aba de Estrategias Promocionais
@@ -1803,6 +1803,9 @@ with tab5:
         if st.button("Processar e Visualizar", use_container_width=True, key="btn_promo_processar"):
             try:
                 with st.spinner("⏳ Processando dados..."):
+                    # Inicializar exportador com o marketplace selecionado
+                    exporter = PromotionExporter(marketplace=marketplace_selecionado)
+                    
                     # Se for oportunidade, usar a lista ja calculada no Dashboard
                     if categoria_filtro == "oportunidade":
                         df_filtrado = st.session_state.get("lista_oportunidades", None)
@@ -1816,7 +1819,6 @@ with tab5:
                             st.error("Erro: Nenhum dado de Dashboard disponivel.")
                             st.stop()
                         
-                        exporter = PromotionExporter(marketplace=marketplace_selecionado)
                         df_filtrado = exporter.filtrar_por_categoria(
                             df_base,
                             categoria=categoria_filtro,
