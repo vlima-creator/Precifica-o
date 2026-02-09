@@ -208,7 +208,7 @@ class PricingCalculatorV2:
         elif margem_bruta >= self.margem_liquida_minima:
             status = "🟡 Alerta"
         else:
-            status = "🔴 Prejuízo/Abaixo"
+            status = "🔴 Prejuízo"
         
         # Determinar tipo de anúncio para exibição
         tipo_anuncio_exibicao = tipo_anuncio if tipo_anuncio else "Padrão"

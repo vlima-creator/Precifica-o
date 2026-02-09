@@ -916,13 +916,25 @@ with tab4:
         try:
             import plotly.graph_objects as go
             
+            # DEBUG: Mostrar informações sobre os dados
+            st.markdown("**DEBUG - Informações dos Dados**")
+            col_debug1, col_debug2 = st.columns(2)
+            with col_debug1:
+                st.info(f"Total de produtos: {len(df_dashboard)}")
+                st.info(f"Colunas disponíveis: {list(df_dashboard.columns)}")
+            with col_debug2:
+                if 'Status' in df_dashboard.columns:
+                    st.info(f"Status únicos: {df_dashboard['Status'].unique().tolist()}")
+                if 'Curva ABC' in df_dashboard.columns:
+                    st.info(f"Curvas ABC únicas: {df_dashboard['Curva ABC'].unique().tolist()}")
+            
+            st.markdown("---")
+            
             # Contar produtos por status
             status_counts = df_dashboard['Status'].value_counts() if 'Status' in df_dashboard.columns else pd.Series()
             
             # Contar produtos por curva ABC
             curva_counts = df_dashboard['Curva ABC'].value_counts() if 'Curva ABC' in df_dashboard.columns else pd.Series()
-            
-            st.markdown("---")
             
             # Gráficos em duas colunas
             col1, col2 = st.columns(2)
@@ -930,7 +942,6 @@ with tab4:
             with col1:
                 st.markdown("**Produtos por Status**")
                 if len(status_counts) > 0:
-                    # Mapear cores para status
                     cores_status = {
                         '🟢 Saudável': '#22C55E',
                         '🟡 Alerta': '#EAB308',
@@ -994,7 +1005,7 @@ with tab4:
             st.markdown("**Análise Detalhada por Curva ABC**")
             
             if 'Curva ABC' in df_dashboard.columns and 'Status' in df_dashboard.columns:
-                curvas = ['A', 'B', 'C']
+                curvas = sorted(df_dashboard['Curva ABC'].unique())
                 for curva in curvas:
                     st.markdown(f"**Curva {curva}**")
                     col1, col2, col3 = st.columns(3)
@@ -1021,13 +1032,6 @@ with tab4:
             
             # Seção de Oportunidades
             st.markdown("**Oportunidades de Acao**")
-            
-            # Debug: mostrar quantos produtos B e C saudáveis existem
-            if 'Curva ABC' in df_dashboard.columns and 'Status' in df_dashboard.columns:
-                curva_b_saudavel = len(df_dashboard[(df_dashboard['Curva ABC'] == 'B') & (df_dashboard['Status'] == '🟢 Saudável')])
-                curva_c_saudavel = len(df_dashboard[(df_dashboard['Curva ABC'] == 'C') & (df_dashboard['Status'] == '🟢 Saudável')])
-                
-                st.info(f"Curva B Saudável: {curva_b_saudavel} | Curva C Saudável: {curva_c_saudavel}")
             
             # Filtrar produtos Curva B e C que estão Saudáveis
             oportunidades = df_dashboard[
@@ -1082,5 +1086,6 @@ with tab4:
                 st.info("Nenhuma oportunidade encontrada. Todos os produtos Curva B e C estao em Alerta ou Prejuizo.")
         
         except Exception as e:
+            st.error(f"Erro ao gerar dashboard: {str(e)}")
             st.error(f"Erro ao gerar dashboard: {str(e)}")
 
