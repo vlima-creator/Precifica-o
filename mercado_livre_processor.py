@@ -49,6 +49,11 @@ class MercadoLivreProcessor:
             "tipo de anuncio": "Tipo de Anúncio",
             "ad type": "Tipo de Anúncio",
             "anuncio": "Tipo de Anúncio",
+            "quantidade vendida": "Quantidade Vendida",
+            "quantidade": "Quantidade Vendida",
+            "quantity": "Quantidade Vendida",
+            "vendas": "Quantidade Vendida",
+            "sales": "Quantidade Vendida",
         }
         
         # Normalizar nomes de colunas
@@ -58,6 +63,10 @@ class MercadoLivreProcessor:
         # Adicionar coluna Tipo de Anúncio se não existir
         if "Tipo de Anúncio" not in df.columns:
             df["Tipo de Anúncio"] = ""  # Vazio por padrão
+        
+        # Adicionar coluna Quantidade Vendida se não existir
+        if "Quantidade Vendida" not in df.columns:
+            df["Quantidade Vendida"] = 0  # Padrão 0 se não informado
         
         # Verificar colunas obrigatórias
         colunas_obrigatorias = ["SKU", "Descrição", "Custo Produto", "Frete", "Preço Atual"]
@@ -102,8 +111,15 @@ class MercadoLivreProcessor:
         # Se ainda tiver valores não reconhecidos, deixar vazio
         df.loc[~df["Tipo de Anúncio"].isin(["Clássico", "Premium", ""]), "Tipo de Anúncio"] = ""
         
+        # Converter Quantidade Vendida para int
+        if "Quantidade Vendida" in df.columns:
+            df["Quantidade Vendida"] = pd.to_numeric(df["Quantidade Vendida"], errors="coerce").fillna(0).astype(int)
+        
         # Selecionar apenas as colunas necessárias
-        df = df[["SKU", "Descrição", "Custo Produto", "Frete", "Preço Atual", "Tipo de Anúncio"]]
+        colunas_selecionadas = ["SKU", "Descrição", "Custo Produto", "Frete", "Preço Atual", "Tipo de Anúncio"]
+        if "Quantidade Vendida" in df.columns:
+            colunas_selecionadas.append("Quantidade Vendida")
+        df = df[colunas_selecionadas]
         
         return df.reset_index(drop=True)
 

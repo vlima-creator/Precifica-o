@@ -589,7 +589,7 @@ with tab2:
             st.divider()
             
             # Filtros
-            col1, col2, col3, col4 = st.columns([2, 2, 2, 1])
+            col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
             
             with col1:
                 pesquisa_sku = st.text_input("Pesquisar por SKU/MLB", placeholder="Digite SKU ou MLB")
@@ -607,8 +607,12 @@ with tab2:
                     filtro_tipo_anuncio = "Todos"
             
             with col4:
-                st.write("")
-                st.write("")
+                # Adicionar filtro por Curva ABC se existir
+                if "Curva ABC" in df_resultado.columns:
+                    curva_abc_opcoes = ["Todos"] + sorted(df_resultado['Curva ABC'].unique())
+                    filtro_curva_abc = st.selectbox("Filtrar por Curva ABC", curva_abc_opcoes)
+                else:
+                    filtro_curva_abc = "Todos"
             
             # Aplicar filtros
             df_filtrado = df_resultado.copy()
@@ -622,6 +626,10 @@ with tab2:
             # Filtro por Tipo de Anuncio (Mercado Livre)
             if marketplace == "Mercado Livre" and filtro_tipo_anuncio != "Todos" and "Tipo de Anuncio" in df_filtrado.columns:
                 df_filtrado = df_filtrado[df_filtrado['Tipo de Anuncio'] == filtro_tipo_anuncio]
+            
+            # Filtro por Curva ABC
+            if filtro_curva_abc != "Todos" and "Curva ABC" in df_filtrado.columns:
+                df_filtrado = df_filtrado[df_filtrado['Curva ABC'] == filtro_curva_abc]
             
             # Tabela
             st.markdown(f"**Detalhes da Precificação** ({len(df_filtrado)} produtos)")
@@ -747,7 +755,7 @@ with tab3:
             st.divider()
             
             # Filtros
-            col1, col2, col3 = st.columns([2, 2, 1])
+            col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
             
             with col1:
                 pesquisa_sku = st.text_input("Pesquisar por SKU/MLB", placeholder="Digite SKU ou MLB", key="sim_pesquisa")
@@ -757,7 +765,14 @@ with tab3:
                 filtro_status = st.selectbox("Filtrar por Status", status_opcoes, key="sim_status")
             
             with col3:
-                st.write("")
+                # Adicionar filtro por Curva ABC se existir
+                if "Curva ABC" in df_simulacao.columns:
+                    curva_abc_opcoes = ["Todos"] + sorted(df_simulacao['Curva ABC'].unique())
+                    filtro_curva_abc = st.selectbox("Filtrar por Curva ABC", curva_abc_opcoes, key="sim_curva_abc")
+                else:
+                    filtro_curva_abc = "Todos"
+            
+            with col4:
                 st.write("")
             
             # Aplicar filtros
@@ -768,6 +783,10 @@ with tab3:
             
             if 'Status' in df_filtrado.columns and filtro_status != "Todos":
                 df_filtrado = df_filtrado[df_filtrado['Status'] == filtro_status]
+            
+            # Filtro por Curva ABC
+            if filtro_curva_abc != "Todos" and "Curva ABC" in df_filtrado.columns:
+                df_filtrado = df_filtrado[df_filtrado['Curva ABC'] == filtro_curva_abc]
             
             # Tabela
             st.markdown(f"**Simulação de Preços** ({len(df_filtrado)} produtos)")
