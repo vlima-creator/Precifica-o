@@ -183,9 +183,9 @@ class PricingCalculatorV2:
         
         return {
             "SKU": sku,
-            "Descrição": descricao,
-            "Tipo de Anúncio": tipo_anuncio_exibicao,
-            "Taxa Comissão %": f"{comissao_percent * 100:.2f}%",
+            "Descricao": descricao,
+            "Tipo de Anuncio": tipo_anuncio_exibicao,
+            "Taxa Comissao %": f"{comissao_percent * 100:.2f}%",
             "Taxa Fixa R$": taxa_fixa,
             "Taxa Fixa Cobrada": "Sim" if taxa_fixa_info["cobrada"] else "Nao",
             "Faixa Taxa Fixa": taxa_fixa_info["faixa"],
@@ -195,14 +195,14 @@ class PricingCalculatorV2:
             "Preco Atual (R$)": preco_atual,
             "Custo Produto": custo_produto,
             "Frete": frete,
-            "Comissão R$": comissao,
+            "Comissao R$": comissao,
             "Custo Fixo Op.": self.custo_fixo_operacional,
             "Impostos": impostos,
             "Publicidade": publicidade,
             "Subsidio Pix (Credito)": subsidio_pix,
             "Lucro R$": lucro,
             "Margem Bruta %": margem_bruta,
-            "Margem Líquida %": margem_bruta,
+            "Margem Liquida %": margem_bruta,
             "Status": status,
         }
 
