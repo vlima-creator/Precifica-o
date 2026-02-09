@@ -134,9 +134,16 @@ class PricingCalculatorV2:
         else:
             status = "🔴 Prejuízo/Abaixo"
         
+        # Determinar tipo de anúncio para exibição
+        tipo_anuncio_exibicao = tipo_anuncio if tipo_anuncio else "Padrão"
+        if marketplace != "Mercado Livre":
+            tipo_anuncio_exibicao = "N/A"
+        
         return {
             "SKU": sku,
             "Descrição": descricao,
+            "Tipo de Anúncio": tipo_anuncio_exibicao,
+            "Taxa Comissão %": f"{comissao_percent * 100:.2f}%",
             "Taxa Fixa Cobrada": "Sim" if taxa_fixa_info["cobrada"] else "Não",
             "Faixa Taxa Fixa": taxa_fixa_info["faixa"],
             "Preço Atual (R$)": preco_atual,
@@ -144,7 +151,6 @@ class PricingCalculatorV2:
             "Frete": frete,
             "Comissão R$": comissao,
             "Taxa Fixa R$": taxa_fixa,
-            "Taxa Fixa Faixa": taxa_fixa_info["faixa"],
             "Custo Fixo Op.": self.custo_fixo_operacional,
             "Impostos": impostos,
             "Publicidade": publicidade,
