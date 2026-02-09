@@ -125,30 +125,13 @@ class PricingCalculatorV2:
         Returns:
             Dict com todos os cálculos
         """
-        # Obter configurações do marketplace (considerando tipo de anúncio)
-        mp_config = self.obter_config_marketplace(marketplace, tipo_anuncio)
-        comissao_percent = mp_config.get("comissao", 0.0)
-        taxa_fixa = mp_config.get("custo_fixo", 0.0)
-        
-        # Obter configurações do regime tributário
-        regime_config = self.regimes.get(regime_tributario, {})
-        impostos_percent = regime_config.get("impostos_encargos", 0.0)
-        
-        # Cálculos
-        comissao = preco_atual * comissao_percent
-        impostos = preco_atual * impostos_percent
-        publicidade = preco_atual * (self.percent_publicidade / 100)
-        devoluoes = preco_atual * (self.taxa_devolucao / 100)
-        
-        # Calcular taxa fixa do Mercado Livre se aplicavel
+        # Inicializar variaveis
         taxa_fixa_info = {"cobrada": False, "faixa": "Nao aplicavel"}
         subsidio_pix = 0.0
         subsidio_pix_info = {"subsidio_pix_percent": 0.0, "faixa": "Nao aplicavel"}
         
-        if marketplace == "Mercado Livre":
-            taxa_fixa_info = self.calcular_taxa_fixa_mercado_livre(preco_atual, "Produtos Comuns")
-            taxa_fixa = taxa_fixa_info["taxa_fixa"]
-        elif marketplace == "Shopee":
+        # Calcular comissao e taxa fixa baseado no marketplace
+        if marketplace == "Shopee":
             # Para Shopee, usar comissao variavel por faixa de preco
             shopee_config = self.calcular_comissao_shopee(preco_atual)
             comissao_percent = shopee_config["comissao_percent"]
@@ -158,8 +141,26 @@ class PricingCalculatorV2:
                 "subsidio_pix_percent": shopee_config["subsidio_pix_percent"] * 100,
                 "faixa": shopee_config["faixa"]
             }
+        else:
+            # Para Mercado Livre e outros marketplaces, usar configuracao padrao
+            mp_config = self.obter_config_marketplace(marketplace, tipo_anuncio)
+            comissao_percent = mp_config.get("comissao", 0.0)
+            taxa_fixa = mp_config.get("custo_fixo", 0.0)
         
+        # Obter configurações do regime tributário
+        regime_config = self.regimes.get(regime_tributario, {})
+        impostos_percent = regime_config.get("impostos_encargos", 0.0)
+        
+        # Calcular taxa fixa do Mercado Livre se aplicavel
+        if marketplace == "Mercado Livre":
+            taxa_fixa_info = self.calcular_taxa_fixa_mercado_livre(preco_atual, "Produtos Comuns")
+            taxa_fixa = taxa_fixa_info["taxa_fixa"]
+        
+        # Calculos
         comissao = preco_atual * comissao_percent
+        impostos = preco_atual * impostos_percent
+        publicidade = preco_atual * (self.percent_publicidade / 100)
+        devoluoes = preco_atual * (self.taxa_devolucao / 100)
         lucro = preco_atual - custo_produto - frete - comissao - taxa_fixa - impostos - publicidade - devoluoes - (self.custo_fixo_operacional / 100 * preco_atual) + subsidio_pix
         
         # Calcular custos operacionais em valor (era percentual)
