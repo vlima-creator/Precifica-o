@@ -972,7 +972,7 @@ with tab2:
                 </div>
                 """, unsafe_allow_html=True)
             with col4:
-                saudaveis = len(df_resultado[df_resultado['Status'] == ' Saudável'])
+                saudaveis = len(df_resultado[df_resultado['Status'] == '🟢 Saudável'])
                 st.markdown(f"""
                 <div class="metric-card-calc" style="border-top-color: #22C55E;">
                     <div style="font-size: 0.9em; color: white; text-transform: uppercase; letter-spacing: 0.5px;">🟢 Saudáveis</div>
@@ -1048,7 +1048,7 @@ with tab2:
                     )
             
             with col2:
-                df_saudaveis = df_resultado[df_resultado['Status'] == ' Saudável']
+                df_saudaveis = df_resultado[df_resultado['Status'] == '🟢 Saudável']
                 if len(df_saudaveis) > 0:
                     excel_saudaveis = formatar_excel_profissional(df_saudaveis, "🟢 Saudáveis")
                     st.download_button(
@@ -1072,7 +1072,7 @@ with tab2:
                     )
             
             with col4:
-                df_prejuizo = df_resultado[df_resultado['Status'].str.contains('Prejuízo', na=False)]
+                df_prejuizo = df_resultado[df_resultado['Status'].str.contains('🔴 Prejuízo', na=False)]
                 if len(df_prejuizo) > 0:
                     excel_prejuizo = formatar_excel_profissional(df_prejuizo, "Prejuízo")
                     st.download_button(
@@ -1399,7 +1399,7 @@ with tab4:
                 """, unsafe_allow_html=True)
             
             with col2:
-                saudaveis_total = len(df_dashboard[df_dashboard['Status'] == ' Saudável']) if 'Status' in df_dashboard.columns else 0
+                saudaveis_total = len(df_dashboard[df_dashboard['Status'] == '🟢 Saudável']) if 'Status' in df_dashboard.columns else 0
                 st.markdown(f"""
                 <div class="metric-card" style="border-top-color: #22C55E;">
                     <div class="metric-label"> Saudável</div>
@@ -1408,7 +1408,7 @@ with tab4:
                 """, unsafe_allow_html=True)
             
             with col3:
-                alerta_total = len(df_dashboard[df_dashboard['Status'] == ' Alerta']) if 'Status' in df_dashboard.columns else 0
+                alerta_total = len(df_dashboard[df_dashboard['Status'] == '🟡 Alerta']) if 'Status' in df_dashboard.columns else 0
                 st.markdown(f"""
                 <div class="metric-card" style="border-top-color: #EAB308;">
                     <div class="metric-label"> Alerta</div>
@@ -1417,7 +1417,7 @@ with tab4:
                 """, unsafe_allow_html=True)
             
             with col4:
-                prejuizo_total = len(df_dashboard[df_dashboard['Status'].astype(str).str.contains('Prejuízo', na=False)]) if 'Status' in df_dashboard.columns else 0
+                prejuizo_total = len(df_dashboard[df_dashboard['Status'].astype(str).str.contains('🔴 Prejuízo', na=False)]) if 'Status' in df_dashboard.columns else 0
                 st.markdown(f"""
                 <div class="metric-card" style="border-top-color: #EF4444;">
                     <div class="metric-label"> Prejuízo</div>
@@ -1536,9 +1536,9 @@ with tab4:
                     
                     df_curva = df_dashboard[df_dashboard['Curva ABC'].astype(str).str.contains(curva_letra, na=False)]
                     
-                    saudaveis_curva = len(df_curva[df_curva['Status'] == ' Saudável'])
-                    alerta_curva = len(df_curva[df_curva['Status'] == ' Alerta'])
-                    prejuizo_curva = len(df_curva[df_curva['Status'].astype(str).str.contains('Prejuízo', na=False)])
+                    saudaveis_curva = len(df_curva[df_curva['Status'] == '🟢 Saudável'])
+                    alerta_curva = len(df_curva[df_curva['Status'] == '🟡 Alerta'])
+                    prejuizo_curva = len(df_curva[df_curva['Status'].astype(str).str.contains('🔴 Prejuízo', na=False)])
                     
                     col1, col2, col3, col4 = st.columns(4)
                     
@@ -1596,7 +1596,7 @@ with tab4:
             
             oportunidades = df_dashboard[
                 (df_dashboard['Curva ABC'].astype(str).str.contains('B', na=False) | df_dashboard['Curva ABC'].astype(str).str.contains('C', na=False)) &
-                (df_dashboard['Status'] == ' Saudável')
+                (df_dashboard['Status'] == '🟢 Saudável')
             ]
             
             if len(oportunidades) > 0:
