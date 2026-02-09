@@ -182,8 +182,8 @@ class PricingCalculatorV2:
             tipo_anuncio_exibicao = "N/A"
         
         return {
-            "SKU": sku,
-            "Descricao": descricao,
+            "SKU ou MLB": sku,
+            "Titulo": descricao,
             "Tipo de Anuncio": tipo_anuncio_exibicao,
             "Taxa Comissao %": f"{comissao_percent * 100:.2f}%",
             "Taxa Fixa R$": taxa_fixa,
@@ -219,8 +219,8 @@ class PricingCalculatorV2:
         if marketplace == "Mercado Livre":
             # Colunas especificas do Mercado Livre
             return [
-                "SKU",
-                "Descricao",
+                "SKU ou MLB",
+                "Titulo",
                 "Tipo de Anuncio",
                 "Taxa Comissao %",
                 "Taxa Fixa R$",
@@ -240,8 +240,8 @@ class PricingCalculatorV2:
         elif marketplace == "Shopee":
             # Colunas especificas da Shopee
             return [
-                "SKU",
-                "Descricao",
+                "SKU ou MLB",
+                "Titulo",
                 "Taxa Comissao %",
                 "Taxa Fixa R$",
                 "Faixa Shopee",
@@ -262,8 +262,8 @@ class PricingCalculatorV2:
         else:
             # Para outros marketplaces, usar colunas comuns
             return [
-                "SKU",
-                "Descricao",
+                "SKU ou MLB",
+                "Titulo",
                 "Taxa Comissao %",
                 "Preco Atual (R$)",
                 "Custo Produto",
