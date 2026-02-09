@@ -407,27 +407,34 @@ with st.sidebar.expander("Margens e Publicidade", expanded=False):
 # 4. CUSTOS OPERACIONAIS
 with st.sidebar.expander("Custos Operacionais", expanded=False):
     
-    custo_fixo_op = st.number_input(
-        "Custo Fixo Operacional (R$)",
-        value=st.session_state.get("custo_fixo_operacional", 0.0),
-        min_value=0.0,
-        step=0.1,
-    )
-    st.caption("Custo fixo mensal (aluguel, salários, etc.)")
-    
-    st.markdown("")
-    
-    taxa_devolucao = st.number_input(
-        "Taxa de Devoluções e Trocas (%)",
-        value=st.session_state.get("taxa_devolucao", 0.0) * 100,
+    custo_fixo_op = st.slider(
+        "Custo Fixo Operacional (%)",
         min_value=0.0,
         max_value=100.0,
+        value=st.session_state.get("custo_fixo_operacional", 0.0),
         step=0.1,
+        key="slider_custo_fixo"
+    )
+    st.caption(f"Percentual da operação: {formatar_percentual_1casa(custo_fixo_op)}")
+    
+    st.markdown("")
+    st.markdown("")
+    
+    taxa_devolucao = st.slider(
+        "Taxa de Devoluções e Trocas (%)",
+        min_value=0.0,
+        max_value=100.0,
+        value=st.session_state.get("taxa_devolucao", 0.0) * 100,
+        step=0.1,
+        key="slider_taxa_devolucao"
     ) / 100
-    st.caption("Percentual de perdas com devoluções")
+    st.caption(f"Percentual de perdas: {formatar_percentual_1casa(taxa_devolucao * 100)}")
     
     st.session_state.custo_fixo_operacional = custo_fixo_op
     st.session_state.taxa_devolucao = taxa_devolucao
+    
+    st.markdown("")
+    st.info("Os custos operacionais são aplicados como percentual do faturamento total.")
 
 # 5. CARREGAR RELATÓRIO
 with st.sidebar.expander("Carregar Relatório de Vendas", expanded=False):
@@ -581,20 +588,85 @@ with tab2:
             
             st.divider()
             
+            # Filtros
+            col1, col2, col3 = st.columns([2, 2, 1])
+            
+            with col1:
+                pesquisa_sku = st.text_input("Pesquisar por SKU/MLB", placeholder="Digite SKU ou MLB")
+            
+            with col2:
+                status_opcoes = ["Todos"] + list(df_resultado['Status'].unique())
+                filtro_status = st.selectbox("Filtrar por Status", status_opcoes)
+            
+            with col3:
+                st.write("")
+                st.write("")
+            
+            # Aplicar filtros
+            df_filtrado = df_resultado.copy()
+            
+            if pesquisa_sku:
+                df_filtrado = df_filtrado[df_filtrado['SKU'].str.contains(pesquisa_sku, case=False, na=False)]
+            
+            if filtro_status != "Todos":
+                df_filtrado = df_filtrado[df_filtrado['Status'] == filtro_status]
+            
             # Tabela
-            st.markdown("**Detalhes da Precificação**")
-            st.dataframe(df_resultado, use_container_width=True, hide_index=True)
+            st.markdown(f"**Detalhes da Precificação** ({len(df_filtrado)} produtos)")
+            st.dataframe(df_filtrado, use_container_width=True, hide_index=True)
             
-            # Download
-            excel_buffer = formatar_excel_profissional(df_resultado, "Calculadora")
+            # Downloads individuais
+            st.markdown("**Downloads**")
+            col1, col2, col3, col4 = st.columns(4)
             
-            st.download_button(
-                label="Baixar Resultado (Excel)",
-                data=excel_buffer,
-                file_name="calculadora_precificacao.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True
-            )
+            with col1:
+                if len(df_filtrado) > 0:
+                    excel_filtrado = formatar_excel_profissional(df_filtrado, "Filtrado")
+                    st.download_button(
+                        label="Resultado Filtrado",
+                        data=excel_filtrado,
+                        file_name="calculadora_filtrado.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        use_container_width=True
+                    )
+            
+            with col2:
+                df_saudaveis = df_resultado[df_resultado['Status'] == '🟢 Saudável']
+                if len(df_saudaveis) > 0:
+                    excel_saudaveis = formatar_excel_profissional(df_saudaveis, "Saudáveis")
+                    st.download_button(
+                        label="Produtos Saudáveis",
+                        data=excel_saudaveis,
+                        file_name="calculadora_saudaveis.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        use_container_width=True
+                    )
+            
+            with col3:
+                df_alerta = df_resultado[df_resultado['Status'].str.contains('Alerta', na=False)]
+                if len(df_alerta) > 0:
+                    excel_alerta = formatar_excel_profissional(df_alerta, "Alerta")
+                    st.download_button(
+                        label="Produtos em Alerta",
+                        data=excel_alerta,
+                        file_name="calculadora_alerta.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        use_container_width=True
+                    )
+            
+            with col4:
+                df_prejuizo = df_resultado[df_resultado['Status'].str.contains('Prejuízo', na=False)]
+                if len(df_prejuizo) > 0:
+                    excel_prejuizo = formatar_excel_profissional(df_prejuizo, "Prejuízo")
+                    st.download_button(
+                        label="Produtos em Prejuízo",
+                        data=excel_prejuizo,
+                        file_name="calculadora_prejuizo.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        use_container_width=True
+                    )
+            
+
 
 # ============ ABA 3: SIMULADOR ============
 with tab3:
@@ -647,7 +719,7 @@ with tab3:
             df_simulacao = st.session_state.resultado_simulador
             
             # Métricas
-            col1, col2, col3, col4 = st.columns(4)
+            col1, col2, col3, col4, col5 = st.columns(5)
             with col1:
                 st.metric("Preço Médio Sugerido", formatar_moeda(df_simulacao['Preço Sugerido'].mean()))
             with col2:
@@ -656,20 +728,95 @@ with tab3:
                 st.metric("Lucro Bruto Total", formatar_moeda(df_simulacao['Lucro Bruto'].sum()))
             with col4:
                 st.metric("Lucro Líquido Total", formatar_moeda(df_simulacao['Lucro Líquido'].sum()))
+            with col5:
+                margem_media = df_simulacao['Margem Líquida %'].mean() if 'Margem Líquida %' in df_simulacao.columns else df_simulacao['Margem Bruta %'].mean()
+                st.metric("Margem Restante", formatar_percentual_1casa(margem_media))
             
             st.divider()
             
+            # Filtros
+            col1, col2, col3 = st.columns([2, 2, 1])
+            
+            with col1:
+                pesquisa_sku = st.text_input("Pesquisar por SKU/MLB", placeholder="Digite SKU ou MLB", key="sim_pesquisa")
+            
+            with col2:
+                status_opcoes = ["Todos"] + list(df_simulacao['Status'].unique()) if 'Status' in df_simulacao.columns else ["Todos"]
+                filtro_status = st.selectbox("Filtrar por Status", status_opcoes, key="sim_status")
+            
+            with col3:
+                st.write("")
+                st.write("")
+            
+            # Aplicar filtros
+            df_filtrado = df_simulacao.copy()
+            
+            if pesquisa_sku:
+                df_filtrado = df_filtrado[df_filtrado['SKU'].str.contains(pesquisa_sku, case=False, na=False)]
+            
+            if 'Status' in df_filtrado.columns and filtro_status != "Todos":
+                df_filtrado = df_filtrado[df_filtrado['Status'] == filtro_status]
+            
             # Tabela
-            st.markdown("**Simulação de Preços**")
-            st.dataframe(df_simulacao, use_container_width=True, hide_index=True)
+            st.markdown(f"**Simulação de Preços** ({len(df_filtrado)} produtos)")
+            st.dataframe(df_filtrado, use_container_width=True, hide_index=True)
             
-            # Download
-            excel_buffer = formatar_excel_profissional(df_simulacao, "Simulador")
+            # Downloads individuais
+            st.markdown("**Downloads**")
+            col1, col2, col3, col4 = st.columns(4)
             
-            st.download_button(
-                label="Baixar Simulacao (Excel)",
-                data=excel_buffer,
-                file_name="simulador_preco_alvo.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True
-            )
+            with col1:
+                if len(df_filtrado) > 0:
+                    excel_filtrado = formatar_excel_profissional(df_filtrado, "Filtrado")
+                    st.download_button(
+                        label="Resultado Filtrado",
+                        data=excel_filtrado,
+                        file_name="simulador_filtrado.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        use_container_width=True,
+                        key="btn_sim_filtrado"
+                    )
+            
+            with col2:
+                if 'Status' in df_simulacao.columns:
+                    df_saudaveis = df_simulacao[df_simulacao['Status'] == '🟢 Saudável']
+                    if len(df_saudaveis) > 0:
+                        excel_saudaveis = formatar_excel_profissional(df_saudaveis, "Saudáveis")
+                        st.download_button(
+                            label="Produtos Saudáveis",
+                            data=excel_saudaveis,
+                            file_name="simulador_saudaveis.xlsx",
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            use_container_width=True,
+                            key="btn_sim_saudaveis"
+                        )
+            
+            with col3:
+                if 'Status' in df_simulacao.columns:
+                    df_alerta = df_simulacao[df_simulacao['Status'].str.contains('Alerta', na=False)]
+                    if len(df_alerta) > 0:
+                        excel_alerta = formatar_excel_profissional(df_alerta, "Alerta")
+                        st.download_button(
+                            label="Produtos em Alerta",
+                            data=excel_alerta,
+                            file_name="simulador_alerta.xlsx",
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            use_container_width=True,
+                            key="btn_sim_alerta"
+                        )
+            
+            with col4:
+                if 'Status' in df_simulacao.columns:
+                    df_prejuizo = df_simulacao[df_simulacao['Status'].str.contains('Prejuízo', na=False)]
+                    if len(df_prejuizo) > 0:
+                        excel_prejuizo = formatar_excel_profissional(df_prejuizo, "Prejuízo")
+                        st.download_button(
+                            label="Produtos em Prejuízo",
+                            data=excel_prejuizo,
+                            file_name="simulador_prejuizo.xlsx",
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            use_container_width=True,
+                            key="btn_sim_prejuizo"
+                        )
+            
+
