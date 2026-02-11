@@ -107,7 +107,7 @@ class PriceSimulator:
             lucro_liquido = 0
         
         return {
-            "SKU ou MLB": sku,
+            "SKU": sku,
             "Descrição": descricao,
             "Marketplace": marketplace,
             "Regime": regime_tributario,

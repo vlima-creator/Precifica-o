@@ -64,10 +64,6 @@ class MercadoLivreProcessor:
             "ad type": "Tipo de Anúncio",
             "anuncio": "Tipo de Anúncio",
             "col f": "Tipo de Anúncio",
-            # Categoria
-            "categoria": "Categoria",
-            "category": "Categoria",
-            "col h": "Categoria",
             # Quantidade Vendida
             "quantidade vendida": "Quantidade Vendida",
             "quantidade": "Quantidade Vendida",
@@ -86,10 +82,6 @@ class MercadoLivreProcessor:
         # Adicionar coluna Tipo de Anúncio se não existir
         if "Tipo de Anúncio" not in df.columns:
             df["Tipo de Anúncio"] = ""  # Vazio por padrão
-        
-        # Adicionar coluna Categoria se não existir
-        if "Categoria" not in df.columns:
-            df["Categoria"] = ""  # Vazio por padrão
         
         # Adicionar coluna Quantidade Vendida se não existir
         if "Quantidade Vendida" not in df.columns:
@@ -138,9 +130,6 @@ class MercadoLivreProcessor:
         # Se ainda tiver valores não reconhecidos, deixar vazio
         df.loc[~df["Tipo de Anúncio"].isin(["Clássico", "Premium", ""]), "Tipo de Anúncio"] = ""
         
-        # Converter Categoria para string
-        df["Categoria"] = df["Categoria"].astype(str).str.strip().replace("nan", "")
-        
         # Converter Quantidade Vendida para int
         if "Quantidade Vendida" in df.columns:
             df["Quantidade Vendida"] = pd.to_numeric(df["Quantidade Vendida"], errors="coerce").fillna(0).astype(int)
@@ -148,7 +137,7 @@ class MercadoLivreProcessor:
         print(f"Quantidade Vendida após conversão: {df['Quantidade Vendida'].tolist()[:5]}")
         
         # Selecionar apenas as colunas necessárias
-        colunas_selecionadas = ["SKU", "Descrição", "Custo Produto", "Frete", "Preço Atual", "Tipo de Anúncio", "Categoria"]
+        colunas_selecionadas = ["SKU", "Descrição", "Custo Produto", "Frete", "Preço Atual", "Tipo de Anúncio"]
         if "Quantidade Vendida" in df.columns:
             colunas_selecionadas.append("Quantidade Vendida")
         df = df[colunas_selecionadas]
@@ -172,7 +161,6 @@ class MercadoLivreProcessor:
             "Frete": "mean",
             "Preço Atual": "mean",
             "Tipo de Anúncio": "first",
-            "Categoria": "first",
         }
         
         # Adicionar Quantidade Vendida se existir

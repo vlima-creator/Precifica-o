@@ -1,13 +1,11 @@
 """
-Módulo para Calculadora de Precificação V2 - ATUALIZADO PARA MARÇO 2026
+Módulo para Calculadora de Precificação V2
 Implementa a lógica automática baseada em dados do relatório
-Versão com suporte às novas regras de custo operacional do Mercado Livre
 """
 
 import pandas as pd
 import numpy as np
-from config import MERCADO_LIVRE_AD_TYPES, MERCADO_LIVRE_LIMITE_TAXA_FIXA, SHOPEE_FAIXAS_PRECO
-from mercado_livre_costs import MercadoLivreCostsCalculator
+from config import MERCADO_LIVRE_AD_TYPES, MERCADO_LIVRE_TAXA_FIXA, MERCADO_LIVRE_LIMITE_TAXA_FIXA, SHOPEE_FAIXAS_PRECO
 
 
 class PricingCalculatorV2:
@@ -64,10 +62,7 @@ class PricingCalculatorV2:
     
     def calcular_taxa_fixa_mercado_livre(self, preco_venda, categoria="Produtos Comuns"):
         """
-        DEPRECADO: Use MercadoLivreCostsCalculator em vez desta função.
-        Mantida para compatibilidade com código legado.
-        
-        Calcula a taxa fixa do Mercado Livre baseada na faixa de preço (Válido até 01/03/2026)
+        Calcula a taxa fixa do Mercado Livre baseada na faixa de preço
         
         Args:
             preco_venda: Preço de venda em R$
@@ -147,7 +142,7 @@ class PricingCalculatorV2:
         return self.marketplaces.get(marketplace, {"comissao": 0.0, "custo_fixo": 0.0})
 
     def calcular_linha(self, sku, descricao, custo_produto, frete, preco_atual, 
-                       marketplace, regime_tributario, tipo_anuncio="", peso_kg=0.0, tipo_logistica_ml="Full", categoria_ml="Produtos Comuns"):
+                       marketplace, regime_tributario, tipo_anuncio=""):
         """
         Calcula uma linha da Calculadora de Precificação
         
@@ -160,9 +155,6 @@ class PricingCalculatorV2:
             marketplace: Nome do marketplace
             regime_tributario: Regime tributário
             tipo_anuncio: Tipo de anúncio (opcional, para Mercado Livre)
-            peso_kg: Peso do produto em kg (novo parâmetro para Mercado Livre - válido a partir de 02/03/2026)
-            tipo_logistica_ml: Tipo de logística do Mercado Livre ("Full" ou "Flex") - válido a partir de 02/03/2026
-            categoria_ml: Categoria do produto no Mercado Livre ("Produtos Comuns" ou "Livros")
             
         Returns:
             Dict com todos os cálculos
@@ -193,29 +185,16 @@ class PricingCalculatorV2:
         regime_config = self.regimes.get(regime_tributario, {})
         impostos_percent = regime_config.get("impostos_encargos", 0.0)
         
-        # Calcular taxa fixa/custo operacional do Mercado Livre se aplicavel (Valido a partir de 02/03/2026)
+        # Calcular taxa fixa do Mercado Livre se aplicavel
         if marketplace == "Mercado Livre":
-            # Usar novo calculo de custos operacionais baseado em peso e logistica
-            custo_info = MercadoLivreCostsCalculator.calcular_custo_total_ml(
-                preco_atual, peso_kg, tipo_logistica_ml, categoria_ml
-            )
-            
-            # Extrair o custo (pode ser custo_operacional, taxa_fixa ou custo_frete)
-            taxa_fixa = custo_info.get("custo_operacional", 0.0) or custo_info.get("frete", 0.0)
-            taxa_fixa_info = {
-                "cobrada": taxa_fixa > 0,
-                "faixa": custo_info.get("detalhes", "Mercado Livre"),
-                "tipo": "Mercado Livre"
-            }
+            taxa_fixa_info = self.calcular_taxa_fixa_mercado_livre(preco_atual, "Produtos Comuns")
+            taxa_fixa = taxa_fixa_info["taxa_fixa"]
         
         # Calculos
         comissao = preco_atual * comissao_percent
         impostos = preco_atual * impostos_percent
         publicidade = preco_atual * (self.percent_publicidade / 100)
         devoluoes = preco_atual * (self.taxa_devolucao / 100)
-        # Adicionar comissão do Mercado Livre ao cálculo se aplicável
-        if marketplace == "Mercado Livre":
-            comissao += custo_info.get("comissao", 0.0)
         lucro = preco_atual - custo_produto - frete - comissao - taxa_fixa - impostos - publicidade - devoluoes - (self.custo_fixo_operacional / 100 * preco_atual) + subsidio_pix
         
         # Calcular custos operacionais em valor (era percentual)
@@ -291,7 +270,6 @@ class PricingCalculatorV2:
                 "Margem Bruta %",
                 "Margem Liquida %",
                 "Curva ABC",
-                "Categoria",
                 "Status",
             ]
         elif marketplace == "Shopee":
@@ -300,20 +278,25 @@ class PricingCalculatorV2:
                 "SKU ou MLB",
                 "Titulo",
                 "Taxa Comissao %",
+                "Taxa Fixa R$",
                 "Faixa Shopee",
                 "Subsidio Pix %",
+                "Subsidio Pix R$",
                 "Preco Atual (R$)",
                 "Custo Produto",
                 "Frete",
                 "Comissao R$",
                 "Impostos",
                 "Publicidade",
+                "Subsidio Pix (Credito)",
                 "Lucro R$",
                 "Margem Bruta %",
+                "Margem Liquida %",
+                "Curva ABC",
                 "Status",
             ]
         else:
-            # Colunas padrão para outros marketplaces
+            # Para outros marketplaces, usar colunas comuns
             return [
                 "SKU ou MLB",
                 "Titulo",
@@ -326,15 +309,17 @@ class PricingCalculatorV2:
                 "Publicidade",
                 "Lucro R$",
                 "Margem Bruta %",
+                "Margem Liquida %",
+                "Curva ABC",
                 "Status",
             ]
-
+    
     def calcular_dataframe(self, df, marketplace, regime_tributario):
         """
         Calcula precificação para múltiplas linhas
         
         Args:
-            df: DataFrame com colunas: SKU, Descrição, Custo Produto, Frete, Preço Atual, Tipo de Anúncio (opcional), Peso (opcional para ML)
+            df: DataFrame com colunas: SKU, Descrição, Custo Produto, Frete, Preço Atual, Tipo de Anúncio (opcional)
             marketplace: Marketplace selecionado
             regime_tributario: Regime tributário selecionado
                 
@@ -346,22 +331,6 @@ class PricingCalculatorV2:
         for _, row in df.iterrows():
             tipo_anuncio = row.get("Tipo de Anúncio", "")
             
-            # Novos parâmetros para Mercado Livre (válido a partir de 02/03/2026)
-            peso_kg = float(row.get("Peso", 0.0) or 0.0) if "Peso" in row else 0.0
-            tipo_logistica_ml = row.get("Tipo de Logística", "Full") if "Tipo de Logística" in row else "Full"
-            
-            # Mapeamento automático de categoria (se vazio ou não informado)
-            categoria_ml = row.get("Categoria", "")
-            if not categoria_ml or categoria_ml == "" or categoria_ml == "nan":
-                # Tentar identificar pelo título/descrição
-                titulo = str(row.get("Descrição", "")).lower()
-                if any(word in titulo for word in ["livro", "book", "bíblia", "biblia", "hq", "manga"]):
-                    categoria_ml = "Livros"
-                elif any(word in titulo for word in ["bebida", "comida", "alimento", "snack", "doce", "café", "azeite"]):
-                    categoria_ml = "Supermercado"
-                else:
-                    categoria_ml = "Produtos Comuns"
-            
             resultado = self.calcular_linha(
                 sku=row.get("SKU", ""),
                 descricao=row.get("Descrição", ""),
@@ -371,28 +340,11 @@ class PricingCalculatorV2:
                 marketplace=marketplace,
                 regime_tributario=regime_tributario,
                 tipo_anuncio=tipo_anuncio,
-                peso_kg=peso_kg,
-                tipo_logistica_ml=tipo_logistica_ml,
-                categoria_ml=categoria_ml,
             )
             resultados.append(resultado)
         
         df_resultado = pd.DataFrame(resultados)
         
-        # Adicionar coluna de Categoria ao resultado final
-        if "Categoria" not in df_resultado.columns:
-            # Re-extrair categorias para o dataframe de resultado
-            categorias_finais = []
-            for _, row in df.iterrows():
-                cat = row.get("Categoria", "")
-                if not cat or cat == "" or cat == "nan":
-                    titulo = str(row.get("Descrição", "")).lower()
-                    if any(word in titulo for word in ["livro", "book", "bíblia", "biblia", "hq", "manga"]): cat = "Livros"
-                    elif any(word in titulo for word in ["bebida", "comida", "alimento", "snack", "doce", "café", "azeite"]): cat = "Supermercado"
-                    else: cat = "Produtos Comuns"
-                categorias_finais.append(cat)
-            df_resultado["Categoria"] = categorias_finais
-
         # Calcular Curva ABC se houver coluna de Quantidade Vendida
         if "Quantidade Vendida" in df.columns:
             # Calcular faturamento (preco_atual * quantidade_vendida)
