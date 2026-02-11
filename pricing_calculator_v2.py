@@ -153,13 +153,18 @@ class PricingCalculatorV2:
         taxa_comissao = config_mkt["comissao"]
         
         # Cálculo do Custo Operacional (Frete Grátis) para Mercado Livre 2026
+        taxa_fixa_cobrada = False
+        faixa_taxa_fixa = "N/A"
         if marketplace == "Mercado Livre":
             res_ml = self._calcular_custo_operacional_ml_2026(preco_atual, peso, categoria)
             taxa_fixa = res_ml["custo_operacional"]
+            taxa_fixa_cobrada = res_ml["cobrada"]
+            faixa_taxa_fixa = res_ml["faixa"]
         elif marketplace == "Shopee":
             res_shopee = self.calcular_comissao_shopee(preco_atual)
             taxa_comissao = res_shopee["comissao_percent"]
             taxa_fixa = res_shopee["comissao_fixa"]
+            faixa_taxa_fixa = res_shopee["faixa"]
         else:
             taxa_fixa = config_mkt["custo_fixo"]
 
@@ -179,15 +184,97 @@ class PricingCalculatorV2:
         margem_liquida_valor = margem_bruta_valor - publicidade_valor
         margem_liquida_percent = (margem_liquida_valor / preco_atual) * 100 if preco_atual > 0 else 0
 
+        # Status
+        status = "🟢 Saudável"
+        if margem_liquida_percent < 0:
+            status = "🔴 Prejuízo/Abaixo"
+        elif margem_liquida_percent < self.margem_liquida_minima:
+            status = "🟡 Alerta"
+
         return {
-            "SKU": sku,
-            "Descrição": descricao,
-            "Preço Venda": preco_atual,
+            "SKU ou MLB": sku,
+            "Titulo": descricao,
+            "Tipo de Anuncio": tipo_anuncio,
+            "Preco Atual (R$)": preco_atual,
             "Custo Produto": custo_produto,
             "Frete": frete,
             "Taxa Comissao %": f"{taxa_comissao*100:.2f}%",
             "Taxa Fixa R$": taxa_fixa,
-            "Impostos R$": impostos_valor,
+            "Taxa Fixa Cobrada": "Sim" if taxa_fixa_cobrada else "Não",
+            "Faixa Taxa Fixa": faixa_taxa_fixa,
+            "Comissao R$": comissao_valor,
+            "Impostos": impostos_valor,
+            "Publicidade": publicidade_valor,
+            "Lucro R$": margem_liquida_valor,
             "Margem Bruta %": margem_bruta_percent,
-            "Margem Líquida %": margem_liquida_percent
+            "Margem Liquida %": margem_liquida_percent,
+            "Status": status
         }
+
+    def calcular_dataframe(self, df, marketplace, regime_tributario):
+        """
+        Calcula precificação para múltiplas linhas
+        """
+        resultados = []
+        
+        for _, row in df.iterrows():
+            tipo_anuncio = row.get("Tipo de Anúncio", row.get("Tipo de Anuncio", ""))
+            categoria = row.get("Categoria", "Produtos Comuns")
+            peso = row.get("Peso", "Até 0,3 kg")
+            
+            resultado = self.calcular_linha(
+                sku=row.get("SKU", row.get("SKU ou MLB", "")),
+                descricao=row.get("Título", row.get("Titulo", row.get("Descrição", ""))),
+                custo_produto=float(row.get("Custo Produto", 0) or 0),
+                frete=float(row.get("Frete", 0) or 0),
+                preco_atual=float(row.get("Preço Atual", row.get("Preco Atual (R$)", 0)) or 0),
+                marketplace=marketplace,
+                regime_tributario=regime_tributario,
+                tipo_anuncio=tipo_anuncio,
+                categoria=categoria,
+                peso=peso
+            )
+            resultados.append(resultado)
+        
+        df_resultado = pd.DataFrame(resultados)
+        
+        # Calcular Curva ABC se houver coluna de Quantidade Vendida ou Vendas/Mês
+        col_vendas = "Quantidade Vendida" if "Quantidade Vendida" in df.columns else ("Vendas/Mês" if "Vendas/Mês" in df.columns else None)
+        if col_vendas:
+            df_temp = df.copy()
+            preco_col = "Preço Atual" if "Preço Atual" in df.columns else "Preco Atual (R$)"
+            df_temp['Faturamento'] = df_temp[preco_col] * df_temp[col_vendas]
+            curva_abc = self.calcular_curva_abc(df_temp)
+            df_resultado['Curva ABC'] = curva_abc['Curva ABC']
+        else:
+            df_resultado['Curva ABC'] = "N/A"
+        
+        # Filtrar colunas baseado no marketplace
+        colunas_exibir = self.obter_colunas_por_marketplace(marketplace)
+        colunas_existentes = [col for col in colunas_exibir if col in df_resultado.columns]
+        
+        return df_resultado[colunas_existentes]
+
+    def obter_colunas_por_marketplace(self, marketplace):
+        """
+        Retorna as colunas que devem ser exibidas baseado no marketplace
+        """
+        if marketplace == "Mercado Livre":
+            return [
+                "SKU ou MLB", "Titulo", "Tipo de Anuncio", "Taxa Comissao %", "Taxa Fixa R$", 
+                "Taxa Fixa Cobrada", "Faixa Taxa Fixa", "Preco Atual (R$)", "Custo Produto", 
+                "Frete", "Comissao R$", "Impostos", "Publicidade", "Lucro R$", 
+                "Margem Bruta %", "Margem Liquida %", "Curva ABC", "Status"
+            ]
+        elif marketplace == "Shopee":
+            return [
+                "SKU ou MLB", "Titulo", "Taxa Comissao %", "Taxa Fixa R$", "Faixa Taxa Fixa", 
+                "Preco Atual (R$)", "Custo Produto", "Frete", "Comissao R$", "Impostos", 
+                "Publicidade", "Lucro R$", "Margem Bruta %", "Margem Liquida %", "Curva ABC", "Status"
+            ]
+        else:
+            return [
+                "SKU ou MLB", "Titulo", "Taxa Comissao %", "Preco Atual (R$)", "Custo Produto", 
+                "Frete", "Comissao R$", "Impostos", "Publicidade", "Lucro R$", 
+                "Margem Bruta %", "Margem Liquida %", "Curva ABC", "Status"
+            ]
