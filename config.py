@@ -1,6 +1,6 @@
-
 """
 Configurações e constantes do aplicativo de precificação Carblue
+Estrutura baseada na planilha Analise_Mercado_Livre_2026.xlsx
 """
 
 # Configurações padrão de Marketplaces
@@ -48,7 +48,7 @@ MERCADO_LIVRE_COMISSOES_POR_CATEGORIA_2026 = {
     "Saúde": {"classico": 0.12, "premium": 0.17}
 }
 
-# Novas Tabelas de Custo Operacional do Mercado Livre (2026) - Dados exatos da aba Geral (Full-Coleta-Ag)
+# ABA: Geral (Full-Coleta-Agências) - Custos operacionais para todos os produtos
 MERCADO_LIVRE_CUSTO_OPERACIONAL_GERAL_2026 = [
     {'Peso': 'Até 0,3 kg', 'R$ 0-18,99': 5.65, 'R$ 19-48,99': 6.55, 'R$ 49-78,99': 7.75, 'R$ 79-99,99': 12.35, 'R$ 100-119,99': 14.35, 'R$ 120-149,99': 16.45, 'R$ 150-199,99': 18.45, 'A partir de R$ 200': 20.95},
     {'Peso': '0,3 a 0,5 kg', 'R$ 0-18,99': 5.95, 'R$ 19-48,99': 6.65, 'R$ 49-78,99': 7.85, 'R$ 79-99,99': 13.25, 'R$ 100-119,99': 15.45, 'R$ 120-149,99': 17.65, 'R$ 150-199,99': 19.85, 'A partir de R$ 200': 22.55},
@@ -56,15 +56,34 @@ MERCADO_LIVRE_CUSTO_OPERACIONAL_GERAL_2026 = [
     {'Peso': '1 a 2 kg', 'R$ 0-18,99': 6.25, 'R$ 19-48,99': 6.95, 'R$ 49-78,99': 8.15, 'R$ 79-99,99': 14.45, 'R$ 100-119,99': 16.85, 'R$ 120-149,99': 19.25, 'R$ 150-199,99': 21.65, 'A partir de R$ 200': 24.65},
 ]
 
+# ABA: Livros 2026 - Custos operacionais específicos para livros
 MERCADO_LIVRE_LIVROS_2026 = [
     {'Peso': 'Até 0,3 kg', 'R$ 0-18,99': 2.83, 'R$ 19-48,99': 3.28, 'R$ 49-78,99': 3.88, 'R$ 79-99,99': 12.35, 'R$ 100-119,99': 14.35, 'R$ 120-149,99': 16.45, 'R$ 150-199,99': 18.45, 'A partir de R$ 200': 20.95},
     {'Peso': '0,5 a 1 kg', 'R$ 0-18,99': 3.03, 'R$ 19-48,99': 3.38, 'R$ 49-78,99': 3.98, 'R$ 79-99,99': 13.85, 'R$ 100-119,99': 16.15, 'R$ 120-149,99': 18.45, 'R$ 150-199,99': 20.75, 'A partir de R$ 200': 23.65},
 ]
 
+# ABA: Supermercado 2026 - Custos operacionais específicos para supermercado
 MERCADO_LIVRE_SUPERMERCADO_2026 = [
     {'Peso': 'Até 0,3 kg', 'R$ 0-18,99': 1.25, 'R$ 19-28,99': 1.5, 'R$ 29-48,99': 2, 'R$ 49-78,99': 3, 'R$ 79-98,99': 4, 'R$ 99-198,99': 6, 'A partir de R$ 199': 20.95},
     {'Peso': '0,5 a 1 kg', 'R$ 0-18,99': 1.25, 'R$ 19-28,99': 1.5, 'R$ 29-48,99': 2, 'R$ 49-78,99': 3, 'R$ 79-98,99': 4, 'R$ 99-198,99': 6, 'A partir de R$ 199': 23.65},
 ]
+
+# ABA: Tabela de Fretes - Custos adicionais de frete por peso e faixa de preço
+MERCADO_LIVRE_TABELA_FRETES_2026 = [
+    {'Peso': 'Até 300g', 'Custo (R$ 79-99)': 11.97, 'Custo (> R$ 200)': 19.95},
+    {'Peso': '300g a 500g', 'Custo (R$ 79-99)': 12.87, 'Custo (> R$ 200)': 21.45},
+    {'Peso': '500g a 1kg', 'Custo (R$ 79-99)': 13.47, 'Custo (> R$ 200)': 22.45},
+    {'Peso': '1kg a 2kg', 'Custo (R$ 79-99)': 14.07, 'Custo (> R$ 200)': 23.45},
+    {'Peso': '2kg a 3kg', 'Custo (R$ 79-99)': 14.97, 'Custo (> R$ 200)': 24.95},
+]
+
+# Mapeamento de pesos entre formatos diferentes
+PESO_MAPPING = {
+    'Até 0,3 kg': 'Até 300g',
+    '0,3 a 0,5 kg': '300g a 500g',
+    '0,5 a 1 kg': '500g a 1kg',
+    '1 a 2 kg': '1kg a 2kg',
+}
 
 # Limite para aplicacao de frete grátis
 MERCADO_LIVRE_LIMITE_FRETE_GRATIS = 79.0

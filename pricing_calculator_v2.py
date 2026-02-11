@@ -1,14 +1,17 @@
-
 """
 Módulo para Calculadora de Precificação V2
 Implementa a lógica automática baseada em dados do relatório
+Estrutura baseada na planilha Analise_Mercado_Livre_2026.xlsx
 """
 
 import pandas as pd
 import numpy as np
-from config import MERCADO_LIVRE_AD_TYPES, MERCADO_LIVRE_LIMITE_FRETE_GRATIS, SHOPEE_FAIXAS_PRECO, \
-    MERCADO_LIVRE_COMISSOES_POR_CATEGORIA_2026, MERCADO_LIVRE_CUSTO_OPERACIONAL_GERAL_2026, \
-    MERCADO_LIVRE_SUPERMERCADO_2026, MERCADO_LIVRE_LIVROS_2026
+from config import (
+    MERCADO_LIVRE_AD_TYPES, MERCADO_LIVRE_LIMITE_FRETE_GRATIS, SHOPEE_FAIXAS_PRECO,
+    MERCADO_LIVRE_COMISSOES_POR_CATEGORIA_2026, MERCADO_LIVRE_CUSTO_OPERACIONAL_GERAL_2026,
+    MERCADO_LIVRE_SUPERMERCADO_2026, MERCADO_LIVRE_LIVROS_2026, MERCADO_LIVRE_TABELA_FRETES_2026,
+    PESO_MAPPING
+)
 
 
 class PricingCalculatorV2:
@@ -35,21 +38,21 @@ class PricingCalculatorV2:
                 }
         return {"comissao_percent": 0.20, "comissao_fixa": 4.0, "subsidio_pix_percent": 0.0, "faixa": "Nao identificada"}
 
-    def _calcular_custo_operacional_ml_2026(self, preco_venda, peso, categoria="Produtos Comuns"):
+    def _obter_custo_operacional_ml_2026(self, preco_venda, peso, categoria="Produtos Comuns"):
         """
-        Calcula o custo operacional do Mercado Livre para 2026.
-        Segue rigorosamente as faixas de preço e peso da planilha.
+        Obtém o custo operacional do Mercado Livre 2026 baseado na planilha.
+        Suporta: Geral, Livros, Supermercado.
         """
         custo_operacional = 0.0
         faixa_identificada = "N/A"
-        cobrada = False
 
         # Selecionar tabela correta
-        tabela_custo = MERCADO_LIVRE_CUSTO_OPERACIONAL_GERAL_2026
         if "Livros" in categoria:
             tabela_custo = MERCADO_LIVRE_LIVROS_2026
         elif "Supermercado" in categoria or "Alimentos e Bebidas" in categoria:
             tabela_custo = MERCADO_LIVRE_SUPERMERCADO_2026
+        else:
+            tabela_custo = MERCADO_LIVRE_CUSTO_OPERACIONAL_GERAL_2026
 
         # Encontrar linha de peso
         linha_peso = None
@@ -59,27 +62,27 @@ class PricingCalculatorV2:
                 break
         
         if not linha_peso:
-            # Fallback para o primeiro peso se não encontrar exato
-            linha_peso = tabela_custo[0]
+            linha_peso = tabela_custo[0]  # Fallback
 
-        # Lógica de faixas de preço (Rigorosa conforme planilha)
+        # Lógica de faixas de preço - RIGOROSA CONFORME PLANILHA
         if "Supermercado" in categoria or "Alimentos e Bebidas" in categoria:
-            if preco_venda <= 18.99:
+            # Supermercado tem faixas diferentes
+            if preco_venda < 19:
                 custo_operacional = linha_peso.get("R$ 0-18,99", 0.0)
                 faixa_identificada = "R$ 0-18,99"
-            elif preco_venda <= 28.99:
+            elif preco_venda < 29:
                 custo_operacional = linha_peso.get("R$ 19-28,99", 0.0)
                 faixa_identificada = "R$ 19-28,99"
-            elif preco_venda <= 48.99:
+            elif preco_venda < 49:
                 custo_operacional = linha_peso.get("R$ 29-48,99", 0.0)
                 faixa_identificada = "R$ 29-48,99"
-            elif preco_venda <= 78.99:
+            elif preco_venda < 79:
                 custo_operacional = linha_peso.get("R$ 49-78,99", 0.0)
                 faixa_identificada = "R$ 49-78,99"
-            elif preco_venda <= 98.99:
+            elif preco_venda < 99:
                 custo_operacional = linha_peso.get("R$ 79-98,99", 0.0)
                 faixa_identificada = "R$ 79-98,99"
-            elif preco_venda <= 198.99:
+            elif preco_venda < 199:
                 custo_operacional = linha_peso.get("R$ 99-198,99", 0.0)
                 faixa_identificada = "R$ 99-198,99"
             else:
@@ -112,17 +115,42 @@ class PricingCalculatorV2:
                 custo_operacional = linha_peso.get("A partir de R$ 200", 0.0)
                 faixa_identificada = "A partir de R$ 200"
 
-        # Conforme solicitado, o Custo Fixo foi extinto. 
-        # No entanto, a planilha ainda mostra valores para faixas abaixo de R$ 79.
-        # Se o usuário quer "retirar a parte de Regras Custo Fixo", isso significa que 
-        # para produtos < R$ 79, o custo operacional deve ser 0.
+        # Conforme solicitado, o Custo Fixo foi extinto.
+        # Para produtos abaixo de R$ 79, o custo operacional deve ser 0.
         if preco_venda < MERCADO_LIVRE_LIMITE_FRETE_GRATIS:
             custo_operacional = 0.0
-            cobrada = False
-        else:
-            cobrada = True
 
-        return {"custo_operacional": custo_operacional, "cobrada": cobrada, "faixa": faixa_identificada}
+        return {"custo_operacional": custo_operacional, "faixa": faixa_identificada}
+
+    def _obter_custo_frete_adicional(self, preco_venda, peso_gramas):
+        """
+        Obtém custo de frete adicional da Tabela de Fretes para faixas específicas.
+        Aplicável apenas para certos cenários.
+        """
+        # Mapear peso em gramas para faixa da tabela
+        peso_faixa = None
+        if peso_gramas <= 300:
+            peso_faixa = "Até 300g"
+        elif peso_gramas <= 500:
+            peso_faixa = "300g a 500g"
+        elif peso_gramas <= 1000:
+            peso_faixa = "500g a 1kg"
+        elif peso_gramas <= 2000:
+            peso_faixa = "1kg a 2kg"
+        elif peso_gramas <= 3000:
+            peso_faixa = "2kg a 3kg"
+        else:
+            return 0.0
+
+        # Buscar na tabela de fretes
+        for linha in MERCADO_LIVRE_TABELA_FRETES_2026:
+            if linha["Peso"] == peso_faixa:
+                if preco_venda < 200:
+                    return linha.get("Custo (R$ 79-99)", 0.0)
+                else:
+                    return linha.get("Custo (> R$ 200)", 0.0)
+        
+        return 0.0
 
     def calcular_curva_abc(self, df_com_faturamento):
         faturamento_total = df_com_faturamento['Faturamento'].sum()
@@ -148,18 +176,18 @@ class PricingCalculatorV2:
         return self.marketplaces.get(marketplace, {"comissao": 0.0, "custo_fixo": 0.0})
 
     def calcular_linha(self, sku, descricao, custo_produto, frete, preco_atual, marketplace, regime_tributario, 
-                       tipo_anuncio="", categoria="Produtos Comuns", peso="Até 0,3 kg"):
+                       tipo_anuncio="", categoria="Produtos Comuns", peso="Até 0,3 kg", peso_gramas=300):
         config_mkt = self.obter_config_marketplace(marketplace, tipo_anuncio, categoria)
         taxa_comissao = config_mkt["comissao"]
         
-        # Cálculo do Custo Operacional (Frete Grátis) para Mercado Livre 2026
+        # Cálculo do Custo Operacional para Mercado Livre 2026
         taxa_fixa_cobrada = False
         faixa_taxa_fixa = "N/A"
         if marketplace == "Mercado Livre":
-            res_ml = self._calcular_custo_operacional_ml_2026(preco_atual, peso, categoria)
+            res_ml = self._obter_custo_operacional_ml_2026(preco_atual, peso, categoria)
             taxa_fixa = res_ml["custo_operacional"]
-            taxa_fixa_cobrada = res_ml["cobrada"]
             faixa_taxa_fixa = res_ml["faixa"]
+            taxa_fixa_cobrada = taxa_fixa > 0
         elif marketplace == "Shopee":
             res_shopee = self.calcular_comissao_shopee(preco_atual)
             taxa_comissao = res_shopee["comissao_percent"]
@@ -221,6 +249,7 @@ class PricingCalculatorV2:
             tipo_anuncio = row.get("Tipo de Anúncio", row.get("Tipo de Anuncio", ""))
             categoria = row.get("Categoria", "Produtos Comuns")
             peso = row.get("Peso", "Até 0,3 kg")
+            peso_gramas = row.get("Peso (g)", row.get("Peso Gramas", 300))
             
             resultado = self.calcular_linha(
                 sku=row.get("SKU", row.get("SKU ou MLB", "")),
@@ -232,7 +261,8 @@ class PricingCalculatorV2:
                 regime_tributario=regime_tributario,
                 tipo_anuncio=tipo_anuncio,
                 categoria=categoria,
-                peso=peso
+                peso=peso,
+                peso_gramas=peso_gramas
             )
             resultados.append(resultado)
         
