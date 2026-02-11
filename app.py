@@ -1429,10 +1429,10 @@ with tab4:
             
             st.markdown("---")
             
-            # Gráficos em duas colunas
+            # Gráficos em três colunas (Status, Curva ABC e Categorias)
             st.markdown('<div class="section-title">Distribuição de Produtos</div>', unsafe_allow_html=True)
             
-            col1, col2 = st.columns(2)
+            col1, col2, col3 = st.columns(3)
             
             with col1:
                 st.markdown('<div class="chart-container">', unsafe_allow_html=True)
@@ -1462,8 +1462,8 @@ with tab4:
                         pull=[0.05, 0.05, 0.05]
                     )])
                     fig_status.update_layout(
-                        height=380,
-                        margin=dict(l=20, r=20, t=20, b=20),
+                        height=350,
+                        margin=dict(l=10, r=10, t=10, b=10),
                         showlegend=False,
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
@@ -1503,8 +1503,8 @@ with tab4:
                         pull=[0.05, 0.05, 0.05]
                     )])
                     fig_curva.update_layout(
-                        height=380,
-                        margin=dict(l=20, r=20, t=20, b=20),
+                        height=350,
+                        margin=dict(l=10, r=10, t=10, b=10),
                         showlegend=False,
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
@@ -1513,7 +1513,41 @@ with tab4:
                     )
                     st.plotly_chart(fig_curva, use_container_width=True)
                 else:
-                    st.info("Sem dados de Curva ABC")
+                    st.info("Sem dados de curva ABC")
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+            with col3:
+                st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+                st.markdown("### Por Categoria")
+                cat_counts = df_dashboard['Categoria'].value_counts() if 'Categoria' in df_dashboard.columns else pd.Series()
+                if len(cat_counts) > 0:
+                    cores_cat = ['#667eea', '#764ba2', '#a266ea', '#ea667e', '#66eab3']
+                    
+                    fig_cat = go.Figure(data=[go.Pie(
+                        labels=[str(label) for label in cat_counts.index],
+                        values=cat_counts.values,
+                        marker=dict(
+                            colors=cores_cat,
+                            line=dict(color='rgba(255,255,255,0.3)', width=3)
+                        ),
+                        textposition='inside',
+                        textinfo='label+percent',
+                        textfont=dict(size=12, color='white', family='Arial Black'),
+                        hovertemplate='<b>%{label}</b><br>%{value} produtos<br>%{percent}<extra></extra>',
+                        hole=0.4
+                    )])
+                    fig_cat.update_layout(
+                        height=350,
+                        margin=dict(l=10, r=10, t=10, b=10),
+                        showlegend=False,
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        font=dict(color='white', size=11),
+                        hovermode='closest'
+                    )
+                    st.plotly_chart(fig_cat, use_container_width=True)
+                else:
+                    st.info("Sem dados de categoria")
                 st.markdown('</div>', unsafe_allow_html=True)
 
             

@@ -12,6 +12,12 @@ DEFAULT_MARKETPLACES = {
     "Outros": {"comissao": 0.18, "custo_fixo": 0.0, "taxa_devolucao": 0.02},
 }
 
+# Configurações de tipos de anúncio para Mercado Livre
+MERCADO_LIVRE_AD_TYPES = {
+    "Clássico": {"comissao": 0.14, "custo_fixo": 6.0},
+    "Premium": {"comissao": 0.19, "custo_fixo": 6.0},
+}
+
 # ============================================================================
 # MERCADO LIVRE 2026 - MATRIZES DE CUSTOS E REGRAS
 # ============================================================================

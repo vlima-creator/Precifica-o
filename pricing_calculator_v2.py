@@ -306,6 +306,7 @@ class PricingCalculatorV2:
                 "Margem Bruta %",
                 "Margem Liquida %",
                 "Curva ABC",
+                "Categoria",
                 "Status",
             ]
         elif marketplace == "Shopee":
@@ -363,7 +364,18 @@ class PricingCalculatorV2:
             # Novos parâmetros para Mercado Livre (válido a partir de 02/03/2026)
             peso_kg = float(row.get("Peso", 0.0) or 0.0) if "Peso" in row else 0.0
             tipo_logistica_ml = row.get("Tipo de Logística", "Full") if "Tipo de Logística" in row else "Full"
-            categoria_ml = row.get("Categoria", "Produtos Comuns") if "Categoria" in row else "Produtos Comuns"
+            
+            # Mapeamento automático de categoria (se vazio ou não informado)
+            categoria_ml = row.get("Categoria", "")
+            if not categoria_ml or categoria_ml == "" or categoria_ml == "nan":
+                # Tentar identificar pelo título/descrição
+                titulo = str(row.get("Descrição", "")).lower()
+                if any(word in titulo for word in ["livro", "book", "bíblia", "biblia", "hq", "manga"]):
+                    categoria_ml = "Livros"
+                elif any(word in titulo for word in ["bebida", "comida", "alimento", "snack", "doce", "café", "azeite"]):
+                    categoria_ml = "Supermercado"
+                else:
+                    categoria_ml = "Produtos Comuns"
             
             resultado = self.calcular_linha(
                 sku=row.get("SKU", ""),
@@ -382,6 +394,20 @@ class PricingCalculatorV2:
         
         df_resultado = pd.DataFrame(resultados)
         
+        # Adicionar coluna de Categoria ao resultado final
+        if "Categoria" not in df_resultado.columns:
+            # Re-extrair categorias para o dataframe de resultado
+            categorias_finais = []
+            for _, row in df.iterrows():
+                cat = row.get("Categoria", "")
+                if not cat or cat == "" or cat == "nan":
+                    titulo = str(row.get("Descrição", "")).lower()
+                    if any(word in titulo for word in ["livro", "book", "bíblia", "biblia", "hq", "manga"]): cat = "Livros"
+                    elif any(word in titulo for word in ["bebida", "comida", "alimento", "snack", "doce", "café", "azeite"]): cat = "Supermercado"
+                    else: cat = "Produtos Comuns"
+                categorias_finais.append(cat)
+            df_resultado["Categoria"] = categorias_finais
+
         # Calcular Curva ABC se houver coluna de Quantidade Vendida
         if "Quantidade Vendida" in df.columns:
             # Calcular faturamento (preco_atual * quantidade_vendida)
