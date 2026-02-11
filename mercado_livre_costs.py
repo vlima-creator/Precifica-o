@@ -1,206 +1,268 @@
 """
-Módulo para cálculo de custos operacionais e de frete do Mercado Livre (Válido a partir de 02/03/2026)
-Implementa a nova lógica de custos baseada em peso e faixa de preço
+Módulo aprimorado para cálculo de custos do Mercado Livre 2026
+Integra as novas regras de precificação do arquivo Analise_Mercado_Livre_2026.xlsx
 """
 
 from config import (
-    MERCADO_LIVRE_CUSTO_OPERACIONAL_PESO,
-    MERCADO_LIVRE_TAXA_FIXA_FLEX,
-    MERCADO_LIVRE_FRETE_GRATIS_PESO,
+    MERCADO_LIVRE_CUSTO_OPERACIONAL_FULL_2026,
+    MERCADO_LIVRE_CUSTO_OPERACIONAL_SUPERMERCADO_2026,
+    MERCADO_LIVRE_CUSTO_OPERACIONAL_LIVROS_2026,
+    MERCADO_LIVRE_TAXA_FIXA_FLEX_2026,
+    MERCADO_LIVRE_FRETE_GRATIS_FULL_2026,
+    MERCADO_LIVRE_REGRAS_CUSTO_FIXO,
+    MERCADO_LIVRE_COMISSAO_CATEGORIA_2026,
+    MERCADO_LIVRE_CUSTOS_ADICIONAIS,
     MERCADO_LIVRE_LIMITE_TAXA_FIXA,
+    MERCADO_LIVRE_LIMITE_CUSTO_FIXO_BAIXO,
+    MERCADO_LIVRE_LIMITE_CUSTO_OPERACIONAL_GERAL,
+    MERCADO_LIVRE_LIMITE_CUSTO_OPERACIONAL_SUPERMERCADO,
 )
 
 
 class MercadoLivreCostsCalculator:
-    """Calcula custos operacionais e de frete do Mercado Livre com base nas novas regras de março de 2026."""
+    """
+    Calculadora de custos do Mercado Livre 2026 com suporte às novas regras
+    """
 
     @staticmethod
-    def calcular_custo_operacional_full(preco_venda, peso_kg, categoria="Produtos Comuns"):
+    def _encontrar_faixa_peso(peso_kg):
         """
-        Calcula o custo operacional para logística Full (Mercado Livre) quando preço <= R$ 79.
+        Encontra a faixa de peso correspondente para o produto
         
         Args:
-            preco_venda: Preço de venda em R$
             peso_kg: Peso do produto em kg
-            categoria: Categoria do produto ("Produtos Comuns" ou "Livros")
             
         Returns:
-            dict com custo_operacional (valor em R$), faixa_peso e faixa_preco
+            String com a faixa de peso (ex: "Até 0,3 kg", "0,3 a 0,5 kg")
         """
-        # Se preço > 79, não há custo operacional (há frete grátis)
-        if preco_venda > MERCADO_LIVRE_LIMITE_TAXA_FIXA:
-            return {
-                "custo_operacional": 0.0,
-                "faixa_peso": "Acima de R$ 79",
-                "faixa_preco": "N/A",
-                "tipo": "Frete Grátis"
-            }
-        
-        # Buscar categoria
-        categorias = MERCADO_LIVRE_CUSTO_OPERACIONAL_PESO.get(categoria)
-        if not categorias:
-            categorias = MERCADO_LIVRE_CUSTO_OPERACIONAL_PESO.get("Produtos Comuns")
-        
-        # Encontrar faixa de peso
-        for faixa_peso in categorias:
-            if faixa_peso["peso_min_kg"] <= peso_kg < faixa_peso["peso_max_kg"]:
-                # Encontrar faixa de preço dentro da faixa de peso
-                for faixa_preco in faixa_peso["custos_por_faixa"]:
-                    if preco_venda <= faixa_preco["preco_max"]:
-                        return {
-                            "custo_operacional": faixa_preco["custo"],
-                            "faixa_peso": f"{faixa_peso['peso_min_kg']:.1f}kg - {faixa_peso['peso_max_kg']:.1f}kg",
-                            "faixa_preco": f"Até R$ {faixa_preco['preco_max']:.2f}",
-                            "tipo": "Custo Operacional"
-                        }
-        
-        # Fallback: retornar o custo máximo da faixa de peso mais próxima
-        if categorias:
-            faixa_peso = categorias[-1]  # Última faixa
-            faixa_preco = faixa_peso["custos_por_faixa"][-1]  # Última faixa de preço
-            return {
-                "custo_operacional": faixa_preco["custo"],
-                "faixa_peso": f"{faixa_peso['peso_min_kg']:.1f}kg - {faixa_peso['peso_max_kg']:.1f}kg",
-                "faixa_preco": f"Acima de R$ {faixa_preco['preco_max']:.2f}",
-                "tipo": "Custo Operacional"
-            }
-        
-        return {
-            "custo_operacional": 0.0,
-            "faixa_peso": "Não identificada",
-            "faixa_preco": "N/A",
-            "tipo": "Erro"
-        }
-
-    @staticmethod
-    def calcular_taxa_fixa_flex(preco_venda, categoria="Produtos Comuns"):
-        """
-        Calcula a taxa fixa para logística Flex (própria) quando preço <= R$ 79.
-        
-        Args:
-            preco_venda: Preço de venda em R$
-            categoria: Categoria do produto ("Produtos Comuns" ou "Livros")
-            
-        Returns:
-            dict com taxa_fixa (valor em R$), faixa_preco
-        """
-        # Se preço > 79, não há taxa fixa
-        if preco_venda > MERCADO_LIVRE_LIMITE_TAXA_FIXA:
-            return {
-                "taxa_fixa": 0.0,
-                "faixa_preco": "Acima de R$ 79",
-                "tipo": "Sem Taxa"
-            }
-        
-        # Buscar categoria
-        categorias = MERCADO_LIVRE_TAXA_FIXA_FLEX.get(categoria)
-        if not categorias:
-            categorias = MERCADO_LIVRE_TAXA_FIXA_FLEX.get("Produtos Comuns")
-        
-        # Encontrar faixa de preço
-        for faixa in categorias:
-            if faixa["min"] <= preco_venda <= faixa["max"]:
-                return {
-                    "taxa_fixa": faixa["taxa_fixa"],
-                    "faixa_preco": f"R$ {faixa['min']:.2f} - R$ {faixa['max']:.2f}",
-                    "tipo": "Taxa Fixa Flex"
-                }
-        
-        # Fallback
-        return {
-            "taxa_fixa": 0.0,
-            "faixa_preco": "Não identificada",
-            "tipo": "Erro"
-        }
-
-    @staticmethod
-    def calcular_frete_gratis_full(preco_venda, peso_kg, categoria="Produtos Comuns"):
-        """
-        Calcula o custo de frete para logística Full quando preço >= R$ 79 (Frete Grátis).
-        
-        Args:
-            preco_venda: Preço de venda em R$
-            peso_kg: Peso do produto em kg
-            categoria: Categoria do produto ("Produtos Comuns" ou "Livros")
-            
-        Returns:
-            dict com custo_frete (valor em R$), faixa_peso, faixa_preco
-        """
-        # Se preço < 79, não há frete grátis
-        if preco_venda < MERCADO_LIVRE_LIMITE_TAXA_FIXA:
-            return {
-                "custo_frete": 0.0,
-                "faixa_peso": "Abaixo de R$ 79",
-                "faixa_preco": "N/A",
-                "tipo": "Custo Operacional"
-            }
-        
-        # Buscar categoria
-        categorias = MERCADO_LIVRE_FRETE_GRATIS_PESO.get(categoria)
-        if not categorias:
-            categorias = MERCADO_LIVRE_FRETE_GRATIS_PESO.get("Produtos Comuns")
-        
-        # Encontrar faixa de peso
-        for faixa_peso in categorias:
-            if faixa_peso["peso_min_kg"] <= peso_kg < faixa_peso["peso_max_kg"]:
-                # Encontrar faixa de preço dentro da faixa de peso
-                for faixa_preco in faixa_peso["custos_por_faixa"]:
-                    if preco_venda <= faixa_preco["preco_max"]:
-                        return {
-                            "custo_frete": faixa_preco["custo"],
-                            "faixa_peso": f"{faixa_peso['peso_min_kg']:.1f}kg - {faixa_peso['peso_max_kg']:.1f}kg",
-                            "faixa_preco": f"Até R$ {faixa_preco['preco_max']:.2f}",
-                            "tipo": "Frete Grátis"
-                        }
-        
-        # Fallback: retornar o custo máximo da faixa de peso mais próxima
-        if categorias:
-            faixa_peso = categorias[-1]  # Última faixa
-            faixa_preco = faixa_peso["custos_por_faixa"][-1]  # Última faixa de preço
-            return {
-                "custo_frete": faixa_preco["custo"],
-                "faixa_peso": f"{faixa_peso['peso_min_kg']:.1f}kg - {faixa_peso['peso_max_kg']:.1f}kg",
-                "faixa_preco": f"Acima de R$ {faixa_preco['preco_max']:.2f}",
-                "tipo": "Frete Grátis"
-            }
-        
-        return {
-            "custo_frete": 0.0,
-            "faixa_peso": "Não identificada",
-            "faixa_preco": "N/A",
-            "tipo": "Erro"
-        }
-
-    @staticmethod
-    def calcular_custo_total_ml(preco_venda, peso_kg, tipo_logistica="Full", categoria="Produtos Comuns"):
-        """
-        Calcula o custo total (operacional ou taxa fixa) para o Mercado Livre.
-        
-        Args:
-            preco_venda: Preço de venda em R$
-            peso_kg: Peso do produto em kg
-            tipo_logistica: Tipo de logística ("Full" ou "Flex")
-            categoria: Categoria do produto ("Produtos Comuns" ou "Livros")
-            
-        Returns:
-            dict com custo_total, detalhes de faixa e tipo
-        """
-        if tipo_logistica == "Full":
-            if preco_venda <= MERCADO_LIVRE_LIMITE_TAXA_FIXA:
-                return MercadoLivreCostsCalculator.calcular_custo_operacional_full(
-                    preco_venda, peso_kg, categoria
-                )
-            else:
-                return MercadoLivreCostsCalculator.calcular_frete_gratis_full(
-                    preco_venda, peso_kg, categoria
-                )
-        elif tipo_logistica == "Flex":
-            return MercadoLivreCostsCalculator.calcular_taxa_fixa_flex(
-                preco_venda, categoria
-            )
+        if peso_kg <= 0.3:
+            return "Até 300g"
+        elif peso_kg <= 0.5:
+            return "300g a 500g"
+        elif peso_kg <= 1.0:
+            return "500g a 1kg"
+        elif peso_kg <= 2.0:
+            return "1kg a 2kg"
+        elif peso_kg <= 3.0:
+            return "2kg a 3kg"
         else:
-            return {
-                "custo_total": 0.0,
-                "faixa": "Tipo de logística inválido",
-                "tipo": "Erro"
+            return "2kg a 3kg"  # Padrão para pesos maiores
+
+    @staticmethod
+    def _encontrar_custo_por_preco(tabela_faixas, preco):
+        """
+        Encontra o custo correspondente à faixa de preço
+        
+        Args:
+            tabela_faixas: Lista de dicts com preco_min, preco_max e custo (ou taxa_fixa)
+            preco: Preço do produto
+            
+        Returns:
+            Float com o custo encontrado, ou None se não encontrado
+        """
+        for faixa in tabela_faixas:
+            if faixa["preco_min"] <= preco <= faixa["preco_max"]:
+                # Tenta encontrar 'custo' primeiro, depois 'taxa_fixa'
+                if "custo" in faixa:
+                    return faixa["custo"]
+                elif "taxa_fixa" in faixa:
+                    return faixa["taxa_fixa"]
+        return None
+
+    @staticmethod
+    def calcular_comissao_categoria(categoria, tipo_anuncio="Clássico"):
+        """
+        Calcula a comissão baseada na categoria e tipo de anúncio
+        
+        Args:
+            categoria: Categoria do produto
+            tipo_anuncio: "Clássico" ou "Premium"
+            
+        Returns:
+            Float com a taxa de comissão (ex: 0.14 para 14%)
+        """
+        tipo_key = "classico" if tipo_anuncio.lower() == "clássico" else "premium"
+        
+        if categoria in MERCADO_LIVRE_COMISSAO_CATEGORIA_2026:
+            return MERCADO_LIVRE_COMISSAO_CATEGORIA_2026[categoria].get(tipo_key, 0.14)
+        
+        # Padrão se categoria não encontrada
+        return 0.14 if tipo_key == "classico" else 0.19
+
+    @staticmethod
+    def calcular_custo_operacional_full(preco, peso_kg, categoria="Geral"):
+        """
+        Calcula o custo operacional para logística Full, Coleta e Agências
+        Aplicado quando preço <= R$ 79
+        
+        Args:
+            preco: Preço do produto
+            peso_kg: Peso do produto em kg
+            categoria: "Geral", "Livros" ou "Supermercado"
+            
+        Returns:
+            Float com o custo operacional
+        """
+        # Se preço >= 79, retorna 0 (paga frete, não custo fixo)
+        if preco >= MERCADO_LIVRE_LIMITE_TAXA_FIXA:
+            return 0.0
+        
+        # Seleciona a tabela apropriada
+        if categoria.lower() == "livros":
+            tabela = MERCADO_LIVRE_CUSTO_OPERACIONAL_LIVROS_2026
+        elif categoria.lower() == "supermercado":
+            tabela = MERCADO_LIVRE_CUSTO_OPERACIONAL_SUPERMERCADO_2026
+        else:
+            tabela = MERCADO_LIVRE_CUSTO_OPERACIONAL_FULL_2026
+        
+        # Encontra a faixa de peso
+        faixa_peso = MercadoLivreCostsCalculator._encontrar_faixa_peso(peso_kg)
+        
+        if faixa_peso not in tabela:
+            return 0.0
+        
+        # Encontra o custo para a faixa de preço
+        custo = MercadoLivreCostsCalculator._encontrar_custo_por_preco(
+            tabela[faixa_peso], preco
+        )
+        
+        if custo is None:
+            return 0.0
+        
+        # Aplica regra de limite de custo fixo para produtos muito baratos
+        if preco < MERCADO_LIVRE_LIMITE_CUSTO_FIXO_BAIXO:
+            custo_maximo = preco * MERCADO_LIVRE_REGRAS_CUSTO_FIXO["abaixo_12_50"]
+            custo = min(custo, custo_maximo)
+        
+        # Aplica limite de 50% para produtos < R$ 19 (Geral)
+        if categoria.lower() != "supermercado" and preco < MERCADO_LIVRE_LIMITE_CUSTO_OPERACIONAL_GERAL:
+            custo_maximo = preco * MERCADO_LIVRE_REGRAS_CUSTO_FIXO["abaixo_19_geral"]
+            custo = min(custo, custo_maximo)
+        
+        # Aplica limite de 25% para produtos < R$ 29 (Supermercado)
+        if categoria.lower() == "supermercado" and preco < MERCADO_LIVRE_LIMITE_CUSTO_OPERACIONAL_SUPERMERCADO:
+            custo_maximo = preco * MERCADO_LIVRE_REGRAS_CUSTO_FIXO["abaixo_29_supermercado"]
+            custo = min(custo, custo_maximo)
+        
+        return custo
+
+    @staticmethod
+    def calcular_taxa_fixa_flex(preco, categoria="Geral"):
+        """
+        Calcula a taxa fixa para logística Flex, Retirada e Logística Própria
+        Aplicado quando preço <= R$ 79
+        
+        Args:
+            preco: Preço do produto
+            categoria: "Geral" ou "Livros"
+            
+        Returns:
+            Float com a taxa fixa
+        """
+        # Se preço >= 79, retorna 0 (isento)
+        if preco >= MERCADO_LIVRE_LIMITE_TAXA_FIXA:
+            return 0.0
+        
+        # Seleciona a tabela apropriada
+        tipo_categoria = "Livros" if categoria.lower() == "livros" else "Geral"
+        tabela = MERCADO_LIVRE_TAXA_FIXA_FLEX_2026[tipo_categoria]
+        
+        # Encontra o custo para a faixa de preço
+        taxa = MercadoLivreCostsCalculator._encontrar_custo_por_preco(tabela, preco)
+        
+        return taxa if taxa is not None else 0.0
+
+    @staticmethod
+    def calcular_frete_gratis_full(preco, peso_kg):
+        """
+        Calcula o custo de frete para logística Full quando preço >= R$ 79
+        
+        Args:
+            preco: Preço do produto
+            peso_kg: Peso do produto em kg
+            
+        Returns:
+            Float com o custo de frete
+        """
+        # Se preço < 79, retorna 0 (paga custo operacional, não frete)
+        if preco < MERCADO_LIVRE_LIMITE_TAXA_FIXA:
+            return 0.0
+        
+        # Encontra a faixa de peso
+        faixa_peso = MercadoLivreCostsCalculator._encontrar_faixa_peso(peso_kg)
+        
+        if faixa_peso not in MERCADO_LIVRE_FRETE_GRATIS_FULL_2026:
+            return 0.0
+        
+        # Encontra o custo para a faixa de preço
+        custo = MercadoLivreCostsCalculator._encontrar_custo_por_preco(
+            MERCADO_LIVRE_FRETE_GRATIS_FULL_2026[faixa_peso], preco
+        )
+        
+        return custo if custo is not None else 0.0
+
+    @staticmethod
+    def calcular_custo_total_ml(preco, peso_kg, tipo_logistica, categoria="Geral", tipo_anuncio="Clássico"):
+        """
+        Calcula o custo total do Mercado Livre (comissão + custo operacional/frete)
+        
+        Args:
+            preco: Preço do produto
+            peso_kg: Peso do produto em kg
+            tipo_logistica: "Full" ou "Flex"
+            categoria: Categoria do produto
+            tipo_anuncio: "Clássico" ou "Premium"
+            
+        Returns:
+            Dict com breakdown de custos:
+            {
+                "comissao": float,
+                "custo_operacional": float,
+                "frete": float,
+                "custo_total": float,
+                "detalhes": str
             }
+        """
+        # Calcula comissão
+        comissao_taxa = MercadoLivreCostsCalculator.calcular_comissao_categoria(categoria, tipo_anuncio)
+        comissao = preco * comissao_taxa
+        
+        # Calcula custo operacional ou frete
+        if tipo_logistica.lower() == "flex":
+            # Logística Flex: taxa fixa
+            custo_operacional = MercadoLivreCostsCalculator.calcular_taxa_fixa_flex(preco, categoria)
+            frete = 0.0
+            detalhes = f"Flex - Taxa Fixa: R$ {custo_operacional:.2f}"
+        else:
+            # Logística Full: custo operacional ou frete
+            if preco < MERCADO_LIVRE_LIMITE_TAXA_FIXA:
+                custo_operacional = MercadoLivreCostsCalculator.calcular_custo_operacional_full(
+                    preco, peso_kg, categoria
+                )
+                frete = 0.0
+                detalhes = f"Full - Custo Operacional: R$ {custo_operacional:.2f}"
+            else:
+                custo_operacional = 0.0
+                frete = MercadoLivreCostsCalculator.calcular_frete_gratis_full(preco, peso_kg)
+                detalhes = f"Full - Frete: R$ {frete:.2f}"
+        
+        custo_total = comissao + custo_operacional + frete
+        
+        return {
+            "comissao": comissao,
+            "comissao_taxa": comissao_taxa,
+            "custo_operacional": custo_operacional,
+            "frete": frete,
+            "custo_total": custo_total,
+            "detalhes": detalhes,
+        }
+
+
+# Função auxiliar para compatibilidade com código existente
+def calcular_custo_total_ml_simples(preco, peso_kg=0.3, tipo_logistica="Full", categoria="Geral"):
+    """
+    Função simplificada para cálculo de custo total
+    """
+    calc = MercadoLivreCostsCalculator()
+    resultado = calc.calcular_custo_total_ml(preco, peso_kg, tipo_logistica, categoria)
+    return resultado["custo_total"]
