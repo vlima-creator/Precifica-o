@@ -1,3 +1,4 @@
+
 """
 Módulo para Calculadora de Precificação V2
 Implementa a lógica automática baseada em dados do relatório
@@ -5,7 +6,9 @@ Implementa a lógica automática baseada em dados do relatório
 
 import pandas as pd
 import numpy as np
-from config import MERCADO_LIVRE_AD_TYPES, MERCADO_LIVRE_TAXA_FIXA, MERCADO_LIVRE_LIMITE_TAXA_FIXA, SHOPEE_FAIXAS_PRECO
+from config import MERCADO_LIVRE_AD_TYPES, MERCADO_LIVRE_LIMITE_FRETE_GRATIS, SHOPEE_FAIXAS_PRECO, \
+    MERCADO_LIVRE_COMISSOES_POR_CATEGORIA_2026, MERCADO_LIVRE_CUSTO_OPERACIONAL_GERAL_2026, \
+    MERCADO_LIVRE_SUPERMERCADO_2026, MERCADO_LIVRE_LIVROS_2026
 
 
 class PricingCalculatorV2:
@@ -13,18 +16,6 @@ class PricingCalculatorV2:
 
     def __init__(self, marketplaces, regimes, margem_bruta_alvo, margem_liquida_minima, percent_publicidade, 
                  custo_fixo_operacional=0.0, taxa_devolucao=0.0):
-        """
-        Inicializa a calculadora
-        
-        Args:
-            marketplaces: Dict com configurações de marketplaces
-            regimes: Dict com configurações de regimes tributários
-            margem_bruta_alvo: Margem bruta alvo (%)
-            margem_liquida_minima: Margem líquida mínima (%)
-            percent_publicidade: % de publicidade
-            custo_fixo_operacional: Custo fixo operacional (R$)
-            taxa_devolucao: Taxa de devoluções e trocas (%)
-        """
         self.marketplaces = marketplaces
         self.regimes = regimes
         self.margem_bruta_alvo = margem_bruta_alvo
@@ -34,15 +25,6 @@ class PricingCalculatorV2:
         self.taxa_devolucao = taxa_devolucao
 
     def calcular_comissao_shopee(self, preco_venda):
-        """
-        Calcula a comissao e subsidio Pix da Shopee baseado na faixa de preco
-        
-        Args:
-            preco_venda: Preco de venda em R$
-            
-        Returns:
-            dict com comissao_percent, comissao_fixa, subsidio_pix_percent e faixa
-        """
         for faixa in SHOPEE_FAIXAS_PRECO:
             if faixa["min"] <= preco_venda <= faixa["max"]:
                 return {
@@ -51,312 +33,161 @@ class PricingCalculatorV2:
                     "subsidio_pix_percent": faixa["subsidio_pix_percent"],
                     "faixa": faixa["descricao"]
                 }
-        
-        # Fallback (nao deve chegar aqui)
-        return {
-            "comissao_percent": 0.20,
-            "comissao_fixa": 4.0,
-            "subsidio_pix_percent": 0.0,
-            "faixa": "Nao identificada"
-        }
-    
-    def calcular_taxa_fixa_mercado_livre(self, preco_venda, categoria="Produtos Comuns"):
+        return {"comissao_percent": 0.20, "comissao_fixa": 4.0, "subsidio_pix_percent": 0.0, "faixa": "Nao identificada"}
+
+    def _calcular_custo_operacional_ml_2026(self, preco_venda, peso, categoria="Produtos Comuns"):
         """
-        Calcula a taxa fixa do Mercado Livre baseada na faixa de preço
-        
-        Args:
-            preco_venda: Preço de venda em R$
-            categoria: Categoria do produto ("Produtos Comuns" ou "Livros")
-            
-        Returns:
-            dict com taxa_fixa (valor em R$) e cobrada (bool)
+        Calcula o custo operacional do Mercado Livre para 2026.
+        Segue rigorosamente as faixas de preço e peso da planilha.
         """
-        # Se preço > limite, não cobra taxa fixa
-        if preco_venda > MERCADO_LIVRE_LIMITE_TAXA_FIXA:
-            return {"taxa_fixa": 0.0, "cobrada": False, "faixa": "Acima de R$ 79,00"}
+        custo_operacional = 0.0
+        faixa_identificada = "N/A"
+        cobrada = False
+
+        # Selecionar tabela correta
+        tabela_custo = MERCADO_LIVRE_CUSTO_OPERACIONAL_GERAL_2026
+        if "Livros" in categoria:
+            tabela_custo = MERCADO_LIVRE_LIVROS_2026
+        elif "Supermercado" in categoria or "Alimentos e Bebidas" in categoria:
+            tabela_custo = MERCADO_LIVRE_SUPERMERCADO_2026
+
+        # Encontrar linha de peso
+        linha_peso = None
+        for linha in tabela_custo:
+            if linha["Peso"] == peso:
+                linha_peso = linha
+                break
         
-        # Buscar faixa correta
-        faixas = MERCADO_LIVRE_TAXA_FIXA.get(categoria, MERCADO_LIVRE_TAXA_FIXA["Produtos Comuns"])
-        
-        for faixa in faixas:
-            if faixa["min"] <= preco_venda <= faixa["max"]:
-                return {
-                    "taxa_fixa": faixa["taxa_fixa"],
-                    "cobrada": True,
-                    "faixa": f"R$ {faixa['min']:.0f} - R$ {faixa['max']:.0f}"
-                }
-        
-        # Fallback (não deve chegar aqui)
-        return {"taxa_fixa": 0.0, "cobrada": False, "faixa": "Não identificada"}
-    
+        if not linha_peso:
+            # Fallback para o primeiro peso se não encontrar exato
+            linha_peso = tabela_custo[0]
+
+        # Lógica de faixas de preço (Rigorosa conforme planilha)
+        if "Supermercado" in categoria or "Alimentos e Bebidas" in categoria:
+            if preco_venda <= 18.99:
+                custo_operacional = linha_peso.get("R$ 0-18,99", 0.0)
+                faixa_identificada = "R$ 0-18,99"
+            elif preco_venda <= 28.99:
+                custo_operacional = linha_peso.get("R$ 19-28,99", 0.0)
+                faixa_identificada = "R$ 19-28,99"
+            elif preco_venda <= 48.99:
+                custo_operacional = linha_peso.get("R$ 29-48,99", 0.0)
+                faixa_identificada = "R$ 29-48,99"
+            elif preco_venda <= 78.99:
+                custo_operacional = linha_peso.get("R$ 49-78,99", 0.0)
+                faixa_identificada = "R$ 49-78,99"
+            elif preco_venda <= 98.99:
+                custo_operacional = linha_peso.get("R$ 79-98,99", 0.0)
+                faixa_identificada = "R$ 79-98,99"
+            elif preco_venda <= 198.99:
+                custo_operacional = linha_peso.get("R$ 99-198,99", 0.0)
+                faixa_identificada = "R$ 99-198,99"
+            else:
+                custo_operacional = linha_peso.get("A partir de R$ 199", 0.0)
+                faixa_identificada = "A partir de R$ 199"
+        else:
+            # Geral e Livros
+            if preco_venda <= 18.99:
+                custo_operacional = linha_peso.get("R$ 0-18,99", 0.0)
+                faixa_identificada = "R$ 0-18,99"
+            elif preco_venda <= 48.99:
+                custo_operacional = linha_peso.get("R$ 19-48,99", 0.0)
+                faixa_identificada = "R$ 19-48,99"
+            elif preco_venda <= 78.99:
+                custo_operacional = linha_peso.get("R$ 49-78,99", 0.0)
+                faixa_identificada = "R$ 49-78,99"
+            elif preco_venda <= 99.99:
+                custo_operacional = linha_peso.get("R$ 79-99,99", 0.0)
+                faixa_identificada = "R$ 79-99,99"
+            elif preco_venda <= 119.99:
+                custo_operacional = linha_peso.get("R$ 100-119,99", 0.0)
+                faixa_identificada = "R$ 100-119,99"
+            elif preco_venda <= 149.99:
+                custo_operacional = linha_peso.get("R$ 120-149,99", 0.0)
+                faixa_identificada = "R$ 120-149,99"
+            elif preco_venda <= 199.99:
+                custo_operacional = linha_peso.get("R$ 150-199,99", 0.0)
+                faixa_identificada = "R$ 150-199,99"
+            else:
+                custo_operacional = linha_peso.get("A partir de R$ 200", 0.0)
+                faixa_identificada = "A partir de R$ 200"
+
+        # Conforme solicitado, o Custo Fixo foi extinto. 
+        # No entanto, a planilha ainda mostra valores para faixas abaixo de R$ 79.
+        # Se o usuário quer "retirar a parte de Regras Custo Fixo", isso significa que 
+        # para produtos < R$ 79, o custo operacional deve ser 0.
+        if preco_venda < MERCADO_LIVRE_LIMITE_FRETE_GRATIS:
+            custo_operacional = 0.0
+            cobrada = False
+        else:
+            cobrada = True
+
+        return {"custo_operacional": custo_operacional, "cobrada": cobrada, "faixa": faixa_identificada}
+
     def calcular_curva_abc(self, df_com_faturamento):
-        """
-        Calcula a Curva ABC baseado no faturamento de cada produto
-        
-        Args:
-            df_com_faturamento: DataFrame com coluna Faturamento calculada
-            
-        Returns:
-            Series com classificacao ABC para cada linha
-        """
-        # Calcular faturamento total
         faturamento_total = df_com_faturamento['Faturamento'].sum()
-        
-        # Ordenar por faturamento em ordem decrescente
         df_ordenado = df_com_faturamento.sort_values('Faturamento', ascending=False).reset_index(drop=True)
-        
-        # Calcular faturamento acumulado
         df_ordenado['Faturamento_Acumulado'] = df_ordenado['Faturamento'].cumsum()
         df_ordenado['Percentual_Acumulado'] = (df_ordenado['Faturamento_Acumulado'] / faturamento_total) * 100
-        
-        # Classificar em A, B ou C
         def classificar_abc(percentual):
-            if percentual <= 80:
-                return "A"
-            elif percentual <= 95:
-                return "B"
-            else:
-                return "C"
-        
+            if percentual <= 80: return "A"
+            elif percentual <= 95: return "B"
+            else: return "C"
         df_ordenado['Curva ABC'] = df_ordenado['Percentual_Acumulado'].apply(classificar_abc)
-        
-        # Retornar em ordem original
         return df_ordenado[['Curva ABC']].reset_index(drop=True)
     
-    def obter_config_marketplace(self, marketplace, tipo_anuncio=""):
-        """
-        Obtém configuração do marketplace, considerando tipo de anúncio para Mercado Livre
-        
-        Args:
-            marketplace: Nome do marketplace
-            tipo_anuncio: Tipo de anúncio (para Mercado Livre: "Clássico" ou "Premium")
-            
-        Returns:
-            Dict com configuração (comissao, custo_fixo)
-        """
-        # Se é Mercado Livre e tem tipo de anúncio especificado
-        if marketplace == "Mercado Livre" and tipo_anuncio and tipo_anuncio in MERCADO_LIVRE_AD_TYPES:
-            return MERCADO_LIVRE_AD_TYPES[tipo_anuncio]
-        
-        # Caso contrário, usar configuração padrão do marketplace
+    def obter_config_marketplace(self, marketplace, tipo_anuncio="", categoria="Produtos Comuns"):
+        if marketplace == "Mercado Livre":
+            comissoes_categoria = MERCADO_LIVRE_COMISSOES_POR_CATEGORIA_2026.get(categoria, {"classico": 0.14, "premium": 0.19})
+            if tipo_anuncio == "Clássico":
+                return {"comissao": comissoes_categoria["classico"], "custo_fixo": 0.0}
+            elif tipo_anuncio == "Premium":
+                return {"comissao": comissoes_categoria["premium"], "custo_fixo": 0.0}
+            else:
+                return {"comissao": comissoes_categoria["classico"], "custo_fixo": 0.0}
         return self.marketplaces.get(marketplace, {"comissao": 0.0, "custo_fixo": 0.0})
 
-    def calcular_linha(self, sku, descricao, custo_produto, frete, preco_atual, 
-                       marketplace, regime_tributario, tipo_anuncio=""):
-        """
-        Calcula uma linha da Calculadora de Precificação
+    def calcular_linha(self, sku, descricao, custo_produto, frete, preco_atual, marketplace, regime_tributario, 
+                       tipo_anuncio="", categoria="Produtos Comuns", peso="Até 0,3 kg"):
+        config_mkt = self.obter_config_marketplace(marketplace, tipo_anuncio, categoria)
+        taxa_comissao = config_mkt["comissao"]
         
-        Args:
-            sku: SKU do produto
-            descricao: Descrição do produto
-            custo_produto: Custo do produto (R$)
-            frete: Frete (R$)
-            preco_atual: Preço atual (R$)
-            marketplace: Nome do marketplace
-            regime_tributario: Regime tributário
-            tipo_anuncio: Tipo de anúncio (opcional, para Mercado Livre)
-            
-        Returns:
-            Dict com todos os cálculos
-        """
-        # Inicializar variaveis
-        taxa_fixa_info = {"cobrada": False, "faixa": "Nao aplicavel"}
-        subsidio_pix = 0.0
-        subsidio_pix_info = {"subsidio_pix_percent": 0.0, "faixa": "Nao aplicavel"}
-        
-        # Calcular comissao e taxa fixa baseado no marketplace
-        if marketplace == "Shopee":
-            # Para Shopee, usar comissao variavel por faixa de preco
-            shopee_config = self.calcular_comissao_shopee(preco_atual)
-            comissao_percent = shopee_config["comissao_percent"]
-            taxa_fixa = shopee_config["comissao_fixa"]
-            subsidio_pix = preco_atual * shopee_config["subsidio_pix_percent"]
-            subsidio_pix_info = {
-                "subsidio_pix_percent": shopee_config["subsidio_pix_percent"] * 100,
-                "faixa": shopee_config["faixa"]
-            }
-        else:
-            # Para Mercado Livre e outros marketplaces, usar configuracao padrao
-            mp_config = self.obter_config_marketplace(marketplace, tipo_anuncio)
-            comissao_percent = mp_config.get("comissao", 0.0)
-            taxa_fixa = mp_config.get("custo_fixo", 0.0)
-        
-        # Obter configurações do regime tributário
-        regime_config = self.regimes.get(regime_tributario, {})
-        impostos_percent = regime_config.get("impostos_encargos", 0.0)
-        
-        # Calcular taxa fixa do Mercado Livre se aplicavel
+        # Cálculo do Custo Operacional (Frete Grátis) para Mercado Livre 2026
         if marketplace == "Mercado Livre":
-            taxa_fixa_info = self.calcular_taxa_fixa_mercado_livre(preco_atual, "Produtos Comuns")
-            taxa_fixa = taxa_fixa_info["taxa_fixa"]
-        
-        # Calculos
-        comissao = preco_atual * comissao_percent
-        impostos = preco_atual * impostos_percent
-        publicidade = preco_atual * (self.percent_publicidade / 100)
-        devoluoes = preco_atual * (self.taxa_devolucao / 100)
-        lucro = preco_atual - custo_produto - frete - comissao - taxa_fixa - impostos - publicidade - devoluoes - (self.custo_fixo_operacional / 100 * preco_atual) + subsidio_pix
-        
-        # Calcular custos operacionais em valor (era percentual)
-        custo_fixo_op_valor = (self.custo_fixo_operacional / 100 * preco_atual)
-        
-        margem_bruta = (lucro / preco_atual * 100) if preco_atual > 0 else 0
-        
-        # Determinar status
-        if margem_bruta >= self.margem_bruta_alvo:
-            status = "🟢 Saudável"
-        elif margem_bruta >= self.margem_liquida_minima:
-            status = "🟡 Alerta"
+            res_ml = self._calcular_custo_operacional_ml_2026(preco_atual, peso, categoria)
+            taxa_fixa = res_ml["custo_operacional"]
+        elif marketplace == "Shopee":
+            res_shopee = self.calcular_comissao_shopee(preco_atual)
+            taxa_comissao = res_shopee["comissao_percent"]
+            taxa_fixa = res_shopee["comissao_fixa"]
         else:
-            status = "🔴 Prejuízo"
+            taxa_fixa = config_mkt["custo_fixo"]
+
+        # Impostos
+        config_regime = self.regimes.get(regime_tributario, self.regimes["Simples Nacional"])
+        impostos_percent = config_regime["ibs"] + config_regime["cbs"] + config_regime["impostos_encargos"]
+        impostos_valor = preco_atual * impostos_percent
+
+        # Comissões e Taxas
+        comissao_valor = preco_atual * taxa_comissao
+        publicidade_valor = preco_atual * (self.percent_publicidade / 100)
         
-        # Determinar tipo de anúncio para exibição
-        tipo_anuncio_exibicao = tipo_anuncio if tipo_anuncio else "Padrão"
-        if marketplace != "Mercado Livre":
-            tipo_anuncio_exibicao = "N/A"
+        # Margens
+        margem_bruta_valor = preco_atual - custo_produto - frete - comissao_valor - taxa_fixa - impostos_valor
+        margem_bruta_percent = (margem_bruta_valor / preco_atual) * 100 if preco_atual > 0 else 0
         
+        margem_liquida_valor = margem_bruta_valor - publicidade_valor
+        margem_liquida_percent = (margem_liquida_valor / preco_atual) * 100 if preco_atual > 0 else 0
+
         return {
-            "SKU ou MLB": sku,
-            "Titulo": descricao,
-            "Tipo de Anuncio": tipo_anuncio_exibicao,
-            "Taxa Comissao %": f"{comissao_percent * 100:.2f}%",
-            "Taxa Fixa R$": taxa_fixa,
-            "Taxa Fixa Cobrada": "Sim" if taxa_fixa_info["cobrada"] else "Nao",
-            "Faixa Taxa Fixa": taxa_fixa_info["faixa"],
-            "Faixa Shopee": subsidio_pix_info["faixa"],
-            "Subsidio Pix %": f"{subsidio_pix_info['subsidio_pix_percent']:.2f}%",
-            "Subsidio Pix R$": subsidio_pix,
-            "Preco Atual (R$)": preco_atual,
+            "SKU": sku,
+            "Descrição": descricao,
+            "Preço Venda": preco_atual,
             "Custo Produto": custo_produto,
             "Frete": frete,
-            "Comissao R$": comissao,
-            "Custo Fixo Op.": self.custo_fixo_operacional,
-            "Impostos": impostos,
-            "Publicidade": publicidade,
-            "Subsidio Pix (Credito)": subsidio_pix,
-            "Lucro R$": lucro,
-            "Margem Bruta %": margem_bruta,
-            "Margem Liquida %": margem_bruta,
-            "Status": status,
+            "Taxa Comissao %": f"{taxa_comissao*100:.2f}%",
+            "Taxa Fixa R$": taxa_fixa,
+            "Impostos R$": impostos_valor,
+            "Margem Bruta %": margem_bruta_percent,
+            "Margem Líquida %": margem_liquida_percent
         }
-
-    def obter_colunas_por_marketplace(self, marketplace):
-        """
-        Retorna as colunas que devem ser exibidas baseado no marketplace
-        
-        Args:
-            marketplace: Nome do marketplace
-            
-        Returns:
-            Lista de colunas a exibir
-        """
-        if marketplace == "Mercado Livre":
-            # Colunas especificas do Mercado Livre
-            return [
-                "SKU ou MLB",
-                "Titulo",
-                "Tipo de Anuncio",
-                "Taxa Comissao %",
-                "Taxa Fixa R$",
-                "Taxa Fixa Cobrada",
-                "Faixa Taxa Fixa",
-                "Preco Atual (R$)",
-                "Custo Produto",
-                "Frete",
-                "Comissao R$",
-                "Impostos",
-                "Publicidade",
-                "Lucro R$",
-                "Margem Bruta %",
-                "Margem Liquida %",
-                "Curva ABC",
-                "Status",
-            ]
-        elif marketplace == "Shopee":
-            # Colunas especificas da Shopee
-            return [
-                "SKU ou MLB",
-                "Titulo",
-                "Taxa Comissao %",
-                "Taxa Fixa R$",
-                "Faixa Shopee",
-                "Subsidio Pix %",
-                "Subsidio Pix R$",
-                "Preco Atual (R$)",
-                "Custo Produto",
-                "Frete",
-                "Comissao R$",
-                "Impostos",
-                "Publicidade",
-                "Subsidio Pix (Credito)",
-                "Lucro R$",
-                "Margem Bruta %",
-                "Margem Liquida %",
-                "Curva ABC",
-                "Status",
-            ]
-        else:
-            # Para outros marketplaces, usar colunas comuns
-            return [
-                "SKU ou MLB",
-                "Titulo",
-                "Taxa Comissao %",
-                "Preco Atual (R$)",
-                "Custo Produto",
-                "Frete",
-                "Comissao R$",
-                "Impostos",
-                "Publicidade",
-                "Lucro R$",
-                "Margem Bruta %",
-                "Margem Liquida %",
-                "Curva ABC",
-                "Status",
-            ]
-    
-    def calcular_dataframe(self, df, marketplace, regime_tributario):
-        """
-        Calcula precificação para múltiplas linhas
-        
-        Args:
-            df: DataFrame com colunas: SKU, Descrição, Custo Produto, Frete, Preço Atual, Tipo de Anúncio (opcional)
-            marketplace: Marketplace selecionado
-            regime_tributario: Regime tributário selecionado
-                
-        Returns:
-            DataFrame com cálculos completos
-        """
-        resultados = []
-        
-        for _, row in df.iterrows():
-            tipo_anuncio = row.get("Tipo de Anúncio", "")
-            
-            resultado = self.calcular_linha(
-                sku=row.get("SKU", ""),
-                descricao=row.get("Descrição", ""),
-                custo_produto=float(row.get("Custo Produto", 0) or 0),
-                frete=float(row.get("Frete", 0) or 0),
-                preco_atual=float(row.get("Preço Atual", 0) or 0),
-                marketplace=marketplace,
-                regime_tributario=regime_tributario,
-                tipo_anuncio=tipo_anuncio,
-            )
-            resultados.append(resultado)
-        
-        df_resultado = pd.DataFrame(resultados)
-        
-        # Calcular Curva ABC se houver coluna de Quantidade Vendida
-        if "Quantidade Vendida" in df.columns:
-            # Calcular faturamento (preco_atual * quantidade_vendida)
-            df_temp = df.copy()
-            df_temp['Faturamento'] = df_temp['Preço Atual'] * df_temp['Quantidade Vendida']
-            
-            # Calcular Curva ABC
-            curva_abc = self.calcular_curva_abc(df_temp)
-            df_resultado['Curva ABC'] = curva_abc['Curva ABC']
-        
-        # Filtrar colunas baseado no marketplace
-        colunas_exibir = self.obter_colunas_por_marketplace(marketplace)
-        colunas_existentes = [col for col in colunas_exibir if col in df_resultado.columns]
-        
-        return df_resultado[colunas_existentes]
