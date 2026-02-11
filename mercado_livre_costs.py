@@ -90,14 +90,14 @@ class MercadoLivreCostsCalculator:
         return 0.14 if tipo_key == "classico" else 0.19
 
     @staticmethod
-    def calcular_custo_operacional_full(preco, peso_kg, categoria="Geral"):
+    def calcular_custo_operacional_full(preco, peso_kg=0.0, categoria="Geral"):
         """
         Calcula o custo operacional para logística Full, Coleta e Agências
         Aplicado quando preço <= R$ 79
         
         Args:
             preco: Preço do produto
-            peso_kg: Peso do produto em kg
+            peso_kg: Peso do produto em kg (padrão: 0.0 = até 300g)
             categoria: "Geral", "Livros" ou "Supermercado"
             
         Returns:
@@ -106,6 +106,10 @@ class MercadoLivreCostsCalculator:
         # Se preço >= 79, retorna 0 (paga frete, não custo fixo)
         if preco >= MERCADO_LIVRE_LIMITE_TAXA_FIXA:
             return 0.0
+        
+        # Se peso não informado, assume a faixa mínima (até 300g)
+        if peso_kg is None or peso_kg <= 0:
+            peso_kg = 0.15  # Meio da faixa "Até 300g"
         
         # Seleciona a tabela apropriada
         if categoria.lower() == "livros":
@@ -173,13 +177,13 @@ class MercadoLivreCostsCalculator:
         return taxa if taxa is not None else 0.0
 
     @staticmethod
-    def calcular_frete_gratis_full(preco, peso_kg):
+    def calcular_frete_gratis_full(preco, peso_kg=0.0):
         """
         Calcula o custo de frete para logística Full quando preço >= R$ 79
         
         Args:
             preco: Preço do produto
-            peso_kg: Peso do produto em kg
+            peso_kg: Peso do produto em kg (padrão: 0.0 = até 300g)
             
         Returns:
             Float com o custo de frete
@@ -187,6 +191,10 @@ class MercadoLivreCostsCalculator:
         # Se preço < 79, retorna 0 (paga custo operacional, não frete)
         if preco < MERCADO_LIVRE_LIMITE_TAXA_FIXA:
             return 0.0
+        
+        # Se peso não informado, assume a faixa mínima (até 300g)
+        if peso_kg is None or peso_kg <= 0:
+            peso_kg = 0.15  # Meio da faixa "Até 300g"
         
         # Encontra a faixa de peso
         faixa_peso = MercadoLivreCostsCalculator._encontrar_faixa_peso(peso_kg)

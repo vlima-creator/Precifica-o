@@ -201,36 +201,21 @@ class PricingCalculatorV2:
             )
             
             # Extrair o custo (pode ser custo_operacional, taxa_fixa ou custo_frete)
-            if "custo_operacional" in custo_info:
-                taxa_fixa = custo_info["custo_operacional"]
-                taxa_fixa_info = {
-                    "cobrada": True,
-                    "faixa": custo_info["faixa_peso"] + " | " + custo_info["faixa_preco"],
-                    "tipo": custo_info["tipo"]
-                }
-            elif "taxa_fixa" in custo_info:
-                taxa_fixa = custo_info["taxa_fixa"]
-                taxa_fixa_info = {
-                    "cobrada": taxa_fixa > 0,
-                    "faixa": custo_info["faixa_preco"],
-                    "tipo": custo_info["tipo"]
-                }
-            elif "custo_frete" in custo_info:
-                taxa_fixa = custo_info["custo_frete"]
-                taxa_fixa_info = {
-                    "cobrada": True,
-                    "faixa": custo_info["faixa_peso"] + " | " + custo_info["faixa_preco"],
-                    "tipo": custo_info["tipo"]
-                }
-            else:
-                taxa_fixa = 0.0
-                taxa_fixa_info = {"cobrada": False, "faixa": "Erro no calculo", "tipo": "Erro"}
+            taxa_fixa = custo_info.get("custo_operacional", 0.0) or custo_info.get("frete", 0.0)
+            taxa_fixa_info = {
+                "cobrada": taxa_fixa > 0,
+                "faixa": custo_info.get("detalhes", "Mercado Livre"),
+                "tipo": "Mercado Livre"
+            }
         
         # Calculos
         comissao = preco_atual * comissao_percent
         impostos = preco_atual * impostos_percent
         publicidade = preco_atual * (self.percent_publicidade / 100)
         devoluoes = preco_atual * (self.taxa_devolucao / 100)
+        # Adicionar comissão do Mercado Livre ao cálculo se aplicável
+        if marketplace == "Mercado Livre":
+            comissao += custo_info.get("comissao", 0.0)
         lucro = preco_atual - custo_produto - frete - comissao - taxa_fixa - impostos - publicidade - devoluoes - (self.custo_fixo_operacional / 100 * preco_atual) + subsidio_pix
         
         # Calcular custos operacionais em valor (era percentual)
