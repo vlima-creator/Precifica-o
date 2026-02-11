@@ -5,7 +5,7 @@ Configurações e constantes do aplicativo de precificação Carblue
 
 # Configurações padrão de Marketplaces
 DEFAULT_MARKETPLACES = {
-    "Mercado Livre": {"comissao": 0.14, "custo_fixo": 0.0, "taxa_devolucao": 0.02},  # Custo fixo removido conforme atualização
+    "Mercado Livre": {"comissao": 0.14, "custo_fixo": 0.0, "taxa_devolucao": 0.02},
     "Shopee": {"comissao": 0.20, "custo_fixo": 0.0, "taxa_devolucao": 0.02},
     "Amazon": {"comissao": 0.15, "custo_fixo": 0.0, "taxa_devolucao": 0.02},
     "Magalu": {"comissao": 0.18, "custo_fixo": 0.0, "taxa_devolucao": 0.02},
@@ -48,7 +48,7 @@ MERCADO_LIVRE_COMISSOES_POR_CATEGORIA_2026 = {
     "Saúde": {"classico": 0.12, "premium": 0.17}
 }
 
-# Novas Tabelas de Custo Operacional do Mercado Livre (2026) - Dados exatos da planilha
+# Novas Tabelas de Custo Operacional do Mercado Livre (2026) - Dados exatos da aba Geral (Full-Coleta-Ag)
 MERCADO_LIVRE_CUSTO_OPERACIONAL_GERAL_2026 = [
     {'Peso': 'Até 0,3 kg', 'R$ 0-18,99': 5.65, 'R$ 19-48,99': 6.55, 'R$ 49-78,99': 7.75, 'R$ 79-99,99': 12.35, 'R$ 100-119,99': 14.35, 'R$ 120-149,99': 16.45, 'R$ 150-199,99': 18.45, 'A partir de R$ 200': 20.95},
     {'Peso': '0,3 a 0,5 kg', 'R$ 0-18,99': 5.95, 'R$ 19-48,99': 6.65, 'R$ 49-78,99': 7.85, 'R$ 79-99,99': 13.25, 'R$ 100-119,99': 15.45, 'R$ 120-149,99': 17.65, 'R$ 150-199,99': 19.85, 'A partir de R$ 200': 22.55},

@@ -87,25 +87,25 @@ class PricingCalculatorV2:
                 faixa_identificada = "A partir de R$ 199"
         else:
             # Geral e Livros
-            if preco_venda <= 18.99:
+            if preco_venda < 19:
                 custo_operacional = linha_peso.get("R$ 0-18,99", 0.0)
                 faixa_identificada = "R$ 0-18,99"
-            elif preco_venda <= 48.99:
+            elif preco_venda < 49:
                 custo_operacional = linha_peso.get("R$ 19-48,99", 0.0)
                 faixa_identificada = "R$ 19-48,99"
-            elif preco_venda <= 78.99:
+            elif preco_venda < 79:
                 custo_operacional = linha_peso.get("R$ 49-78,99", 0.0)
                 faixa_identificada = "R$ 49-78,99"
-            elif preco_venda <= 99.99:
+            elif preco_venda < 100:
                 custo_operacional = linha_peso.get("R$ 79-99,99", 0.0)
                 faixa_identificada = "R$ 79-99,99"
-            elif preco_venda <= 119.99:
+            elif preco_venda < 120:
                 custo_operacional = linha_peso.get("R$ 100-119,99", 0.0)
                 faixa_identificada = "R$ 100-119,99"
-            elif preco_venda <= 149.99:
+            elif preco_venda < 150:
                 custo_operacional = linha_peso.get("R$ 120-149,99", 0.0)
                 faixa_identificada = "R$ 120-149,99"
-            elif preco_venda <= 199.99:
+            elif preco_venda < 200:
                 custo_operacional = linha_peso.get("R$ 150-199,99", 0.0)
                 faixa_identificada = "R$ 150-199,99"
             else:
